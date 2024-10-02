@@ -1,0 +1,243 @@
+input::placeholder {
+    font-family: 'Kumbh Sans', sans-serif;
+}
+
+p {
+    font-family: 'Roboto', sans-serif;
+}
+
+a {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+}
+
+.login-title-first {
+    font-family: 'Kumbh Sans', sans-serif;
+}
+
+.btn-blue-1 {
+    background-color: #2D88D4;
+    color: #fff;
+    border: 0.5px solid #A7A7A7;
+    width: 248px;
+    height: 42px;
+}
+
+.text-blue {
+    color: #2D88D4;
+    cursor: pointer
+}
+
+.text-blue-2 {
+    color: #2D88D4;
+    font-size: 16px;
+}
+
+.input-1 {
+    border: 0.5px solid #A7A7A7;
+    width: 248px;
+    height: 42px;
+}
+
+.login-form-body {
+    width: 512px;
+    height: 382px;
+    background: #fff;
+}
+
+.login-page {
+    background: #FCFAFA;
+}
+
+.sidebar-custom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 20px 0;
+    background: #152259;
+
+}
+
+.nav-link {
+    margin-top: 8px;
+    width: 80%
+}
+
+.nav-link.active {
+    background: #509CDB;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    .sidebar-custom {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 180px;
+        height: 100vh;
+        overflow-y: auto;
+        padding: 18px 0;
+        background: #152259;
+
+    }
+
+    .nav-link {
+        font-size: 0.875rem;
+    }
+
+    .sidebar-nav-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .sidebar-nav-title {
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .nav-link {
+        font-size: 0.75rem;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .sidebar-nav-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .sidebar-nav-title {
+        font-size: 0.75rem;
+        margin-left: 0;
+    }
+}
+
+.sidebar-nav-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.roboto-font {
+    color: white;
+    font-size: 16px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 600;
+    word-wrap: break-word;
+}
+
+.sidebar-logo {
+    margin-top: 26px;
+}
+
+.logo {
+    width: 65px;
+    height: 65px;
+}
+
+.divider {
+    width: 100%;
+    height: 100%;
+    border: 0.5px solid #BDBDBD;
+    margin-top: 27px;
+}
+
+.logout-btn {
+    background: #509CDB;
+    color: #fff;
+    border-radius: 8px;
+}
+
+.navbar-custom {
+    height: 95px;
+}
+
+@media (max-width: 768px) {
+    .navbar-custom {
+        height: 95px;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-custom {
+        height: 80px;
+    }
+
+    .teacher-avatar {
+        width: 175px;
+        height: 200px;
+    }
+}
+
+.text-1 {
+    color: #424242;
+}
+
+.welcome-title {
+    color: var(--Grey-400, #4F4F4F);
+    text-align: center;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.ele-icon {
+    padding: 8px;
+    background: #EFF3FA;
+    border-radius: 8px;
+}
+
+.ele-title {
+    font-size: 24px;
+}
+
+.ele-sub-title {
+    font-size: 14px;
+}
+
+.btn-support {
+    background: #152259;
+    border-radius: 30px;
+    font-size: 14px;
+    color: #fff;
+    width: 181px;
+    height: 60px;
+    flex-shrink: 0;
+}
+
+.no-teachers {
+    background: #FCFAFA;
+    width: 952px;
+    height: 419px;
+    flex-shrink: 0;
+}
+
+.no-teacher-title {
+    color: #4F4F4F;
+    font-weight: bold;
+    font-size: 28px;
+    text-align: center;
+}
+
+.no-teacher-sub-title {
+    font-size: 14px;
+    text-align: center;
+}
+
+.table tbody tr td {
+    color: #4F4F4F;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #EBF6FF;
+    border: #C4C4C4;
+}
+
+.teacher-avatar {
+    width: 175px;
+    height: 200px;
+}
