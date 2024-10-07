@@ -17,6 +17,7 @@ import PrivateRoute from './route/PrivateRoute';
 
 import { StaffList } from './page/staff/StaffList';
 import ClassList from './page/class/ClassList';
+import StaffInformation from './page/staff/StaffInformation';
 
 const router = createBrowserRouter([
   {
@@ -47,6 +48,7 @@ const router = createBrowserRouter([
       { path: "teacher/:id", element: <TeacherInformation /> },
       { path: "class", element: <ClassList /> },
       { path: "staff", element: <StaffList /> },
+      { path: "staff/:id", element: <StaffInformation /> },
     ],
   },
 ]);

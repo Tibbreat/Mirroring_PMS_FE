@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { getAccountAPI } from "../services/service.auth";
 import { AuthContext } from "../component/context/auth.context";
 import { Navigate } from "react-router-dom";
+import Loading from "../page/common/Loading";
 
 const PrivateRoute = ({ children }) => {
     const { user, setUser } = useContext(AuthContext);
@@ -34,14 +35,14 @@ const PrivateRoute = ({ children }) => {
     }, [setUser]);
 
     if (loading) {
-        return <div>Loading...</div>; // Hiển thị thông báo khi đang kiểm tra xác thực
+        return <Loading />;
     }
 
     if (isAuthenticated) {
-        return <>{children}</>; // Nếu đã xác thực, hiển thị các component con
+        return <>{children}</>;
     }
 
-    return <Navigate to="/pms/auth/login" replace />; // Nếu không xác thực, chuyển hướng đến trang đăng nhập
+    return <Navigate to="/pms/auth/login" replace />;
 }
 
 export default PrivateRoute;

@@ -2,14 +2,14 @@ import React from 'react';
 import { Link } from "react-router-dom";
 import { Table, Tag } from "antd";
 
-const TeacherTable = ({ data }) => {
+const StaffTable = ({ data }) => {
     const columns = [
         {
             title: 'Tên đầy đủ',
             dataIndex: 'fullName',
             key: 'fullName',
             render: (text, record) => (
-                <Link to={`/pms/manage/teacher/${record.id}`} className="text-blue-2" style={{ textDecoration: "none" }}>
+                <Link to={`/pms/manage/staff/${record.id}`} className="text-blue-2" style={{ textDecoration: "none" }}>
                     {text}
                 </Link>
             ),
@@ -55,4 +55,4 @@ const TeacherTable = ({ data }) => {
     );
 }
 
-export default TeacherTable;
+export default StaffTable;
