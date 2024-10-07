@@ -1,28 +1,41 @@
 import React, { useContext, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import AddTeacherModal from '../page/teacher/modal/AddTeacherModal';
+
 import { logoutAPI } from '../services/service.auth';
 import { AuthContext } from '../component/context/auth.context';
+import AddTeacherModal from '../component/modal/AddTeacherModal';
+import AddStaffModal from '../component/modal/AddStaffModal';
 
-
-const Navbar = () => {
+const Navbar = ({ onTeacherAdded }) => {
     const location = useLocation();
-    const [isModalOpen, setIsModalOpen] = useState(false); // Trạng thái modal
+    const [isModalTeacherOpen, setIsModalTeacherOpen] = useState(false);
+    const [isModalStaffOpen, setIsModalStaffOpen] = useState(false);
     const navigate = useNavigate();
     const { user, setUser } = useContext(AuthContext);
 
-    // Hàm để mở modal
-    const showModal = () => {
-        setIsModalOpen(true);
+    const showModalTeacher = () => {
+        setIsModalTeacherOpen(true);
     };
 
-    // Hàm để đóng modal
-    const handleOk = () => {
-        setIsModalOpen(false);
+    const handleOkTeacher = () => {
+        setIsModalTeacherOpen(false);
+        onTeacherAdded(); 
     };
 
-    const handleCancel = () => {
-        setIsModalOpen(false);
+    const handleCancelTeacher = () => {
+        setIsModalTeacherOpen(false);
+    };
+
+    const showModalStaff = () => {
+        setIsModalStaffOpen(true);
+    };
+
+    const handleOkStaff = () => {
+        setIsModalStaffOpen(false);
+    };
+
+    const handleCancelStaff = () => {
+        setIsModalStaffOpen(false);
     };
 
     const onLogout = async () => {
@@ -31,40 +44,53 @@ const Navbar = () => {
             setUser(null);
             localStorage.removeItem("access_token");
             navigate('/pms/auth/login');
-
         } catch (error) {
             console.error('Logout failed', error);
         }
     }
+
     return (
         <>
             <nav className="navbar-custom d-flex">
                 <div className='navbar-content-1 col-10 d-flex justify-content-center mt-3'>
                     <div className='col-8 d-flex align-items-center'>
                         {location.pathname.includes('/teacher') && (
-                            <div className='d-flex '>
+                            <div className='d-flex'>
                                 <div className='d-flex justify-content-center align-items-center me-4 text-blue fw-bold'>Xuất CSV</div>
-                                <button className="logout-btn btn" type="button" onClick={showModal}>
+                                <button className="logout-btn btn" type="button" onClick={showModalTeacher}>
                                     Thêm giáo viên
+                                </button>
+                            </div>
+                        )}
+                        {location.pathname.includes('/staff') && (
+                            <div className='d-flex'>
+                                <div className='d-flex justify-content-center align-items-center me-4 text-blue fw-bold'>Xuất CSV</div>
+                                <button className="logout-btn btn" type="button" onClick={showModalStaff}>
+                                    Thêm nhân viên
                                 </button>
                             </div>
                         )}
                     </div>
                 </div>
                 <div className='navbar-content-2 col-2 d-flex justify-content-center align-items-center'>
-                    {location.pathname.includes('/dashboard') ? (
-                        <button className="logout-btn btn" type="button" onClick={onLogout} >
+                    {user && (
+                        <button className="logout-btn btn" type="button" onClick={onLogout}>
                             Đăng xuất
                         </button>
-                    ) : (
-                        <div className='text-blue fw-bold' onClick={onLogout}>Đăng xuất</div>
                     )}
                 </div>
             </nav>
+
             <AddTeacherModal
-                isModalOpen={isModalOpen}
-                handleOk={handleOk}
-                handleCancel={handleCancel}
+                isModalOpen={isModalTeacherOpen}
+                handleOk={handleOkTeacher}
+                handleCancel={handleCancelTeacher}
+            />
+
+            <AddStaffModal
+                isModalOpen={isModalStaffOpen}
+                handleOk={handleOkStaff}
+                handleCancel={handleCancelStaff}
             />
         </>
     );

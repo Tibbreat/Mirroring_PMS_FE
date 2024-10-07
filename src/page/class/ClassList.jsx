@@ -1,37 +1,34 @@
 import { useCallback, useState, useEffect } from "react";
 import NoData from "../../component/no-data-page/NoTeachers";
-import TeacherTable from "../../component/table/TeacherTable";
-import { getUsersAPI } from "../../services/services.user";
+import { ClassTable } from "../../component/table/ClassTable";
+import { getClassesAPI } from "../../services/services.class";
 import { Pagination, Spin, Card, Row, Col, Input, Select } from "antd";
+
 
 const { Option } = Select;
 
-const TeacherList = ({ onTeacherAdded }) => {
-    const [teachers, setTeachers] = useState([]);
+const ClassList = () => {
+    const [classes, setClasses] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [total, setTotal] = useState(0); 
-    const [loading, setLoading] = useState(true); 
+    const [total, setTotal] = useState(0);
+    const [loading, setLoading] = useState(true);
 
-    const fetchTeachers = useCallback(async (page) => {
-        setLoading(true); 
+    const fetchClasses = useCallback(async (page) => {
+        setLoading(true);
         try {
-            const response = await getUsersAPI(page, "TEACHER", null);
-            setTeachers(response.data.listData);
+            const response = await getClassesAPI(page, null, null);
+            setClasses(response.data.listData);
             setTotal(response.data.total);
         } catch (error) {
-            console.error('Error fetching teachers:', error);
+            console.error('Error fetching classes:', error);
         } finally {
-            setLoading(false); // Set loading to false after fetching data
+            setLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        fetchTeachers(currentPage);
-    }, [currentPage, fetchTeachers]);
-
-    const handleTeacherAdded = () => {
-        fetchTeachers(currentPage); // Reload the teacher table when a teacher is added
-    };
+        fetchClasses(currentPage);
+    }, [currentPage, fetchClasses]);
 
     return (
         <Card style={{ margin: 20 }}>
@@ -44,7 +41,7 @@ const TeacherList = ({ onTeacherAdded }) => {
                 </Col>
                 <Col xs={24} sm={16}>
                     <Input.Search
-                        placeholder="Nhập tên giáo viên cần tìm"
+                        placeholder="Nhập tên lớp cần tìm"
                         enterButton
                         onSearch={(value) => console.log(value)}
                     />
@@ -54,9 +51,9 @@ const TeacherList = ({ onTeacherAdded }) => {
                 <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
                     <Spin size="large" />
                 </div>
-            ) : teachers.length > 0 ? (
+            ) : classes.length > 0 ? (
                 <>
-                    <TeacherTable data={teachers} />
+                    <ClassTable data={classes} />
                     <Pagination
                         current={currentPage}
                         total={total}
@@ -71,4 +68,4 @@ const TeacherList = ({ onTeacherAdded }) => {
     );
 };
 
-export default TeacherList;
+export default ClassList;

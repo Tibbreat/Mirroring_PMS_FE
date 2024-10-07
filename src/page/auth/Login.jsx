@@ -2,22 +2,19 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginAPI } from '../../services/service.auth';
 import { AuthContext } from '../../component/context/auth.context';
-import { message } from 'antd';
+import { message, Form, Input, Button, Card } from 'antd';
 
 
 const Login = () => {
     const navigate = useNavigate();
-
     const [disable, setDisable] = useState(false);
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const { user, setUser } = useContext(AuthContext);
+    const { setUser } = useContext(AuthContext);
+    const [form] = Form.useForm();
 
-    const onSubmitLogin = async (e) => {
-        e.preventDefault();
+    const onSubmitLogin = async (values) => {
         setDisable(true);
         try {
-            const response = await loginAPI(username, password);
+            const response = await loginAPI(values.username, values.password);
             if (response?.status === 200) {
                 localStorage.setItem("access_token", response.data.token);
                 setUser({
@@ -40,57 +37,45 @@ const Login = () => {
     }, []);
 
     return (
-        <div className="login-page d-flex justify-content-center align-items-center vh-100" >
-            <div className='login'>
-                <div className="login-title text-center mb-4">
-                    <div className="login-title-first display-6 fw-bold">Đăng nhập vào hệ thống</div>
+        <div className="login-page d-flex justify-content-center align-items-center vh-100">
+            <Card className="login-card" style={{ width: 400 }}>
+                <div className="d-flex justify-content-center align-items-center mb-4">
+                    <img className='logo' src="/icon/logo.svg" alt="Logo" />
                 </div>
-                <form className='login-form-body' onSubmit={onSubmitLogin}>
-
-                    <div className="login-form-input d-flex flex-column justify-content-center align-items-center">
-                        <div className='login-sub-title mt-5'>
-                            <p>Sử dụng tài khoản được cấp để đăng nhập vào hệ thống</p>
-                        </div>
-
-                        <div className='form-input mt-3'>
-                            <input
-                                className='form-control input-1 mt-3'
-                                type="text"
-                                id="username"
-                                name="username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                placeholder="Tài khoản"
-                                required
-                            />
-                        </div>
-                        <div className='form-input'>
-                            <input
-                                className='form-control input-1 mt-3'
-                                type="password"
-                                id="password"
-                                name="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Mật khẩu"
-                                required
-                            />
-                        </div>
-
-                    </div>
-                    <div className='login-form-btn d-flex justify-content-center mt-3' >
-                        <button className='btn btn-blue-1 ' type='submit'>Đăng nhập</button>
-                    </div>
-                    <div className='login-form-btn d-flex justify-content-center mt-3'>
-                        <Link to={"/pms/auth/forgot-password"} className='forgot-password '>
-                            Quên mật khẩu
-                        </Link>
-                    </div>
-
-                </form>
-            </div>
+                <div className="login-title text-center mb-4">
+                    <h4 className="login-title-first fw-bold">Đăng nhập vào hệ thống</h4>
+                </div>
+                <Form
+                    form={form}
+                    name="login"
+                    className="login-form"
+                    initialValues={{ remember: true }}
+                    onFinish={onSubmitLogin}
+                >
+                    <Form.Item
+                        name="username"
+                        rules={[{ required: true, message: 'Vui lòng nhập tài khoản được cấp bởi quản trị viên!' }]}
+                    >
+                        <Input placeholder="Username" />
+                    </Form.Item>
+                    <Form.Item
+                        name="password"
+                        rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+                    >
+                        <Input.Password placeholder="Password" />
+                    </Form.Item>
+                    <Form.Item className="text-center">
+                        <Button type="primary" htmlType="submit" className="login-form-button" disabled={disable}>
+                            Log in
+                        </Button>
+                    </Form.Item>
+                </Form>
+                <div className="text-center">
+                    <Link to="/pms/auth/forgot-password">Quên mật khẩu?</Link>
+                </div>
+            </Card>
         </div>
     );
-}
+};
 
 export default Login;

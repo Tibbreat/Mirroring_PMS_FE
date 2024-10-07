@@ -1,10 +1,9 @@
-import { createRoot } from 'react-dom/client'
-import ReactDOM from 'react-dom/client'
-
+import { createRoot } from 'react-dom/client';
 import {
   createBrowserRouter,
   RouterProvider,
-} from "react-router-dom";
+} from 'react-router-dom';
+
 import Login from './page/auth/Login';
 import Auth from './Auth';
 import ForgotPassword from './page/auth/ForgotPassword';
@@ -16,53 +15,42 @@ import TeacherInformation from './page/teacher/TeacherInformation';
 import { AuthWrapper } from './component/context/auth.context';
 import PrivateRoute from './route/PrivateRoute';
 
-const router = createBrowserRouter(
-  [
-    {
-      path: "/pms/auth",
-      element: (
-        <AuthWrapper>
-          <Auth />
-        </AuthWrapper>
-      ),
-      children: [
-        {
-          index: true,
-          path: "login",
-          element: <Login />
-        },
-        { path: "forgot-password", element: <ForgotPassword /> },
-        { path: "change-password", element: <ChangePassword /> }
-      ]
-    },
-    {
-      path: "/pms/manage",
-      element: (
-        <AuthWrapper>
-          <PrivateRoute>
-            <ManageSite />
-          </PrivateRoute>
-        </AuthWrapper>
-      ),
-      children: [
-        {
-          index: true,
-          path: "dashboard",
-          element: <Dashboard />
-        },
-        {
-          path: "teacher",
-          element: <TeacherList />
-        },
-        {
-          path: "teacher/:id",
-          element: <TeacherInformation />
-        }
-      ]
-    }
+import { StaffList } from './page/staff/StaffList';
+import ClassList from './page/class/ClassList';
 
-  ]
-)
+const router = createBrowserRouter([
+  {
+    path: "/pms/auth",
+    element: (
+      <AuthWrapper>
+        <Auth />
+      </AuthWrapper>
+    ),
+    children: [
+      { index: true, path: "login", element: <Login /> },
+      { path: "forgot-password", element: <ForgotPassword /> },
+      { path: "change-password", element: <ChangePassword /> },
+    ],
+  },
+  {
+    path: "/pms/manage",
+    element: (
+      <AuthWrapper>
+        <PrivateRoute>
+          <ManageSite />
+        </PrivateRoute>
+      </AuthWrapper>
+    ),
+    children: [
+      { index: true, path: "dashboard", element: <Dashboard /> },
+      { path: "teacher", element: <TeacherList /> },
+      { path: "teacher/:id", element: <TeacherInformation /> },
+      { path: "class", element: <ClassList /> },
+      { path: "staff", element: <StaffList /> },
+    ],
+  },
+]);
+
 createRoot(document.getElementById('root')).render(
   <RouterProvider router={router} />
-)
+);

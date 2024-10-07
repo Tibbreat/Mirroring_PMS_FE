@@ -2,21 +2,34 @@ import React from 'react';
 import Sidebar from './layout/Sidebar';
 import Navbar from './layout/Navbar';
 import { Outlet } from 'react-router-dom';
+import { Layout } from 'antd';
+
+
+
+const { Content, Sider } = Layout;
+
 const ManageSite = () => {
   return (
-    <div className='d-flex'>
-      <div className='col-2'>
+    <Layout style={{ minHeight: '100vh' }}>
+      <Sider
+        breakpoint="lg"
+        collapsedWidth="0"
+        className="fixed-sidebar"
+      >
         <Sidebar />
-      </div>
-      <div className='col-10'>
-        <Navbar />
-        <div className='mt-5'>
-          <Outlet />
+      </Sider>
+      <Layout className="site-layout">
+        <div className="site-layout-background">
+          <Navbar />
         </div>
-      </div>
-    </div>
-
-  )
+        <Content className="site-layout-content">
+          <div className="site-layout-content-inner">
+            <Outlet />
+          </div>
+        </Content>
+      </Layout>
+    </Layout>
+  );
 };
 
 export default ManageSite;

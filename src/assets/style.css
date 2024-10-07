@@ -11,9 +11,6 @@ a {
     font-size: 12px;
 }
 
-.login-title-first {
-    font-family: 'Kumbh Sans', sans-serif;
-}
 
 .btn-blue-1 {
     background-color: #2D88D4;
@@ -25,12 +22,22 @@ a {
 
 .text-blue {
     color: #2D88D4;
-    cursor: pointer
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.text-blue:hover {
+    color: #1c6bb0;
 }
 
 .text-blue-2 {
     color: #2D88D4;
     font-size: 16px;
+    font-weight: bold;
+}
+
+.text-blue-2:hover {
+    color: #1c6bb0;
 }
 
 .input-1 {
@@ -146,13 +153,38 @@ a {
 }
 
 .logout-btn {
-    background: #509CDB;
+    background-color: #2D88D4;
     color: #fff;
-    border-radius: 8px;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+    background-color: #1c6bb0;
 }
 
 .navbar-custom {
     height: 95px;
+    background-color: #f8f9fa;
+    padding: 10px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-content-1,
+.navbar-content-2 {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-content-1 {
+    justify-content: flex-start;
+}
+
+.navbar-content-2 {
+    justify-content: flex-end;
 }
 
 @media (max-width: 768px) {
@@ -237,7 +269,39 @@ a {
     border: #C4C4C4;
 }
 
-.teacher-avatar {
-    width: 175px;
-    height: 200px;
+
+/* Custom styles for the Ant Design Menu component */
+.sidebar-custom-antd {
+    background: #152259;
+    height: 100%;
+    width: 200px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    overflow-x: hidden;
+   
+}
+
+.sidebar-title {
+    color: white;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.sidebar-custom-antd .ant-menu-item,
+.sidebar-custom-antd .ant-menu-submenu-title {
+    color: white !important;
+    /* Make the label color white */
+}
+
+.sidebar-custom-antd .ant-menu-item:hover,
+.sidebar-custom-antd .ant-menu-submenu-title:hover {
+    color: #cccccc !important;
+}
+
+/* Ensure the active menu item is also styled in white */
+.sidebar-custom-antd .ant-menu-item-selected {
+    background: #509CDB;
+    color: white !important;
 }

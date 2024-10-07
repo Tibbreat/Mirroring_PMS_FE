@@ -1,50 +1,54 @@
+import React from 'react';
 import { Link } from "react-router-dom";
-import { Pagination, Tag } from "antd";
+import { Table, Tag } from "antd";
 
-const TeacherTable = ({ data, currentPage, total, setCurrentPage }) => {
-    const handlePageChange = (page) => {
-        setCurrentPage(page); // Update current page when the page changes
-    };
+const TeacherTable = ({ data }) => {
+    const columns = [
+        {
+            title: 'Tên đầy đủ',
+            dataIndex: 'fullName',
+            key: 'fullName',
+            render: (text, record) => (
+                <Link to={`/pms/manage/teacher/${record.id}`} className="text-blue-2" style={{ textDecoration: "none" }}>
+                    {text}
+                </Link>
+            ),
+        },
+        {
+            title: 'Account',
+            dataIndex: 'username',
+            key: 'username',
+        },
+        {
+            title: 'Email',
+            dataIndex: 'email',
+            key: 'email',
+        },
+        {
+            title: 'Số điện thoại',
+            dataIndex: 'phone',
+            key: 'phone',
+            render: (text) => text || "N/A",
+        },
+        {
+            title: 'Trạng thái',
+            dataIndex: 'isActive',
+            key: 'isActive',
+            render: (isActive) => (
+                <Tag color={isActive ? 'green' : 'red'}>
+                    {isActive ? 'Đang hoạt động' : 'Ngưng hoạt động'}
+                </Tag>
+            ),
+        },
+    ];
 
     return (
-        <div className="col-11 p-2">
-            <table className="table">
-                <thead>
-                    <tr>
-                        <th scope="col">Tên đầy đủ</th>
-                        <th scope="col">Account</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Lớp phụ trách</th>
-                        <th scope="col">Trạng thái</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.map((teacher) => (
-                        <tr key={teacher.id}>
-                            <td>
-                                <Link to={`/pms/manage/teacher/${teacher.id}`} className="text-blue-2">
-                                    {teacher.fullName}
-                                </Link>
-                            </td>
-                            <td>{teacher.username}</td>
-                            <td>{teacher.email}</td>
-                            <td>{teacher.phone || "N/A"}</td>
-                            <td>
-                                <Tag color={teacher.isActive ? 'green' : 'red'}>
-                                    {teacher.isActive ? 'Đang hoạt động' : 'Ngưng hoạt động'}
-                                </Tag>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-            <Pagination
-                align="end"
-                current={currentPage}
-                pageSize={10}
-                total={total}
-                showSizeChanger={false}
-                onChange={handlePageChange} // Handle page changes
+        <div className=" p-2">
+            <Table
+                columns={columns}
+                dataSource={data}
+                pagination={false}
+                rowKey="id"
             />
         </div>
     );
