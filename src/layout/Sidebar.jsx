@@ -4,7 +4,6 @@ import { Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const items = [
-
     {
         key: '1',
         icon: <DashboardOutlined />,
@@ -28,7 +27,7 @@ const items = [
     {
         key: '5',
         icon: <ReconciliationOutlined />,
-        label: 'Đối tác ',
+        label: 'Đối tác',
         children: [
             {
                 key: '51',
@@ -52,15 +51,18 @@ const Sidebar = () => {
         // Update selected key based on current location path
         if (location.pathname.includes('/dashboard')) {
             setSelectedKey('1');
-        } else if (location.pathname.includes('manage/teacher')) {
+        } else if (location.pathname.includes('/teacher')) {
             setSelectedKey('2');
-        } else if (location.pathname.includes('manage/class')) {
-            setSelectedKey('4');
-        } else if (location.pathname.includes('manage/staff')) {
+        } else if (location.pathname.includes('/staff')) {
             setSelectedKey('3');
-
+        } else if (location.pathname.includes('/class')) {
+            setSelectedKey('4');
+        } else if (location.pathname.includes('/provider/food')) {
+            setSelectedKey('51');
+        } else if (location.pathname.includes('/provider/transport')) {
+            setSelectedKey('52');
         } else {
-            setSelectedKey(undefined); // Default to no selection
+            setSelectedKey(undefined);
         }
     }, [location.pathname]);
 
@@ -82,7 +84,12 @@ const Sidebar = () => {
             case '4':
                 navigate('/pms/manage/class');
                 break;
-
+            case '51':
+                navigate('/pms/manage/provider/food');
+                break;
+            case '52':
+                navigate('/pms/manage/provider/transport');
+                break;
             default:
                 break;
         }

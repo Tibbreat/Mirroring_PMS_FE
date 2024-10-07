@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getUsersAPI } from "../../services/services.user";
 import { Button, Card, Col, Input, Pagination, Row, Select, Spin } from "antd";
 import StaffTable from "../../component/table/StaffTable";
-import NoData from "../../component/no-data-page/NoTeachers";
+import NoData from "../../component/no-data-page/NoData";
 
 export const StaffList = () => {
     const [staff, setStaff] = useState([]);
@@ -43,15 +43,16 @@ export const StaffList = () => {
                     />
                 </Col>
             </Row>
+            <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
+                <Button type="primary" >Thêm quản lý</Button>
+            </Col>
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
                     <Spin size="large" />
                 </div>
             ) : staff.length > 0 ? (
                 <>
-                    <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
-                        <Button type="primary" >Thêm quản lý</Button>
-                    </Col>
+
                     <StaffTable data={staff} />
                     <Pagination
                         current={currentPage}
@@ -61,7 +62,11 @@ export const StaffList = () => {
                     />
                 </>
             ) : (
-                <NoData />
+                <div className="d-flex justify-content-center align-items-center">
+                    <NoData
+                        title={"Không có nhân viên nào"}
+                        subTitle={"Danh sách nhân viên sẽ xuất hiện khi bạn thêm dữ liệu vào hệ thống"} />
+                </div>
             )}
         </Card>
     );

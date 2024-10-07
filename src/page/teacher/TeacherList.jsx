@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect } from "react";
-import NoData from "../../component/no-data-page/NoTeachers";
+import NoData from "../../component/no-data-page/NoData";
 import TeacherTable from "../../component/table/TeacherTable";
 import { getUsersAPI, addUserAPI } from "../../services/services.user";
 import { Pagination, Spin, Card, Row, Col, Input, Select, Button, Modal, DatePicker, notification } from "antd";
@@ -105,15 +105,16 @@ const TeacherList = () => {
                     />
                 </Col>
             </Row>
+            <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
+                <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm giáo viên</Button>
+            </Col>
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
                     <Spin size="large" />
                 </div>
             ) : teachers.length > 0 ? (
                 <>
-                    <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
-                        <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm giáo viên</Button>
-                    </Col>
+
                     <TeacherTable data={teachers} />
                     <Pagination
                         current={currentPage}
@@ -123,7 +124,12 @@ const TeacherList = () => {
                     />
                 </>
             ) : (
-                <NoData />
+                <div className="d-flex justify-content-center align-items-center">
+                    <NoData
+                        title={"Không có giáo viên nào"}
+                        subTitle={"Danh sách giáo viên sẽ xuất hiện khi bạn thêm dữ liệu vào hệ thống"}
+                    />
+                </div>
             )}
             <Modal
                 title="Thêm giáo viên"

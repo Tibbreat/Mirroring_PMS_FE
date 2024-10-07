@@ -18,6 +18,8 @@ import PrivateRoute from './route/PrivateRoute';
 import { StaffList } from './page/staff/StaffList';
 import ClassList from './page/class/ClassList';
 import StaffInformation from './page/staff/StaffInformation';
+import ListTransportProvider from './page/supplier/transport-provider/ListTransportProvider';
+import ListFoodProvider from './page/supplier/food-provider/ListFoodProvider';
 
 const router = createBrowserRouter([
   {
@@ -49,6 +51,8 @@ const router = createBrowserRouter([
       { path: "class", element: <ClassList /> },
       { path: "staff", element: <StaffList /> },
       { path: "staff/:id", element: <StaffInformation /> },
+      { path: "provider/transport", element: <ListTransportProvider /> },
+      { path: "provider/food", element: <ListFoodProvider /> },
     ],
   },
 ]);

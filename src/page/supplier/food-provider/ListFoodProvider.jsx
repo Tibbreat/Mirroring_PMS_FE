@@ -6,7 +6,7 @@ import { ProviderTable } from "../../../component/table/ProviderTable";
 
 const { Option } = Select;
 
-const ListTransportProvider = () => {
+const ListFoodProvider = () => {
     const [provider, setProvider] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
@@ -71,4 +71,4 @@ const ListTransportProvider = () => {
     );
 };
 
-export default ListTransportProvider;
+export default ListFoodProvider;

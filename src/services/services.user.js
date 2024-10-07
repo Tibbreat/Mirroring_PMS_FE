@@ -3,12 +3,9 @@ import axios from '../../axios.customize';
 export const getUsersAPI = async (page, role, isActive) => {
     const params = new URLSearchParams();
 
-    // Add page parameter
     if (page) {
         params.append('page', page);
     }
-
-    // Add multiple role parameters if role is an array
     if (role && Array.isArray(role)) {
         role.forEach(r => params.append('role', r));
     }
