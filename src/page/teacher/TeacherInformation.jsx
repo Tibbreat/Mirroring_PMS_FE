@@ -1,20 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { getUserAPI, changeUserStatusAPI } from '../../services/services.user';
-import { Spin, Tag, Row, Col, Avatar, Button, Input, Modal, message, Card, Descriptions, Divider } from 'antd';
+import { Spin, Tag, Row, Col, Avatar, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, Pagination } from 'antd';
 import { useParams } from 'react-router-dom';
+import { ClassTable } from '../../component/table/ClassTable';
+import { getClassBaseOnTeacher } from '../../services/services.class';
+import Title from 'antd/es/typography/Title';
 
 const TeacherInformation = () => {
     const [teacher, setTeacher] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [fieldValues, setFieldValues] = useState({});
     const { id } = useParams();
+
+    const [classes, setClasses] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [total, setTotal] = useState(0);
 
     const fetchTeacher = async (id) => {
         setLoading(true);
         try {
             const response = await getUserAPI(id);
+            const response_2 = await getClassBaseOnTeacher(id, currentPage);
+            setClasses(response_2.data.listData);
+            setTotal(response_2.data.total);
             setTeacher(response.data);
-            console.log(response.data)
+            setFieldValues(response.data);
         } catch (error) {
             console.error('Error fetching teacher:', error);
         } finally {
@@ -46,6 +58,19 @@ const TeacherInformation = () => {
         setIsModalVisible(false);
     };
 
+    const handleEditClick = () => {
+        setIsEditing(true);
+    };
+
+    const handleInputChange = (field, value) => {
+        setFieldValues({ ...fieldValues, [field]: value });
+    };
+
+    const handleSave = () => {
+        setIsEditing(false);
+        // Here you can add logic to save the updated field values to the backend if needed
+    };
+
     if (loading) {
         return (
             <div className='d-flex justify-content-center align-items-center' style={{ height: '100vh' }}>
@@ -58,40 +83,79 @@ const TeacherInformation = () => {
         <div className='container'>
             <Card style={{ marginTop: 20 }}>
                 <Row gutter={[16, 16]}>
-                    <Col xs={24} sm={8} className='d-flex justify-content-center'>
+                    <Col xs={24} sm={8} className='d-flex flex-column align-items-center'>
                         <Avatar size={256} src={teacher?.imageLink || "/image/5856.jpg"} />
+                        <Tag color={teacher.isActive ? 'green' : 'red'}>
+                            {teacher.isActive ? 'Đang hoạt động' : 'Ngưng hoạt động'}
+                        </Tag>
                     </Col>
+
                     <Col xs={24} sm={16}>
-                        <Descriptions title="Thông tin giáo viên" bordered>
-                            <Descriptions.Item label="Họ và tên" span={3}>{teacher?.fullName}</Descriptions.Item>
-                            <Descriptions.Item label="Vai trò" span={3}>{teacher?.role}</Descriptions.Item>
-                            <Descriptions.Item label="Trạng thái" span={3}>
-                                <Tag color={teacher.isActive ? 'green' : 'red'} onClick={showModal}>
-                                    {teacher.isActive ? 'Đang hoạt động' : 'Ngưng hoạt động'}
-                                </Tag>
+                        <Descriptions title="Thông tin giáo viên" bordered column={2}>
+                            <Descriptions.Item label="Họ và tên">{teacher?.fullName}</Descriptions.Item>
+                            <Descriptions.Item label="Vai trò">Giáo viên</Descriptions.Item>
+                            <Descriptions.Item label="Trạng thái">
+                                <Switch checked={teacher.isActive} onClick={showModal} />
                             </Descriptions.Item>
-                            <Descriptions.Item label="Mã nhân viên" span={3}>{teacher?.id}</Descriptions.Item>
-                            <Descriptions.Item label="Account" span={3}>{teacher?.username}</Descriptions.Item>
-                            <Descriptions.Item label="E-mail" span={3}>{teacher?.email}</Descriptions.Item>
-                            <Descriptions.Item label="Số điện thoại" span={3}>{teacher?.phone}</Descriptions.Item>
-                            <Descriptions.Item label="CCCD/CMT" span={3}>{teacher?.idCardNumber}</Descriptions.Item>
-                            <Descriptions.Item label="Địa chỉ" span={3}>
-                                <Input value={teacher?.address} readOnly />
+                            <Descriptions.Item label="Mã nhân viên">{teacher?.id}</Descriptions.Item>
+                            <Descriptions.Item label="Account">{teacher?.username}</Descriptions.Item>
+                            <Descriptions.Item label="E-mail">{teacher?.email}</Descriptions.Item>
+                            <Descriptions.Item label="Số điện thoại">
+                                {isEditing ? (
+                                    <Input
+                                        value={fieldValues.phone}
+                                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                                    />
+                                ) : (
+                                    <span>{teacher?.phone}</span>
+                                )}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="CCCD/CMT">
+                                {isEditing ? (
+                                    <Input
+                                        value={fieldValues.idCardNumber}
+                                        onChange={(e) => handleInputChange('idCardNumber', e.target.value)}
+                                    />
+                                ) : (
+                                    <span>{teacher?.idCardNumber}</span>
+                                )}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Địa chỉ" span={2}>
+                                {isEditing ? (
+                                    <Input
+                                        value={fieldValues.address}
+                                        onChange={(e) => handleInputChange('address', e.target.value)}
+                                    />
+                                ) : (
+                                    <span>{teacher?.address}</span>
+                                )}
                             </Descriptions.Item>
                         </Descriptions>
+                        <Row justify="center">
+                            <Col>
+                                <Button type="primary" onClick={isEditing ? handleSave : handleEditClick} style={{ marginTop: 10 }}>
+                                    {isEditing ? 'Lưu' : 'Chỉnh sửa'}
+                                </Button>
+                            </Col>
+                        </Row>
                     </Col>
                 </Row>
                 <Divider />
-                <Row justify="center">
-                    <Button type="primary" className="logout-btn">
-                        Lưu thông tin
-                    </Button>
-                </Row>
+                <Col xs={24} sm={16} className='container'>
+                    <Title level={4}>Danh sách lớp phụ trách</Title>
+                </Col>
+                <ClassTable data={classes} />
+                <Pagination
+                    current={currentPage}
+                    total={total}
+                    onChange={(page) => setCurrentPage(page)}
+                    style={{ textAlign: 'center', marginTop: 20 }}
+                />
             </Card>
             <Modal title="Thay đổi trạng thái" open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
                 <p>
-                    {teacher?.isActive 
-                        ? 'Bạn có muốn hạn chế tài khoản này?' 
+                    {teacher?.isActive
+                        ? 'Bạn có muốn hạn chế tài khoản này?'
                         : 'Bạn có muốn kích hoạt tài khoản này?'}
                 </p>
             </Modal>

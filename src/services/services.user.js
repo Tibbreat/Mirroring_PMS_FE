@@ -29,3 +29,8 @@ export const changeUserStatusAPI = async (userId) => {
     const URL = `/pms/users/user/${userId}/status`;
     return axios.put(URL);
 };
+
+export const getUserOpnionAPI = async (role) => {
+    const URL = `/pms/users/options?role=${role}`;
+    return axios.get(URL);
+}

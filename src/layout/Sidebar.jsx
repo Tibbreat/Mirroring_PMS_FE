@@ -38,7 +38,12 @@ const items = [
                 label: 'Vận chuyển',
             }
         ],
-    }
+    },
+    {
+        key: '6',
+        icon: <HomeOutlined />,
+        label: 'Điểm danh',
+    },
 ];
 
 const Sidebar = () => {

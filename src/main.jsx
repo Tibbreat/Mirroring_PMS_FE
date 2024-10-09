@@ -20,6 +20,7 @@ import ClassList from './page/class/ClassList';
 import StaffInformation from './page/staff/StaffInformation';
 import ListTransportProvider from './page/supplier/transport-provider/ListTransportProvider';
 import ListFoodProvider from './page/supplier/food-provider/ListFoodProvider';
+import ClassInformation from './page/class/ClassInformation';
 
 const router = createBrowserRouter([
   {
@@ -49,6 +50,7 @@ const router = createBrowserRouter([
       { path: "teacher", element: <TeacherList /> },
       { path: "teacher/:id", element: <TeacherInformation /> },
       { path: "class", element: <ClassList /> },
+      { path: "class/:id", element: <ClassInformation /> },
       { path: "staff", element: <StaffList /> },
       { path: "staff/:id", element: <StaffInformation /> },
       { path: "provider/transport", element: <ListTransportProvider /> },

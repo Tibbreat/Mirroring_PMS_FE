@@ -46,7 +46,7 @@ const TeacherList = () => {
                 message: 'Thành công',
                 description: 'Thêm giáo viên mới thành công',
             });
-            fetchTeachers(currentPage);
+            
             handleCancel();
         } catch (error) {
             console.error('Error adding teacher:', error);

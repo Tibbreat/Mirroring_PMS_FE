@@ -11,11 +11,7 @@ const { Content, Sider } = Layout;
 const ManageSite = () => {
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        breakpoint="lg"
-        collapsedWidth="0"
-        className="fixed-sidebar"
-      >
+      <Sider>
         <Sidebar />
       </Sider>
       <Layout className="site-layout">

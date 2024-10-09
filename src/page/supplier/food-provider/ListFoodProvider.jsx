@@ -1,16 +1,17 @@
 import { useCallback, useState, useEffect } from "react";
-import { Pagination, Spin, Card, Row, Col, Input, Select, Button } from "antd";
+import { Pagination, Spin, Card, Row, Col, Input, Select, Button, Form, Modal } from "antd";
 import NoData from "../../../component/no-data-page/NoData";
 import { ProviderTable } from "../../../component/table/ProviderTable";
-
-
-const { Option } = Select;
 
 const ListFoodProvider = () => {
     const [provider, setProvider] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
+
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [form] = Form.useForm();
 
     const fetchProvider = useCallback(async (page) => {
         setLoading(true);
@@ -29,6 +30,23 @@ const ListFoodProvider = () => {
         fetchProvider(currentPage);
     }, [currentPage, fetchProvider]);
 
+    const handleOk = async () => {
+        try {
+            const values = await form.validateFields();
+            console.log('Form values:', values);
+            // Add your logic to handle form submission here
+            setIsModalOpen(false);
+            form.resetFields();
+        } catch (error) {
+            console.error('Form validation failed:', error);
+        }
+    };
+
+    const handleCancel = () => {
+        setIsModalOpen(false);
+        form.resetFields();
+    };
+
     return (
         <Card style={{ margin: 20 }}>
             <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
@@ -41,7 +59,7 @@ const ListFoodProvider = () => {
                 </Col>
             </Row>
             <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
-                <Button type="primary" >Thêm đối tác</Button>
+                <Button type="primary" onClick={() => setIsModalOpen(true)} >Thêm đối tác</Button>
             </Col>
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
@@ -61,12 +79,24 @@ const ListFoodProvider = () => {
             ) : (
                 <div className="d-flex justify-content-center align-items-center">
                     <NoData
-                        title={"Không có nhà cung cấp vận chuyển nào nào"}
+                        title={"Không có nhà cung cấp vận chuyển nào"}
                         subTitle={"Danh sách nhà cung cấp sẽ xuất hiện khi bạn thêm dữ liệu vào hệ thống"}
                     />
                 </div>
 
             )}
+            <Modal
+                title="Thêm đối tác"
+                open={isModalOpen}
+                onCancel={handleCancel}
+                footer={[
+                    <Button key="cancel" onClick={handleCancel}> Hủy</Button>,
+                    <Button key="submit" type="primary" onClick={handleOk}>Thêm</Button>
+                ]}
+                width={800}
+            >
+
+            </Modal>
         </Card>
     );
 };

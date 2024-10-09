@@ -61,7 +61,7 @@ const ListTransportProvider = () => {
             ) : (
                 <div className="d-flex justify-content-center align-items-center">
                     <NoData
-                        title={"Không có nhà cung cấp vận chuyển nào nào"}
+                        title={"Không có nhà cung cấp vận chuyển nào"}
                         subTitle={"Danh sách nhà cung cấp sẽ xuất hiện khi bạn thêm dữ liệu vào hệ thống"}
                     />
                 </div>
