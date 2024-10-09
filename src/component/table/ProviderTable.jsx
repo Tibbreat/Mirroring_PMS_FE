@@ -1,41 +1,41 @@
 import { Pagination, Tag, Table } from "antd";
 import { Link } from "react-router-dom";
 
-export const ProviderTable = ({ data, currentPage, total, setCurrentPage }) => {
+export const ProviderTable = ({ data, currentPage, total, setCurrentPage, providerType }) => {
     const columns = [
         {
-            title: 'Nhà cung cấp',
+            title: providerType === 'food' ? 'Nhà cung cấp Thực phẩm' : 'Nhà cung cấp Vận chuyển',
             dataIndex: 'providerName',
             key: 'providerName',
             render: (text, record) => (
-                <Link to={`/pms/manage/class/${record.id}`} className="text-blue-2" style={{ textDecoration: "none" }}>
+                <Link to={`/pms/manage/provider/${providerType}/${record.id}`} className="text-blue-2" style={{ textDecoration: "none" }}>
                     {text}
                 </Link>
             ),
         },
         {
-            title: 'Độ tuổi',
-            dataIndex: 'ageRange',
-            key: 'ageRange',
-            render: (text) => `${text} tuổi`,
+            title: 'Số điện thoại',
+            dataIndex: 'providerPhone',
+            key: 'providerPhone',
+            render: (text) => `${text}`,
         },
         {
-            title: 'Phụ Trách',
-            dataIndex: 'managerName',
-            key: 'managerName',
+            title: 'Số đăng kí',
+            dataIndex: 'providerRegisterNumber',
+            key: 'providerRegisterNumber',
         },
         {
-            title: 'Năm học',
-            dataIndex: 'schoolYear',
-            key: 'schoolYear',
+            title: 'Email',
+            dataIndex: 'providerEmail',
+            key: 'providerEmail',
         },
         {
             title: 'Trạng thái',
-            dataIndex: 'status',
-            key: 'status',
-            render: (status) => (
-                <Tag color={status ? 'green' : 'red'}>
-                    {status ? 'Đang hoạt động' : 'Ngưng hoạt động'}
+            dataIndex: 'isActive',
+            key: 'isActive',
+            render: (isActive) => (
+                <Tag color={isActive ? 'green' : 'red'}>
+                    {isActive ? 'Đang hoạt động' : 'Ngưng hoạt động'}
                 </Tag>
             ),
         },
@@ -52,6 +52,12 @@ export const ProviderTable = ({ data, currentPage, total, setCurrentPage }) => {
                 dataSource={data}
                 pagination={false}
                 rowKey="id"
+            />
+            <Pagination
+                current={currentPage}
+                total={total}
+                onChange={handlePageChange}
+                style={{ marginTop: '16px', textAlign: 'center' }}
             />
         </div>
     );
