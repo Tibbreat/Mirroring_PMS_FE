@@ -38,3 +38,7 @@ export const updateVehicle= async (vehicleId, vehicleData) => {
     const URL = `/pms/vehicle/change-vehicle-information/${vehicleId}`;
     return await axios.put(URL, vehicleData);
 };
+export const changeStatusAPI = async (id, status) => {
+    const URL = `/pms/vehicle/change-vehicle-status/${id}?newStatus=${status}`;
+    return await axios.put(URL);
+};

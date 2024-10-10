@@ -26,19 +26,19 @@ export const VehicleTable = ({ data, currentPage, total, setCurrentPage }) => {
         },
         {
             title: 'Nhãn hiệu',
-            dataIndex: 'model',
-            key: 'model',
+            dataIndex: 'brand',
+            key: 'brand',
         },
-        // {
-        //     title: 'Trạng thái',
-        //     dataIndex: 'status',
-        //     key: 'status',
-        //     render: (status) => (
-        //         <Tag color={status ? 'green' : 'red'}>
-        //             {status ? 'Đang hoạt động' : 'Ngưng hoạt động'}
-        //         </Tag>
-        //     ),
-        // },
+        {
+            title: 'Trạng thái',
+            dataIndex: 'isActive',
+            key: 'isActive',
+            render: (isActive) => (
+                <Tag color={isActive ? 'green' : 'red'}>
+                    {isActive ? 'Đang hoạt động' : 'Ngưng hoạt động'}
+                </Tag>
+            ),
+        },
     ];
 
     const handlePageChange = (page) => {

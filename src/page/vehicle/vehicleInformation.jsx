@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Spin, Tag, Row, Col, Avatar, Button, Input, Modal, message, Card, Descriptions, Divider, Switch } from 'antd';
 import { useParams } from 'react-router-dom';
 
-import { getVehicleDetail } from '../../services/service.vehicle';
+import { changeStatusAPI, getVehicleDetail } from '../../services/service.vehicle';
 
 const VehicleInformation = () => {
     const [vehicle, setVehicle] = useState(null);
@@ -31,21 +31,21 @@ const VehicleInformation = () => {
         setIsModalVisible(true);
     };
 
-    // const handleOk = async () => {
-    //     try {
-    //         const newStatus = foodProvider?.isActive ? false : true;
+    const handleOk = async () => {
+        try {
+            const newStatus = vehicle?.isActive ? false : true;
 
-    //         // Gọi API với id và trạng thái mới
-    //         await changeStatusAPI(id, newStatus);
+            // Gọi API với id và trạng thái mới
+            await changeStatusAPI(id, newStatus);
       
-    //         message.success('Cập nhật trạng thái thành công');
-    //         await fetchFoodProvider(id);
-    //     } catch (error) {
-    //         console.error('Error changing Food Provider status:', error);
-    //     } finally {
-    //         setIsModalVisible(false);
-    //     }
-    // };
+            message.success('Cập nhật trạng thái thành công');
+            await fetchVehicle(id)
+        } catch (error) {
+            console.error('Error changing vehicle status:', error);
+        } finally {
+            setIsModalVisible(false);
+        }
+    };
 
     const handleCancel = () => {
         setIsModalVisible(false);
@@ -70,9 +70,9 @@ const VehicleInformation = () => {
                             {/* <Descriptions.Item label="Số điện thoại nhà cung cấp" span={3}>
                                 {foodProvider?.providerPhone}
                             </Descriptions.Item> */}
-                            {/* <Descriptions.Item label="Trạng thái" span={3}>
-                            <Switch checked={foodProvider.isActive} onClick={showModal} /> */}
-                            {/* </Descriptions.Item> */}
+                            <Descriptions.Item label="Trạng thái" span={3}>
+                            <Switch checked={vehicle?.isActive} onClick={showModal} /> 
+                             </Descriptions.Item>
                             <Descriptions.Item label="Số đăng kí" span={3}>{vehicle?.brand}</Descriptions.Item>
                             {/* <Descriptions.Item label="Email" span={3}>{foodProvider?.licensePlate}</Descriptions.Item> */}
                             <Descriptions.Item label="Số giấy phép" span={3}>{vehicle?.transportProviderId
@@ -91,13 +91,13 @@ const VehicleInformation = () => {
                     </Button>
                 </Row>
             </Card>
-            {/* <Modal title="Thay đổi trạng thái" open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+            <Modal title="Thay đổi trạng thái" open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
                 <p>
-                    {foodProvider?.isActive
+                    {vehicle?.isActive
                         ? 'Bạn có muốn hạn chế tài khoản này?'
                         : 'Bạn có muốn kích hoạt tài khoản này?'}
                 </p>
-            </Modal> */}
+            </Modal>
         </div>
     );
 };

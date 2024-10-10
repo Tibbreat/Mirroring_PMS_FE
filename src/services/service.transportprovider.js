@@ -30,9 +30,13 @@ export const gettransportProvidersAPI = async (page, isActive) => {
 };
 
 // API để cập nhật thông tin nhà cung cấp thức ăn
-export const updatetransportProviderAPI = async (transportProviderId, updatetransportProviderData) => {
-    const URL = `/pms/transportServiceProvider/change-information/${transportProviderId}`;
-    return await axios.put(URL, updatetransportProviderData);
+export const updateTransportProvider = async (id, data) => {
+    const URL = `/pms/transportServiceProvider/change-information/${id}`;
+    return await axios.put(URL, data, {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
 };
 
 // API để thay đổi trạng thái của nhà cung cấp thức ăn
