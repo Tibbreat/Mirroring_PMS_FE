@@ -61,6 +61,7 @@ const router = createBrowserRouter([
       { path: "provider/transport", element: <ListTransportProvider /> },
       { path: "provider/food/:id", element: <FoodProviderInformation /> },
       { path: "provider/food", element: <ListFoodProvider /> },
+      { path: "attendance", element: <Attendance /> },
     ],
   },
 ]);
