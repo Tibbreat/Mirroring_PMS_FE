@@ -21,6 +21,7 @@ import StaffInformation from './page/staff/StaffInformation';
 import ListTransportProvider from './page/supplier/transport-provider/ListTransportProvider';
 import ListFoodProvider from './page/supplier/food-provider/ListFoodProvider';
 import ClassInformation from './page/class/ClassInformation';
+import Attendance from './page/attdence/Attendance';
 
 const router = createBrowserRouter([
   {
@@ -55,6 +56,7 @@ const router = createBrowserRouter([
       { path: "staff/:id", element: <StaffInformation /> },
       { path: "provider/transport", element: <ListTransportProvider /> },
       { path: "provider/food", element: <ListFoodProvider /> },
+      { path: "attendance", element: <Attendance /> },
     ],
   },
 ]);
