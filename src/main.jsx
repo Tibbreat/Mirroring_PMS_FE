@@ -24,6 +24,7 @@ import ClassInformation from './page/class/ClassInformation';
 import FoodProviderInformation from './page/supplier/food-provider/FoodProviderInformation';
 import TransportProviderInformation from './page/supplier/transport-provider/TransportProviderInformation';
 import VehicleInformation from './page/vehicle/vehicleInformation';
+import ChildrenInformation from './page/children/ChildrenInformation';
 
 import Attendance from './page/attdence/Attendance';
 
@@ -62,6 +63,7 @@ const router = createBrowserRouter([
       { path: "provider/food/:id", element: <FoodProviderInformation /> },
       { path: "provider/food", element: <ListFoodProvider /> },
       { path: "attendance", element: <Attendance /> },
+      { path: "children/:id", element: <ChildrenInformation /> },
     ],
   },
 ]);
