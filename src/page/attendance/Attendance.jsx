@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, Modal, message, Table, Image, Avatar } from 'antd';
+import { Button, Modal, message, Table, Avatar } from 'antd';
 import * as faceapi from 'face-api.js';
 import { useParams } from 'react-router-dom';
 import { getChildrenByClassWithoutPaginationAPI } from '../../services/service.children';
@@ -34,14 +34,18 @@ const Attendance = () => {
         const loadChildren = async () => {
             try {
                 const response = await getChildrenByClassWithoutPaginationAPI(id);
-                setChildren(response.data);  // Lưu dữ liệu trẻ em vào state
+                const childrenWithAttendance = response.data.map(child => ({
+                    ...child,
+                    attendanceStatus: false // Thêm trạng thái điểm danh ban đầu
+                }));
+                setChildren(childrenWithAttendance);  // Lưu dữ liệu trẻ em vào state
             } catch (error) {
                 console.error('Failed to fetch children:', error);
             }
         };
         loadChildren();
         loadModels();
-    }, []);
+    }, [id]);
 
     // Cột cho bảng dữ liệu
     const columns = [
@@ -71,6 +75,12 @@ const Attendance = () => {
             dataIndex: 'childAddress',
             key: 'childAddress',
         },
+        {
+            title: 'Trạng Thái',
+            dataIndex: 'attendanceStatus',
+            key: 'attendanceStatus',
+            render: (attendanceStatus) => attendanceStatus ? 'Đã điểm danh' : 'Chưa điểm danh',
+        }
     ];
 
     // Tạo mô hình nhận diện từ các ảnh trong folder
@@ -133,9 +143,22 @@ const Attendance = () => {
 
             // So sánh khuôn mặt phát hiện với các mô hình đã lưu
             if (labeledDescriptors.length > 0) {
-                const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.5); // Tỉ lệ nhận diện
+                const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.4);
                 resizedDetections.forEach(detection => {
                     const bestMatch = faceMatcher.findBestMatch(detection.descriptor);
+                    const matchedChild = children.find(child => child.childName === bestMatch.label);
+                    
+                    if (matchedChild) {
+                        const currentTime = new Date().toLocaleString();
+                        console.log(`Tên: ${matchedChild.childName}, ID: ${matchedChild.id}, Thời gian: ${currentTime}`);
+
+                        setChildren(prevChildren =>
+                            prevChildren.map(child =>
+                                child.id === matchedChild.id ? { ...child, attendanceStatus: true } : child
+                            )
+                        );
+                    }
+
                     const box = detection.detection.box;
                     const text = bestMatch.toString();
                     context.beginPath();
