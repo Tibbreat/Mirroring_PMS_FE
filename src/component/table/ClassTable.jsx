@@ -1,7 +1,9 @@
-import { Pagination, Tag, Table } from "antd";
-import { Link } from "react-router-dom";
+import { Pagination, Tag, Table, Button } from "antd";
+import { Link, useNavigate } from "react-router-dom";
 
 export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
+
+    const navigate = useNavigate();
     const columns = [
         {
             title: 'Tên lớp',
@@ -39,12 +41,24 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
                 </Tag>
             ),
         },
+        {
+            title: 'Hành động',
+            key: 'action',
+            render: (text, record) => (
+                <Button color="primary" variant="outlined" onClick={() => onAttendance(record.id)}>
+                    Điểm danh
+                </Button>
+            ),
+        },
     ];
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
-
+    const onAttendance = (id) => {
+        navigate(`/pms/manage/class/attendance/${id}`);
+        console.log(id);
+    }
     return (
         <div className="p-2">
             <Table

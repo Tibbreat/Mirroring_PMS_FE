@@ -1,6 +1,5 @@
 import React from 'react';
-import { Row, Col, Card, Button } from 'antd';
-import SupportBtn from "../../component/button/SupportBtn";
+import { Row, Col, Card, Button, FloatButton } from 'antd';
 
 const Dashboard = () => {
     return (
@@ -47,11 +46,7 @@ const Dashboard = () => {
                         </Card>
                     </div>
                 </Col>
-                <Col xs={24} md={6} className="d-flex flex-column">
-                    <div className="mt-auto">
-                        <SupportBtn />
-                    </div>
-                </Col>
+               <FloatButton ></FloatButton>
             </Row>
         </div>
     );

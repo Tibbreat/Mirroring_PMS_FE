@@ -4,7 +4,7 @@ import Navbar from './layout/Navbar';
 import { Outlet } from 'react-router-dom';
 import { Layout } from 'antd';
 
-
+import "./assets/style.css"
 
 const { Content, Sider } = Layout;
 

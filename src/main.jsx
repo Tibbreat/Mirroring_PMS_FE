@@ -1,11 +1,10 @@
 import { createRoot } from 'react-dom/client';
 import {
-  createBrowserRouter,
-  RouterProvider,
+  BrowserRouter as Router,
+  Route,
+  Routes,
 } from 'react-router-dom';
-
 import Login from './page/auth/Login';
-import Auth from './Auth';
 import ForgotPassword from './page/auth/ForgotPassword';
 import ChangePassword from './page/auth/ChangePassword';
 import ManageSite from './ManageSite';
@@ -26,48 +25,45 @@ import TransportProviderInformation from './page/supplier/transport-provider/Tra
 import VehicleInformation from './page/vehicle/vehicleInformation';
 import ChildrenInformation from './page/children/ChildrenInformation';
 
-import Attendance from './page/attdence/Attendance';
+import Attendance from './page/attendance/Attendance';
 
-const router = createBrowserRouter([
-  {
-    path: "/pms/auth",
-    element: (
-      <AuthWrapper>
-        <Auth />
-      </AuthWrapper>
-    ),
-    children: [
-      { index: true, path: "login", element: <Login /> },
-      { path: "forgot-password", element: <ForgotPassword /> },
-      { path: "change-password", element: <ChangePassword /> },
-    ],
-  },
-  {
-    path: "/pms/manage",
-    element: (
-      <AuthWrapper>
-        <PrivateRoute>
-          <ManageSite />
-        </PrivateRoute>
-      </AuthWrapper>
-    ),
-    children: [
-      { index: true, path: "dashboard", element: <Dashboard /> },
-      { path: "teacher", element: <TeacherList /> },
-      { path: "teacher/:id", element: <TeacherInformation /> },
-      { path: "class", element: <ClassList /> },
-      { path: "class/:id", element: <ClassInformation /> },
-      { path: "staff", element: <StaffList /> },
-      { path: "staff/:id", element: <StaffInformation /> },
-      { path: "provider/transport", element: <ListTransportProvider /> },
-      { path: "provider/food/:id", element: <FoodProviderInformation /> },
-      { path: "provider/food", element: <ListFoodProvider /> },
-      { path: "attendance", element: <Attendance /> },
-      { path: "children/:id", element: <ChildrenInformation /> },
-    ],
-  },
-]);
+import Error403 from './page/errors/Error403';
+import Error404 from './page/errors/Error404';
+import Error500 from './page/errors/Error500';
 
-createRoot(document.getElementById('root')).render(
-  <RouterProvider router={router} />
+const App = () => (
+  <Router>
+    <Routes>
+      <Route path="/pms/auth/login" element={<Login />} />
+      <Route path="/pms/auth/forgot-password" element={<ForgotPassword />} />
+      <Route path="/pms/auth/change-password" element={<ChangePassword />} />
+      <Route path="/pms/manage" element={
+        <AuthWrapper>
+          <PrivateRoute>
+            <ManageSite />
+          </PrivateRoute>
+        </AuthWrapper>
+      }>
+        <Route index path="dashboard" element={<Dashboard />} />
+        <Route path="teacher" element={<TeacherList />} />
+        <Route path="teacher/:id" element={<TeacherInformation />} />
+        <Route path="class" element={<ClassList />} />
+        <Route path="class/:id" element={<ClassInformation />} />
+        <Route path="staff" element={<StaffList />} />
+        <Route path="staff/:id" element={<StaffInformation />} />
+        <Route path="provider/transport" element={<ListTransportProvider />} />
+        <Route path="provider/food/:id" element={<FoodProviderInformation />} />
+        <Route path="provider/food" element={<ListFoodProvider />} />
+        <Route path="class/attendance/:id" element={<Attendance />} />
+        <Route path="children/:id" element={<ChildrenInformation />} />
+      </Route>
+
+      {/* Các trang lỗi */}
+      <Route path="/403" element={<Error403 />} />
+      <Route path="/500" element={<Error500 />} />
+      <Route path="*" element={<Error404 />} />
+    </Routes>
+  </Router>
 );
+
+createRoot(document.getElementById('root')).render(<App />);

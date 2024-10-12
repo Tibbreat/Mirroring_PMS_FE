@@ -1,13 +1,14 @@
 import { useContext, useEffect, useState } from "react";
 import { getAccountAPI } from "../services/service.auth";
 import { AuthContext } from "../component/context/auth.context";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import Loading from "../page/common/Loading";
 
-const PrivateRoute = ({ children }) => {
+const PrivateRoute = ({ role, children }) => {
     const { user, setUser } = useContext(AuthContext);
     const [loading, setLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const navigate = useNavigate();
 
     const fetchUserInfo = async () => {
         try {
@@ -16,9 +17,11 @@ const PrivateRoute = ({ children }) => {
                 id: response.data.id,
                 role: response.data.role,
             });
+            console.log("User info:", response.data);
             setIsAuthenticated(true);
         } catch (error) {
             console.error('Failed to fetch user info:', error);
+            navigate("/pms/auth/login");
             setIsAuthenticated(false);
         } finally {
             setLoading(false);
@@ -38,11 +41,15 @@ const PrivateRoute = ({ children }) => {
         return <Loading />;
     }
 
-    if (isAuthenticated) {
-        return <>{children}</>;
+    if (!isAuthenticated) {
+        return <Navigate to="/pms/auth/login" replace />;
     }
 
-    return <Navigate to="/pms/auth/login" replace />;
-}
+    if (role && user.role !== role) {
+        return <Navigate to="/403" replace />;
+    }
+
+    return <>{children}</>;
+};
 
 export default PrivateRoute;

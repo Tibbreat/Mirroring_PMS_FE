@@ -39,11 +39,11 @@ const items = [
             }
         ],
     },
-    {
-        key: '6',
-        icon: <AimOutlined />,
-        label: 'Điểm danh',
-    },
+    // {
+    //     key: '6',
+    //     icon: <AimOutlined />,
+    //     label: 'Điểm danh',
+    // },
 ];
 
 const Sidebar = () => {
@@ -66,8 +66,6 @@ const Sidebar = () => {
             setSelectedKey('51');
         } else if (location.pathname.includes('/provider/transport')) {
             setSelectedKey('52');
-        } else if (location.pathname.includes('/attendance')) {
-            setSelectedKey('6');
         } else {
             setSelectedKey(undefined);
         }
@@ -97,9 +95,9 @@ const Sidebar = () => {
             case '52':
                 navigate('/pms/manage/provider/transport');
                 break;
-            case '6':
-                navigate('/pms/manage/attendance');
-                break;
+            // case '6':
+            //     navigate('/pms/manage/attendance');
+            //     break;
             default:
                 break;
         }

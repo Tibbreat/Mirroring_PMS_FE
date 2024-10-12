@@ -23,7 +23,7 @@ export const ChildrenTable = ({ data, currentPage, total, setCurrentPage }) => {
             title: 'Ngày sinh',
             dataIndex: 'childBirthDate',
             key: 'childBirthDate',
-            render: (date) => new Date(date).toLocaleDateString(),  // Định dạng ngày
+            render: (date) => new Date(date).toLocaleDateString(),  
         },
         {
             title: 'Địa chỉ',

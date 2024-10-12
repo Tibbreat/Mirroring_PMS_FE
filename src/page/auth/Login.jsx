@@ -15,22 +15,22 @@ const Login = () => {
         setDisable(true);
         try {
             const response = await loginAPI(values.username, values.password);
-            if (response?.status === 200) {
+            if (response?.status === 200 && response.data.token) {
                 localStorage.setItem("access_token", response.data.token);
                 setUser({
                     id: response.data.id,
-                    role: response.data.role
+                    role: response.data.role,
                 });
                 navigate("/pms/manage/dashboard");
-            } else {
-                message.error(response?.data?.message || "Login failed.");
-            }
+            } 
         } catch (error) {
-            message.error(error?.response?.data?.message || "An error occurred.");
+            console.log("Login error:", error);
+            message.error(error?.data?.message || "Có lỗi xảy ra trong quá trình đăng nhập.");
         } finally {
             setDisable(false);
         }
     };
+
 
     useEffect(() => {
         localStorage.removeItem("access_token");

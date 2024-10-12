@@ -68,9 +68,10 @@ export const StaffList = () => {
         <Card style={{ margin: 20 }}>
             <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
                 <Col xs={24} sm={8}>
-                    <Select defaultValue="option 1" style={{ width: '100%' }}>
-                        <Option value="option 1">Option 1</Option>
-                        <Option value="option 2">Option 2</Option>
+                    <Select placeholder="Chọn vai trò" style={{ width: '100%' }}>
+                        <Option value="CLASS_MANAGER">Quản lý lớp</Option>
+                        <Option value="KITCHEN_MANAGER">Quản lý bếp</Option>
+                        <Option value="TRANSPORT_MANAGER">Quản lý dịch vụ đưa đón</Option>
                     </Select>
                 </Col>
                 <Col xs={24} sm={16}>

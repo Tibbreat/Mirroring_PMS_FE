@@ -25,7 +25,7 @@ const ClassList = () => {
         setLoading(true);
         try {
             const response = await getClassesAPI(page, null, null);
-         
+
             setClasses(response.data.listData);
             setTotal(response.data.total);
         } catch (error) {
@@ -105,11 +105,14 @@ const ClassList = () => {
         <Card style={{ margin: 20 }}>
             <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
                 <Col xs={24} sm={8}>
-                    <Select defaultValue="option 1" style={{ width: '100%' }}>
-                        <Option value="option 1">Option 1</Option>
-                        <Option value="option 2">Option 2</Option>
+                    <Select placeholder="Độ tuổi" style={{ width: '100%' }}>
+                        <Option value="1 - 2">1 - 2 tuổi</Option>
+                        <Option value="2 - 3">2 - 3 tuổi</Option>
+                        <Option value="3 - 4">3 - 4 tuổi</Option>
+                        <Option value="4 - 5">4 - 5 tuổi</Option>
                     </Select>
                 </Col>
+
                 <Col xs={24} sm={16}>
                     <Input.Search
                         placeholder="Nhập tên lớp cần tìm"

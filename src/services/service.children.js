@@ -57,3 +57,9 @@ export const getChildrenByClassAPI = async (classId, page) => {
     const URL = `/pms/children/children-by-class/${classId}?page=${page}`;
     return await axios.get(URL);
 };
+
+// Get children by class ID (without pagination)
+export const getChildrenByClassWithoutPaginationAPI = async (classId) => {
+    const URL = `/pms/children/class/${classId}`;
+    return await axios.get(URL);
+};
