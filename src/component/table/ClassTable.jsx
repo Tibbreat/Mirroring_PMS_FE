@@ -1,4 +1,5 @@
 import { Pagination, Tag, Table, Button } from "antd";
+import moment from "moment";
 import { Link, useNavigate } from "react-router-dom";
 
 export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
@@ -28,8 +29,11 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
         },
         {
             title: 'Năm học',
-            dataIndex: 'schoolYear',
-            key: 'schoolYear',
+            dataIndex: 'openingDay',
+            key: 'openingDay',
+            render: (text) => {
+                return text ? moment(text).year() : ''; // Lấy năm từ openingDay
+            },
         },
         {
             title: 'Trạng thái',

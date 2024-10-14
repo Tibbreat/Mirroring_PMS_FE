@@ -52,10 +52,12 @@ const App = () => (
         <Route path="staff" element={<StaffList />} />
         <Route path="staff/:id" element={<StaffInformation />} />
         <Route path="provider/transport" element={<ListTransportProvider />} />
+        <Route path="provider/transport/:id" element={<TransportProviderInformation />} />
         <Route path="provider/food/:id" element={<FoodProviderInformation />} />
         <Route path="provider/food" element={<ListFoodProvider />} />
         <Route path="class/attendance/:id" element={<Attendance />} />
         <Route path="children/:id" element={<ChildrenInformation />} />
+        <Route path="vehicle/:id" element={<VehicleInformation />} />
       </Route>
 
       {/* Các trang lỗi */}
