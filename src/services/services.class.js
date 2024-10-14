@@ -31,3 +31,15 @@ export const getTeacherOfClass = async (classId) => {
     const URL = `/pms/classes/teacher/class/${classId}`;
     return await axios.get(URL);
 }
+export const changeClassStatusAPI = async (classId) => {
+    const URL = `/pms/classes/change-class-status/${classId}`;
+    return await axios.put(URL);
+}
+export const changeClassInformationAPI = async (classId,data) => {
+    const URL = `/pms/classes/change-class-description/${classId}`;
+    return await axios.put(URL, data, {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+}

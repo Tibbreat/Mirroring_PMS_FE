@@ -1,5 +1,5 @@
 import { Pagination, Tag, Table, Button } from "antd";
-import { useContext } from "react";
+import moment from "moment";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../component/context/auth.context";
 
@@ -31,8 +31,11 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
         },
         {
             title: 'Năm học',
-            dataIndex: 'schoolYear',
-            key: 'schoolYear',
+            dataIndex: 'openingDay',
+            key: 'openingDay',
+            render: (text) => {
+                return text ? moment(text).year() : ''; // Lấy năm từ openingDay
+            },
         },
         {
             title: 'Trạng thái',
