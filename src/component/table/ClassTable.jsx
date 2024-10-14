@@ -1,9 +1,12 @@
 import { Pagination, Tag, Table, Button } from "antd";
+import { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../component/context/auth.context";
 
 export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
-
     const navigate = useNavigate();
+    const { user } = useContext(AuthContext);
+
     const columns = [
         {
             title: 'Tên lớp',
@@ -41,7 +44,10 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
                 </Tag>
             ),
         },
-        {
+    ];
+
+    if (user.role === "ADMIN") {
+        columns.push({
             title: 'Hành động',
             key: 'action',
             render: (text, record) => (
@@ -49,16 +55,18 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
                     Điểm danh
                 </Button>
             ),
-        },
-    ];
+        });
+    }
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
+
     const onAttendance = (id) => {
         navigate(`/pms/manage/class/attendance/${id}`);
         console.log(id);
-    }
+    };
+
     return (
         <div className="p-2">
             <Table

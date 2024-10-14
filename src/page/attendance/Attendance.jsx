@@ -1,20 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Button, Modal, message, Table, Avatar } from 'antd';
+import React, { useState, useRef, useEffect, useContext } from 'react';
+import { Button, Modal, Table, Avatar, notification } from 'antd';
 import * as faceapi from 'face-api.js';
 import { useParams } from 'react-router-dom';
-import { getChildrenByClassWithoutPaginationAPI } from '../../services/service.children';
-
+import { createBaseLogAPI, getClassLogAPI } from '../../services/service.log';
+import { AuthContext } from '../../component/context/auth.context';
+import { EyeOutlined } from '@ant-design/icons'; // Import the eye icon
 const Attendance = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [videoStream, setVideoStream] = useState(null);
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [labeledDescriptors, setLabeledDescriptors] = useState([]);
-    const [children, setChildren] = useState([]);  // Dữ liệu từ API
+    const [children, setChildren] = useState([]);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const { id } = useParams();
+    const { user } = useContext(AuthContext);
 
-    // Tải các mô hình face-api.js
     useEffect(() => {
         const loadModels = async () => {
             try {
@@ -25,70 +26,148 @@ const Attendance = () => {
                 await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
                 await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
                 setModelsLoaded(true);
-                message.success('Hệ thống sẵn sàng để điểm danh!');
+                notification.success({
+                    message: 'Hệ thống sẵn sàng!',
+                    description: 'Hệ thống đã sẵn sàng để điểm danh.',
+                });
             } catch (error) {
                 console.error('Error loading models:', error);
-                message.error('Failed to load models');
+                notification.error({
+                    message: 'Lỗi',
+                    description: 'Không thể tải các mô hình.',
+                });
             }
         };
+
         const loadChildren = async () => {
             try {
-                const response = await getChildrenByClassWithoutPaginationAPI(id);
-                const childrenWithAttendance = response.data.map(child => ({
+                const response = await getClassLogAPI(id);
+                const childrenWithAttendance = response.map(child => ({
                     ...child,
-                    attendanceStatus: false // Thêm trạng thái điểm danh ban đầu
+                    attendanceStatus: false,
                 }));
-                setChildren(childrenWithAttendance);  // Lưu dữ liệu trẻ em vào state
+                setChildren(childrenWithAttendance);
             } catch (error) {
                 console.error('Failed to fetch children:', error);
             }
         };
+
+        const createBaseLog = async () => {
+            await createBaseLogAPI(id, user.id);
+        };
+
+        createBaseLog();
         loadChildren();
         loadModels();
-    }, [id]);
+    }, [id, user.id]);
 
-    // Cột cho bảng dữ liệu
+
+
     const columns = [
         {
             title: 'Hình ảnh',
             dataIndex: 'imageLink',
             key: 'imageLink',
-            render: (text) => <Avatar width={100} src={text} />, 
+            render: (text) => <Avatar width={100} src={text} />,
         },
         {
-            title: 'Tên trẻ',
+            title: 'Họ và tên',
             dataIndex: 'childName',
             key: 'childName',
         },
         {
-            title: 'Tuổi',
-            dataIndex: 'childAge',
-            key: 'childAge',
+            title: 'Thời gian đi học',
+            dataIndex: 'checkinTime',
+            key: 'checkinTime',
+            render: (text) => text || 'Chưa điểm danh',
         },
         {
-            title: 'Ngày sinh',
-            dataIndex: 'childBirthDate',
-            key: 'childBirthDate',
+            title: 'Thời gian về nhà',
+            dataIndex: 'checkoutTime',
+            key: 'checkoutTime',
+            render: (text) => text || 'Chưa điểm danh',
         },
         {
-            title: 'Địa chỉ',
-            dataIndex: 'childAddress',
-            key: 'childAddress',
+            title: 'Thao tác',
+            key: 'actions',
+            render: (_, record) => {
+                if (!record.checkinTime) {
+                    return (
+                        <Button
+                            type="primary"
+                            onClick={() => handleCheckIn(record.id)}
+                        >
+                            Check-in
+                        </Button>
+                    );
+                } else if (record.checkinTime && !record.checkoutTime) {
+                    return (
+                        <Button
+                            type="danger"
+                            onClick={() => handleCheckOut(record.id)}
+                        >
+                            Check-out
+                        </Button>
+                    );
+                } else {
+                    return null;
+                }
+            },
         },
         {
-            title: 'Trạng Thái',
-            dataIndex: 'attendanceStatus',
-            key: 'attendanceStatus',
-            render: (attendanceStatus) => attendanceStatus ? 'Đã điểm danh' : 'Chưa điểm danh',
-        }
+            title: 'Ghi chú',
+            dataIndex: 'note',
+            key: 'note',
+            render: (text) => (
+                <span>
+                    <Button
+                        type="link"
+                        icon={<EyeOutlined />}
+                        onClick={() => handleViewNote(text)}
+                    >
+                    </Button>
+                </span>
+            ),
+        },
     ];
 
-    // Tạo mô hình nhận diện từ các ảnh trong folder
+
+    const handleCheckIn = (id) => {
+        const currentTime = new Date().toLocaleString();
+        setChildren((prevChildren) =>
+            prevChildren.map((child) =>
+                child.id === id ? { ...child, checkinTime: currentTime } : child
+            )
+        );
+        notification.success({
+            message: 'Check-in thành công',
+            description: `Đã check-in thành công cho học sinh có ID: ${id} vào lúc ${currentTime}`,
+        });
+    };
+
+    const handleCheckOut = (id) => {
+        const currentTime = new Date().toLocaleString();
+        setChildren((prevChildren) =>
+            prevChildren.map((child) =>
+                child.id === id ? { ...child, checkoutTime: currentTime } : child
+            )
+        );
+        notification.success({
+            message: 'Check-out thành công',
+            description: `Đã check-out thành công cho học sinh có ID: ${id} vào lúc ${currentTime}`,
+        });
+    };
+
+
+    // Try capture image from webcam and send to server for face recognition
+    // Try another webcam devide
+
+    
     const loadLabeledImages = async () => {
-        const labels = children.map(child => child.childName);  // Sử dụng tên của trẻ từ API
+        const labels = children.map(child => child.childName);
         return Promise.all(
             labels.map(async (label) => {
-                const imgUrl = children.find(child => child.childName === label).imageLink;  // Lấy ảnh từ API
+                const imgUrl = children.find(child => child.childName === label).imageLink;
                 const img = await faceapi.fetchImage(imgUrl);
                 const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
                 if (!detections) {
@@ -114,7 +193,6 @@ const Attendance = () => {
         }
     }, [modelsLoaded, children]);
 
-    // Bắt đầu stream webcam và tự động phát hiện khuôn mặt
     const startWebcam = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -127,7 +205,6 @@ const Attendance = () => {
         }
     };
 
-    // Phát hiện khuôn mặt và so sánh với các ảnh trong folder
     const detectFaces = async () => {
         if (videoRef.current && canvasRef.current) {
             const detections = await faceapi.detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptors();
@@ -141,22 +218,23 @@ const Attendance = () => {
             const context = canvasRef.current.getContext('2d');
             context.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
-            // So sánh khuôn mặt phát hiện với các mô hình đã lưu
             if (labeledDescriptors.length > 0) {
                 const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.4);
                 resizedDetections.forEach(detection => {
                     const bestMatch = faceMatcher.findBestMatch(detection.descriptor);
                     const matchedChild = children.find(child => child.childName === bestMatch.label);
-                    
-                    if (matchedChild) {
-                        const currentTime = new Date().toLocaleString();
-                        console.log(`Tên: ${matchedChild.childName}, ID: ${matchedChild.id}, Thời gian: ${currentTime}`);
 
+                    if (matchedChild && !matchedChild.attendanceStatus) {
+                        const currentTime = new Date().toLocaleString();
                         setChildren(prevChildren =>
                             prevChildren.map(child =>
                                 child.id === matchedChild.id ? { ...child, attendanceStatus: true } : child
                             )
                         );
+                        notification.success({
+                            message: 'Điểm danh thành công',
+                            description: `Đã điểm danh cho ${matchedChild.childName} (ID: ${matchedChild.id}) vào lúc ${currentTime}`,
+                        });
                     }
 
                     const box = detection.detection.box;
@@ -166,7 +244,7 @@ const Attendance = () => {
                     context.strokeStyle = 'green';
                     context.stroke();
                     context.fillStyle = 'green';
-                    context.font = 'bold 16px Arial'; // Đặt font chữ đậm và kích cỡ to hơn
+                    context.font = 'bold 16px Arial';
                     context.fillText(text, box.x, box.y - 10);
                 });
             }
@@ -200,11 +278,13 @@ const Attendance = () => {
 
     const handleModalClose = () => {
         setIsModalVisible(false);
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+        }
     };
 
     return (
         <div style={{ padding: 20 }}>
-            {/* Hiển thị bảng dữ liệu trẻ em */}
             <Table dataSource={children} columns={columns} rowKey="id" />
 
             <Button type="primary" onClick={handleButtonClick}>
