@@ -30,6 +30,8 @@ import Attendance from './page/attendance/Attendance';
 import Error403 from './page/errors/Error403';
 import Error404 from './page/errors/Error404';
 import Error500 from './page/errors/Error500';
+import ChildrenList from './page/children/ChildrenList';
+import AddChildren from './page/children/AddChildren';
 
 const App = () => (
   <Router>
@@ -58,6 +60,8 @@ const App = () => (
         <Route path="class/attendance/:id" element={<Attendance />} />
         <Route path="children/:id" element={<ChildrenInformation />} />
         <Route path="vehicle/:id" element={<VehicleInformation />} />
+        <Route path="children" element={<ChildrenList />} />
+        <Route path="children/add-children" element={<AddChildren />} />
       </Route>
 
       {/* Các trang lỗi */}

@@ -2,6 +2,7 @@ import { Pagination, Tag, Table, Button } from "antd";
 import moment from "moment";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../component/context/auth.context";
+import { useContext } from "react";
 
 export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
     const navigate = useNavigate();

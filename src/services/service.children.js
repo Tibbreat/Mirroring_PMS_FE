@@ -1,23 +1,74 @@
 import axios from '../../axios.customize';
 
-// Add a new child with an image
-export const addChildAPI = async (childData, image) => {
+
+
+// API để thêm trẻ
+export const addChildAPI = async (
+    childImage,
+    parentImage1,
+    parentImage2,
+    addChildrenRequest,
+    addUserRequest1,
+    addUserRequest2
+) => {
     const formData = new FormData();
-    formData.append('image', image);
-    formData.append('request', new Blob([JSON.stringify(childData)], { type: 'application/json' }));
-    const URL = `/pms/children/add`;
-    return await axios.post(URL, formData, {
+
+    // Thêm hình ảnh trẻ
+    if (childImage) {
+        formData.append('childImage', childImage);
+    }
+
+    // Thêm hình ảnh phụ huynh (nếu có)
+    if (parentImage1) {
+        formData.append('parentImage1', parentImage1);
+    }
+    if (parentImage2) {
+        formData.append('parentImage2', parentImage2);
+    }
+
+    // Thêm dữ liệu cho AddChildrenRequest
+    formData.append('request', new Blob([JSON.stringify(addChildrenRequest)], { type: 'application/json' }));
+
+    // Thêm dữ liệu cho AddUserRequest phụ huynh 1
+    if (addUserRequest1) {
+        formData.append('request1', new Blob([JSON.stringify(addUserRequest1)], { type: 'application/json' }));
+    }
+
+    // Thêm dữ liệu cho AddUserRequest phụ huynh 2
+    if (addUserRequest2) {
+        formData.append('request2', new Blob([JSON.stringify(addUserRequest2)], { type: 'application/json' }));
+    }
+
+    // Gọi API để thêm trẻ
+    const response = await axios.post('/pms/children/add', formData, {
         headers: {
-            'Content-Type': 'multipart/form-data'
-        }
+            'Content-Type': 'multipart/form-data',
+        },
     });
+
+    return response.data;
 };
 
+
+
 // Get children with filters (pagination, fullname, classId)
-export const getChildrenAPI = async (page, fullname = '', classId = '') => {
-    const URL = `/pms/children?page=${page}&fullname=${fullname}&classId=${classId}`;
+export const getChildrenAPI = async (page, fullname, classId) => {
+    const params = new URLSearchParams();
+
+    if (page) {
+        params.append('page', page);
+    }
+    if (fullname) {
+        params.append('fullname', fullname);
+    }
+    if (classId) {
+        params.append('classId', classId);
+    }
+
+    const URL = `/pms/children?${params.toString()}`;
     return await axios.get(URL);
 };
+
 
 // Get child details by ID
 export const getChildDetailAPI = async (childId) => {

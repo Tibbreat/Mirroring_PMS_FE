@@ -30,11 +30,7 @@ export const ChildrenTable = ({ data, currentPage, total, setCurrentPage }) => {
             dataIndex: 'childAddress',
             key: 'childAddress',
         },
-        {
-            title: 'ID lớp',
-            dataIndex: 'classId',
-            key: 'classId',
-        },
+
     ];
 
     const handlePageChange = (page) => {

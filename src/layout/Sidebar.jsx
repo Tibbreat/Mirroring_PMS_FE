@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HomeOutlined, UserOutlined, UsergroupAddOutlined, AimOutlined, DashboardOutlined, ReconciliationOutlined } from '@ant-design/icons';
+import { HomeOutlined, UserOutlined, UsergroupAddOutlined, AimOutlined, DashboardOutlined, ReconciliationOutlined, UserAddOutlined } from '@ant-design/icons';
 import { Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -39,6 +39,11 @@ const items = [
             }
         ],
     },
+    {
+        key: '6',
+        icon: <UserAddOutlined />,
+        label: 'Trẻ',
+    },
     // {
     //     key: '6',
     //     icon: <AimOutlined />,
@@ -66,6 +71,8 @@ const Sidebar = () => {
             setSelectedKey('51');
         } else if (location.pathname.includes('/provider/transport')) {
             setSelectedKey('52');
+        } else if (location.pathname.includes('/children')) {
+            setSelectedKey('6');
         } else {
             setSelectedKey(undefined);
         }
@@ -95,9 +102,9 @@ const Sidebar = () => {
             case '52':
                 navigate('/pms/manage/provider/transport');
                 break;
-            // case '6':
-            //     navigate('/pms/manage/attendance');
-            //     break;
+            case '6':
+                navigate('/pms/manage/children');
+                break;
             default:
                 break;
         }
