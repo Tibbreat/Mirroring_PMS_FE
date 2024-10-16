@@ -30,6 +30,11 @@ export const ChildrenTable = ({ data, currentPage, total, setCurrentPage }) => {
             dataIndex: 'childAddress',
             key: 'childAddress',
         },
+        {
+            title: 'Số định danh',
+            dataIndex: 'identificationNumber',
+            key: 'identificationNumber',
+        },
 
     ];
 

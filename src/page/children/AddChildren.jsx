@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Button, Card, Col, DatePicker, Divider, Form, Input, message, Row, Select } from 'antd';
 import moment from 'moment';
-import { addChildAPI } from '../../services/service.children'; // API để thêm trẻ
+import { addChildAPI } from '../../services/service.children'; 
 import { AuthContext } from '../../component/context/auth.context';
 import UploadImage from '../../component/input/UploadImage';
+import { useNavigate } from 'react-router-dom';
 
 const { Option } = Select;
 
@@ -11,30 +12,18 @@ const AddChildren = () => {
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
     const { user } = useContext(AuthContext);
-    const [parents, setParents] = useState([{ id: Date.now(), fullName: '', idCardNumber: '', address: '', phone: '', isRepresentative: false }]);
+    const [parents, setParents] = useState([{ id: '', fullName: '', idCardNumber: '', address: '', phone: '', isRepresentative: false }]);
     const [imageFile, setImageFile] = useState(null);
-    const [fileList, setFileList] = useState([]); // Dùng để lưu file cho phụ huynh
+    const navigate = useNavigate();
 
     // Hàm để thêm phụ huynh
     const addParent = () => {
-        setParents([...parents, { id: Date.now(), fullName: '', idCardNumber: '', address: '', phone: '', isRepresentative: false }]);
-    };
-
-    // Hàm để xóa phụ huynh
-    const removeParent = (id) => {
-        setParents(parents.filter((parent) => parent.id !== id));
+        setParents([...parents, { id: '', fullName: '', idCardNumber: '', address: '', phone: '', isRepresentative: false }]);
     };
 
     const handleImageChange = (file) => {
         setImageFile(file);
     };
-
-    const handleParentImageChange = (index, file) => {
-        const newFileList = [...fileList];
-        newFileList[index] = file;
-        setFileList(newFileList);
-    };
-
     const handleSubmit = async (values) => {
         setLoading(true);
         try {
@@ -69,32 +58,47 @@ const AddChildren = () => {
                             idCardNumber: values.mother.idCardNumber,
                             address: values.mother.address,
                             phone: values.mother.phone,
-                            role: 'PARENT', // Auto set role là PARENT
+                            role: 'PARENT', 
                         },
                     },
                 ],
+            }; 
+            const addUserRequest1 = {
+                fullName: values.father.fullName,
+                idCardNumber: values.father.idCardNumber,
+                address: values.father.address,
+                phone: values.father.phone,
+                role: 'PARENT', 
             };
-            const formData = new FormData();
-            formData.append('childImage', imageFile);
-            console.log(imageFile);// Thêm ảnh trẻ
-            formData.append('fatherImage', fileList.father); // Thêm ảnh Bố
-            formData.append('motherImage', fileList.mother); // Thêm ảnh Mẹ
-            formData.append('addChildrenRequest', new Blob([JSON.stringify(addChildrenRequest)], { type: 'application/json' }));
 
-            // Gọi API để thêm trẻ cùng với thông tin Bố và Mẹ
-            const response = await addChildAPI(formData);
+         
+            const addUserRequest2 = {
+                fullName: values.mother.fullName,
+                idCardNumber: values.mother.idCardNumber,
+                address: values.mother.address,
+                phone: values.mother.phone,
+                role: 'PARENT', 
+            };
 
+            const response = await addChildAPI(
+                imageFile,            
+                addChildrenRequest,   
+                addUserRequest1,      
+                addUserRequest2       
+            );
+            console.log(response);
             message.success('Thêm học sinh thành công');
-            form.resetFields(); // Reset form sau khi thêm thành công
-            setFileList([]); // Reset fileList sau khi upload xong
-            setImageFile(null); // Reset ảnh trẻ// Reset form sau khi thêm thành công
+            form.resetFields();
+            setImageFile(""); 
+            navigate('/pms/manage/children');
         } catch (error) {
-            console.log(error);
-            message.error('Lỗi khi thêm trẻ: ' + error.response?.data?.message || error.message);
+
+            message.error('Lỗi khi thêm trẻ: ' + (error.response?.data?.message || error.message));
         } finally {
             setLoading(false);
         }
     };
+
     return (
         <div className="container">
             <Card title="Thêm trẻ mới" style={{ marginTop: 20 }}>
@@ -134,6 +138,15 @@ const AddChildren = () => {
                                 <Input placeholder="Nhập địa chỉ" style={{ width: '80%' }} />
                             </Form.Item>
                         </Col>
+                        <Col xs={24} md={12}>
+                            <Form.Item
+                                label="Tuổi"
+                                name="childAge"
+                                rules={[{ required: true, message: 'Vui lòng nhập tuổi' }]}
+                            >
+                                <Input placeholder="Nhập tuổi" style={{ width: '80%' }} />
+                            </Form.Item>
+                        </Col>
                         {/* Field Nơi khai sinh */}
                         <Col xs={24} md={12}>
                             <Form.Item
@@ -158,7 +171,7 @@ const AddChildren = () => {
                         <Col xs={24} md={12}>
                             <Form.Item
                                 label="Quốc tịch"
-                                name="Nationality"
+                                name="nationality"
                                 rules={[{ required: true, message: 'Vui lòng nhập quốc tịch' }]}
                             >
                                 <Input placeholder="Nhập quốc tịch" style={{ width: '80%' }} />

@@ -5,8 +5,6 @@ import axios from '../../axios.customize';
 // API để thêm trẻ
 export const addChildAPI = async (
     childImage,
-    parentImage1,
-    parentImage2,
     addChildrenRequest,
     addUserRequest1,
     addUserRequest2
@@ -16,14 +14,6 @@ export const addChildAPI = async (
     // Thêm hình ảnh trẻ
     if (childImage) {
         formData.append('childImage', childImage);
-    }
-
-    // Thêm hình ảnh phụ huynh (nếu có)
-    if (parentImage1) {
-        formData.append('parentImage1', parentImage1);
-    }
-    if (parentImage2) {
-        formData.append('parentImage2', parentImage2);
     }
 
     // Thêm dữ liệu cho AddChildrenRequest
@@ -48,6 +38,7 @@ export const addChildAPI = async (
 
     return response.data;
 };
+
 
 
 
@@ -91,17 +82,33 @@ export const updateBoardingRegistrationAPI = async (childId, isRegisteredForBoar
 // Update child information with optional image
 export const updateChildAPI = async (childId, updateData, image = null) => {
     const formData = new FormData();
+
+    // Đính kèm đối tượng JSON cập nhật thông tin trẻ em
     formData.append('updateRequest', new Blob([JSON.stringify(updateData)], { type: 'application/json' }));
+
+    // Nếu có ảnh, đính kèm vào form
     if (image) {
         formData.append('image', image);
     }
+
+    // URL API tương ứng
     const URL = `/pms/children/change-information/${childId}`;
-    return await axios.put(URL, formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-    });
+
+    try {
+        // Gửi yêu cầu PUT với dữ liệu multipart/form-data
+        const response = await axios.put(URL, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        return response;
+    } catch (error) {
+        console.error('Error in updateChildAPI:', error);
+        throw error; // Ném lỗi để xử lý ở `handleSave`
+    }
 };
+
 
 // Get children by class ID (with pagination)
 export const getChildrenByClassAPI = async (classId, page) => {

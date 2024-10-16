@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Spin, Row, Col, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, List, Collapse, Avatar } from 'antd';
+import { Spin, Row, Col, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, List, Collapse, Avatar, DatePicker } from 'antd';
 import { useParams } from 'react-router-dom';
 
-import { getChildDetailAPI } from '../../services/service.children';
+import { getChildDetailAPI, updateChildAPI } from '../../services/service.children';
 import { AuthContext } from '../../component/context/auth.context';
-import { getUserAPI } from '../../services/services.user';
 import { updateBoardingRegistrationAPI } from '../../services/service.children';
 import { updateTransportRegistrationAPI } from '../../services/service.children';
+import moment from 'moment/moment';
+import UploadImage from '../../component/input/UploadImage';
 
 const ChildrenInformation = () => {
     const [childrenData, setChildrenData] = useState(null);
@@ -16,6 +17,7 @@ const ChildrenInformation = () => {
     const [isEditing, setIsEditing] = useState(false);
     const { user } = useContext(AuthContext);
     const [updateType, setUpdateType] = useState('');
+    const [imageFile, setImageFile] = useState(null);
     const { Panel } = Collapse;
     const [parentData, setParentData] = useState([]); // Đổi thành mảng
     const [fieldValues, setFieldValues] = useState({
@@ -23,8 +25,6 @@ const ChildrenInformation = () => {
         childAge: null,
         childBirthDate: '',
         childAddress: '',
-        isRegisterForBoarding: false,
-        isRegisterForTransport: false,
         lastModifyById: user?.id,
     });
     const showModalForBoarding = () => {
@@ -46,7 +46,7 @@ const ChildrenInformation = () => {
                 childAddress: childrenData.childAddress,
                 isRegisterForBoarding: childrenData.isRegisterForBoarding,
                 isRegisterForTransport: childrenData.isRegisterForTransport,
-                lastModifyById: user?.id,
+                lastModifiedById: user.id,
             });
         }
     }, [childrenData]);
@@ -57,9 +57,6 @@ const ChildrenInformation = () => {
             const response = await getChildDetailAPI(id);
             setChildrenData(response.data);
             // Gọi fetchParentData cho từng parentId trong relationships
-            response.data.relationships.forEach(rel => {
-                fetchParentData(rel.parentId);
-            });
         } catch (error) {
             console.error('Error fetching children data:', error);
         } finally {
@@ -69,23 +66,12 @@ const ChildrenInformation = () => {
     const onChange = (key) => {
         console.log(key); // In ra key của panel đang được mở
     };
-    const fetchParentData = async (id) => {
-        try {
-            const response = await getUserAPI(id);
-            setParentData(prevData => {
-                // Kiểm tra xem phụ huynh đã tồn tại trong danh sách chưa
-                const exists = prevData.some(parent => parent.id === response.data.id);
-                if (!exists) {
-                    return [...prevData, response.data]; // Thêm phụ huynh mới vào mảng
-                }
-                return prevData; // Nếu đã tồn tại, không thay đổi gì
-            });
-        } catch (error) {
-            console.error('Error fetching parent data:', error);
-        }
+    const handleImageChange = (file) => {
+        setImageFile(file);
     };
 
     useEffect(() => {
+        console.log("childId from params:", id); 
         fetchChildrenData(id);
     }, [id]);
 
@@ -126,22 +112,39 @@ const ChildrenInformation = () => {
     };
     const handleSave = async () => {
         try {
-            // Gọi API để cập nhật thông tin trẻ em
-            await updateChildren(id, fieldValues);
-            message.success('Cập nhật thông tin trẻ em thành công');
-            await fetchChildrenData(id); // Refresh lại thông tin
-            setIsEditing(false);
+            const response = await updateChildAPI(id, fieldValues, imageFile);
+    
+            console.log("Phản hồi từ API:", response); // Thêm dòng này để xem phản hồi
+            console.log(response.status);
+            if (response.message === 'Updated Successfully') {
+                
+                message.success('Cập nhật thông tin trẻ em thành công');
+                await fetchChildrenData(id); 
+                setIsEditing(false);
+            } else {
+                message.error('Cập nhật thất bại. Vui lòng thử lại.');
+            }
+            
         } catch (error) {
             console.error('Error updating Children Information:', error);
+            if (error.response && error.response.data) {
+                message.error(`Đã có lỗi xảy ra: ${error.response.data.message}`);
+            } else {
+                message.error('Đã có lỗi xảy ra trong quá trình cập nhật. Vui lòng thử lại.');
+            }
         }
     };
+    
+    
+    
+    
 
     const handleDelete = async () => {
         setIsModalVisible(false);
         try {
             await deleteChildren(id);
             message.success('Xóa thông tin trẻ em thành công');
-            // Redirect hoặc thực hiện hành động sau khi xóa
+
         } catch (error) {
             console.error('Error deleting Children:', error);
         }
@@ -168,7 +171,14 @@ const ChildrenInformation = () => {
             <Card style={{ marginTop: 20 }}>
                 <Row gutter={[16, 16]}>
                     <Col xs={24} sm={8} className='d-flex flex-column align-items-center'>
-                        <Avatar size={256} src={childrenData?.imageUrl || "/image/5856.jpg"} />
+                    {isEditing ? (
+                            <UploadImage
+                            onImageChange={handleImageChange}
+                            >
+                            </UploadImage>
+                        ) : (
+                            <Avatar size={256} src={childrenData?.imageUrl || "/image/5856.jpg"} />
+                        )}
                     </Col>
                     <Col xs={24} sm={16}>
                         <Descriptions title="Thông tin trẻ em" bordered>
@@ -195,10 +205,10 @@ const ChildrenInformation = () => {
                             </Descriptions.Item>
                             <Descriptions.Item label="Ngày sinh" span={3}>
                                 {isEditing ? (
-                                    <Input
-                                        type="date"
-                                        value={fieldValues.childBirthDate}
-                                        onChange={(e) => handleInputChange('childBirthDate', e.target.value)}
+                                    <DatePicker
+                                        value={fieldValues.childBirthDate ? moment(fieldValues.childBirthDate) : null}
+                                        onChange={(date, dateString) => handleInputChange('childBirthDate', dateString)}
+                                        format="YYYY-MM-DD" // Định dạng ngày cần hiển thị
                                     />
                                 ) : (
                                     <span>{childrenData?.childBirthDate}</span>
@@ -227,27 +237,22 @@ const ChildrenInformation = () => {
                                 />
                             </Descriptions.Item>
                             <Descriptions.Item label="Quan hệ" span={3}>
-                                {isEditing ? (
-                                    <Input
-                                        type="text"
-                                        value={fieldValues.relationships.map(rel => `${rel.relationship} (ID: ${rel.parentId})`).join(', ')}
-                                    />
-                                ) : (
-                                    <Collapse defaultActiveKey={['1']} onChange={onChange}>
-                                        {childrenData?.relationships.map((rel, index) => {
-                                            const parentInfo = parentData.find(parent => parent.id === rel.parentId);
-                                            return (
-                                                <Panel header={`Phụ huynh ${index + 1}`} key={rel.parentId}>
-                                                    <p>
-                                                        <strong>Quan hệ:</strong> {rel.relationship} <br />
-                                                        <strong>Tên phụ huynh:</strong> {parentInfo ? parentInfo.fullName : 'Không tìm thấy tên'} <br />
-                                                        <strong>Đại diện:</strong> {rel.isRepresentative ? 'Có' : 'Không'}
-                                                    </p>
-                                                </Panel>
-                                            );
-                                        })}
-                                    </Collapse>
-                                )}
+
+                                <Collapse defaultActiveKey={['1']} onChange={onChange}>
+                                    {childrenData?.relationships?.map((rel, index) => {
+
+                                        return (
+                                            <Panel header={`Phụ huynh ${index + 1}`} key={rel.parentId}>
+                                                <p>
+                                                    <strong>Quan hệ:</strong> {rel.relationship} <br />
+                                                    <strong>Tên phụ huynh:</strong> {rel.parent ? rel.parent.fullName : 'Không tìm thấy tên'} <br />
+                                                    <strong>Đại diện:</strong> {rel.isRepresentative ? 'Có' : 'Không'}
+                                                </p>
+                                            </Panel>
+                                        );
+                                    }) || <p>Không có thông tin quan hệ</p>}
+                                </Collapse>
+
                             </Descriptions.Item>
 
                         </Descriptions>
