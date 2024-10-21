@@ -32,6 +32,7 @@ import Error404 from './page/errors/Error404';
 import Error500 from './page/errors/Error500';
 import ChildrenList from './page/children/ChildrenList';
 import AddChildren from './page/children/AddChildren';
+import Chatting from './page/chat/Chatting';
 
 const App = () => (
   <Router>
@@ -62,6 +63,7 @@ const App = () => (
         <Route path="vehicle/:id" element={<VehicleInformation />} />
         <Route path="children" element={<ChildrenList />} />
         <Route path="children/add-children" element={<AddChildren />} />
+        <Route path="chatting" element={<Chatting />} />
       </Route>
 
       {/* Các trang lỗi */}

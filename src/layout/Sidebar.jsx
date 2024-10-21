@@ -44,11 +44,11 @@ const items = [
         icon: <UserAddOutlined />,
         label: 'Trẻ',
     },
-    // {
-    //     key: '6',
-    //     icon: <AimOutlined />,
-    //     label: 'Điểm danh',
-    // },
+    {
+        key: '7',
+        icon: <AimOutlined />,
+        label: 'Trò chuyện',
+    },
 ];
 
 const Sidebar = () => {
@@ -73,7 +73,9 @@ const Sidebar = () => {
             setSelectedKey('52');
         } else if (location.pathname.includes('/children')) {
             setSelectedKey('6');
-        } else {
+        } else if (location.pathname.includes('/chatting')) {
+            setSelectedKey('7');}
+        else {
             setSelectedKey(undefined);
         }
     }, [location.pathname]);
@@ -104,6 +106,9 @@ const Sidebar = () => {
                 break;
             case '6':
                 navigate('/pms/manage/children');
+                break;
+            case '7':
+                navigate('/pms/manage/chatting');
                 break;
             default:
                 break;
