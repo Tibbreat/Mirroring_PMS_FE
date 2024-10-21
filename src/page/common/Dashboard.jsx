@@ -1,14 +1,44 @@
-import React from 'react';
-import { Row, Col, Card, Button, FloatButton } from 'antd';
+import React, { useState, useEffect, useContext } from 'react';
+import { Row, Col, Card, message, Spin, FloatButton } from 'antd';
+import { getSchoolInformationAPI } from '../../services/service.school';
+import { AuthContext } from '../../component/context/auth.context';
 
 const Dashboard = () => {
+    const [schoolInfo, setSchoolInfo] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const { user } = useContext(AuthContext);
+
+    useEffect(() => {
+        const fetchSchoolInfo = async () => {
+            try {
+                const response = await getSchoolInformationAPI(user.id);
+                setSchoolInfo(response.data);
+            } catch (error) {
+                console.error('Error fetching school information:', error);
+                message.error('Không thể lấy thông tin trường học');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSchoolInfo();
+    }, [user.id]);
+
+    if (loading) {
+        return (
+            <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+                <Spin size="large" />
+            </div>
+        );
+    }
+
     return (
         <div style={{ padding: 24 }}>
             <Row gutter={[16, 16]} className="welcome-screen">
                 <Col xs={24} md={18} className="d-flex flex-column justify-content-center align-items-center">
                     <Card className="col-10" style={{ textAlign: 'center' }}>
                         <p className="welcome-title">Chào mừng đến với hệ thống quản lý PMS</p>
-                        <p className="welcome-sub-title">mail...</p>
+                        <p className="welcome-sub-title">{schoolInfo?.emailContact}</p>
                     </Card>
                     <div className="col-10">
                         <Card className="ele-1" hoverable>
@@ -22,7 +52,7 @@ const Dashboard = () => {
                                 </Col>
                             </Row>
                         </Card>
-                        <Card className="ele-1 " hoverable>
+                        <Card className="ele-1" hoverable>
                             <Row>
                                 <Col span={3}>
                                     <img className="ele-icon" src="/icon/bank.svg" alt="" />
@@ -33,7 +63,7 @@ const Dashboard = () => {
                                 </Col>
                             </Row>
                         </Card>
-                        <Card className="ele-1 " hoverable>
+                        <Card className="ele-1" hoverable>
                             <Row>
                                 <Col span={3}>
                                     <img className="ele-icon" src="/icon/education.svg" alt="" />
@@ -46,7 +76,7 @@ const Dashboard = () => {
                         </Card>
                     </div>
                 </Col>
-               <FloatButton ></FloatButton>
+                <FloatButton />
             </Row>
         </div>
     );

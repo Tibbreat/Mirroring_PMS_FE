@@ -14,7 +14,7 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
             dataIndex: 'className',
             key: 'className',
             render: (text, record) => (
-                <Link to={`/pms/manage/class/${record.id}`} className="text-blue-2" style={{ textDecoration: "none" }}>
+                <Link to={`/pms/manage/class/${record.id}`} style={{ textDecoration: "none" }}>
                     {text}
                 </Link>
             ),
@@ -34,8 +34,18 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
             title: 'Năm học',
             dataIndex: 'openingDay',
             key: 'openingDay',
+            render: (text, record) => {
+                const openingYear = text ? moment(text).year() : '';
+                const closingYear = record.closingDay ? moment(record.closingDay).year() : '';
+                return `${openingYear} - ${closingYear}`;
+            },
+        },
+        {
+            title: 'Ngày khai giảng',
+            dataIndex: 'openingDay',
+            key: 'openingDay',
             render: (text) => {
-                return text ? moment(text).year() : ''; // Lấy năm từ openingDay
+                return text ? moment(text).format('DD-MM-YYYY') : '';
             },
         },
         {
