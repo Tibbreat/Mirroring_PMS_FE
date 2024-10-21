@@ -1,23 +1,29 @@
-import { Pagination, Tag, Table } from "antd";
+import { Pagination, Tag, Table, Avatar } from "antd";
 import { Link } from "react-router-dom";
 
 export const ChildrenTable = ({ data, currentPage, total, setCurrentPage }) => {
     const columns = [
         {
-            title: 'Tên trẻ',
+            title: 'Ảnh',
+            dataIndex: 'imageUrl',
+            key: 'imageUrl',
+            render: (url) => url ? <Avatar width={50} src={url} /> : 'Không có ảnh',
+        },
+        {
+            title: 'Họ và tên',
             dataIndex: 'childName',
             key: 'childName',
             render: (text, record) => (
-                <Link to={`/pms/manage/children/${record.id}`} className="text-blue-2" style={{ textDecoration: "none" }}>
+                <Link to={`/pms/manage/children/${record.id}`} style={{ textDecoration: "none" }}>
                     {text}
                 </Link>
             ),
         },
         {
-            title: 'Độ tuổi',
-            dataIndex: 'childAge',
-            key: 'childAge',
-            render: (text) => `${text} tuổi`,
+            title: 'Giới tính',
+            dataIndex: 'gender',
+            key: 'gender',
+            render: (text) => text === 'male' ? 'Nam' : text === 'female' ? 'Nữ' : text,
         },
         {
             title: 'Ngày sinh',
@@ -26,16 +32,25 @@ export const ChildrenTable = ({ data, currentPage, total, setCurrentPage }) => {
             render: (date) => new Date(date).toLocaleDateString(),  
         },
         {
-            title: 'Địa chỉ',
-            dataIndex: 'childAddress',
-            key: 'childAddress',
+            title: 'Cha',
+            dataIndex: 'fatherName',
+            key: 'fatherName',
         },
         {
-            title: 'Số định danh',
-            dataIndex: 'identificationNumber',
-            key: 'identificationNumber',
+            title: 'Mẹ',
+            dataIndex: 'motherName',
+            key: 'motherName',
         },
-
+        {
+            title: 'Lớp',
+            dataIndex: 'className',
+            key: 'className',
+            render: (text) => text === null ? 
+                <Tag color="red" >Chưa được thêm vào lớp</Tag> 
+                : 
+                <Tag color="lime"> {text} </Tag> ,
+        }
+        
     ];
 
     const handlePageChange = (page) => {

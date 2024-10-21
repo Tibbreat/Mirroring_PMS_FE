@@ -22,7 +22,6 @@ import ListFoodProvider from './page/supplier/food-provider/ListFoodProvider';
 import ClassInformation from './page/class/ClassInformation';
 import FoodProviderInformation from './page/supplier/food-provider/FoodProviderInformation';
 import TransportProviderInformation from './page/supplier/transport-provider/TransportProviderInformation';
-import VehicleInformation from './page/vehicle/vehicleInformation';
 import ChildrenInformation from './page/children/ChildrenInformation';
 
 import Attendance from './page/attendance/Attendance';
@@ -32,7 +31,9 @@ import Error404 from './page/errors/Error404';
 import Error500 from './page/errors/Error500';
 import ChildrenList from './page/children/ChildrenList';
 import AddChildren from './page/children/AddChildren';
-import Chatting from './page/chat/Chatting';
+
+import AddTransportProvider from './page/supplier/transport-provider/AddTransportProvider';
+
 
 const App = () => (
   <Router>
@@ -56,17 +57,19 @@ const App = () => (
         <Route path="staff/:id" element={<StaffInformation />} />
         <Route path="provider/transport" element={<ListTransportProvider />} />
         <Route path="provider/transport/:id" element={<TransportProviderInformation />} />
+        <Route path="provider/transport/new-provider" element={<AddTransportProvider />} />
         <Route path="provider/food/:id" element={<FoodProviderInformation />} />
         <Route path="provider/food" element={<ListFoodProvider />} />
         <Route path="class/attendance/:id" element={<Attendance />} />
         <Route path="children/:id" element={<ChildrenInformation />} />
-        <Route path="vehicle/:id" element={<VehicleInformation />} />
+
         <Route path="children" element={<ChildrenList />} />
         <Route path="children/add-children" element={<AddChildren />} />
-        <Route path="chatting" element={<Chatting />} />
+
+        {/* <Route path="settings" element={<SchoolInformation />} /> */}
+
       </Route>
 
-      {/* Các trang lỗi */}
       <Route path="/403" element={<Error403 />} />
       <Route path="/500" element={<Error500 />} />
       <Route path="*" element={<Error404 />} />

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Button, message } from 'antd';
 import { logoutAPI } from '../services/service.auth';
 import { AuthContext } from '../component/context/auth.context';
+import { LogoutOutlined } from '@ant-design/icons';
 
 const Navbar = ({ onTeacherAdded }) => {
     const location = useLocation();
@@ -34,7 +35,7 @@ const Navbar = ({ onTeacherAdded }) => {
             </div>
             <div className='navbar-content-2 col-2 d-flex justify-content-center align-items-center'>
                 {user && (
-                    <Button type="primary" onClick={onLogout}>
+                    <Button type="primary" onClick={onLogout} icon={<LogoutOutlined />}>
                         Đăng xuất
                     </Button>
                 )}

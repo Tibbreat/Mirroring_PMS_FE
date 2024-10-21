@@ -1,162 +1,31 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Spin, Row, Col, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, List, Collapse, Avatar, DatePicker } from 'antd';
 import { useParams } from 'react-router-dom';
-
-import { getChildDetailAPI, updateChildAPI } from '../../services/service.children';
-import { AuthContext } from '../../component/context/auth.context';
-import { updateBoardingRegistrationAPI } from '../../services/service.children';
-import { updateTransportRegistrationAPI } from '../../services/service.children';
+import { getChildDetailAPI, updateServiceStatus } from '../../services/service.children';
 import moment from 'moment/moment';
-import UploadImage from '../../component/input/UploadImage';
+import Title from 'antd/es/typography/Title';
+import { EditOutlined } from '@ant-design/icons';
 
 const ChildrenInformation = () => {
     const [childrenData, setChildrenData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [updating, setUpdating] = useState(false);
+
     const { id } = useParams();
-    const [isEditing, setIsEditing] = useState(false);
-    const { user } = useContext(AuthContext);
-    const [updateType, setUpdateType] = useState('');
-    const [imageFile, setImageFile] = useState(null);
-    const { Panel } = Collapse;
-    const [parentData, setParentData] = useState([]); // Đổi thành mảng
-    const [fieldValues, setFieldValues] = useState({
-        childName: '',
-        childAge: null,
-        childBirthDate: '',
-        childAddress: '',
-        lastModifyById: user?.id,
-    });
-    const showModalForBoarding = () => {
-        setIsModalVisible(true);
-        setUpdateType('boarding'); // Để biết đang xử lý phần đăng ký nội trú
-    };
-
-    const showModalForTransport = () => {
-        setIsModalVisible(true);
-        setUpdateType('transport'); // Để biết đang xử lý phần đăng ký xe đưa đón
-    };
-    // Đồng bộ fieldValues với childrenData khi nó thay đổi
-    useEffect(() => {
-        if (childrenData) {
-            setFieldValues({
-                childName: childrenData.childName,
-                childAge: childrenData.childAge,
-                childBirthDate: childrenData.childBirthDate,
-                childAddress: childrenData.childAddress,
-                isRegisterForBoarding: childrenData.isRegisterForBoarding,
-                isRegisterForTransport: childrenData.isRegisterForTransport,
-                lastModifiedById: user.id,
-            });
-        }
-    }, [childrenData]);
-
     const fetchChildrenData = async (id) => {
         setLoading(true);
         try {
             const response = await getChildDetailAPI(id);
             setChildrenData(response.data);
-            // Gọi fetchParentData cho từng parentId trong relationships
         } catch (error) {
             console.error('Error fetching children data:', error);
         } finally {
             setLoading(false);
         }
     };
-    const onChange = (key) => {
-        console.log(key); // In ra key của panel đang được mở
-    };
-    const handleImageChange = (file) => {
-        setImageFile(file);
-    };
-
     useEffect(() => {
-        console.log("childId from params:", id); 
         fetchChildrenData(id);
     }, [id]);
-
-    const handleEditClick = () => {
-        setIsEditing(true);
-    };
-
-    const handleInputChange = (field, value) => {
-        setFieldValues((prevValues) => ({
-            ...prevValues,
-            [field]: value,
-        }));
-    };
-
-    const showModal = () => {
-        setIsModalVisible(true);
-    };
-    const handleOk = async () => {
-        try {
-            if (updateType === 'boarding') {
-                // Đặt newStatus là giá trị ngược lại của trạng thái hiện tại
-                const newStatus = !fieldValues.isRegisterForBoarding;
-                await updateBoardingRegistrationAPI(id, newStatus);
-                message.success('Cập nhật đăng ký nội trú thành công');
-            } else if (updateType === 'transport') {
-                // Đặt newStatus là giá trị ngược lại của trạng thái hiện tại
-                const newStatus = !fieldValues.isRegisterForTransport;
-                await updateTransportRegistrationAPI(id, newStatus);
-                message.success('Cập nhật đăng ký xe đưa đón thành công');
-            }
-            // Gọi API để lấy dữ liệu mới sau khi cập nhật
-            await fetchChildrenData(id);
-        } catch (error) {
-            console.error('Error updating registration status:', error);
-        } finally {
-            setIsModalVisible(false);
-        }
-    };
-    const handleSave = async () => {
-        try {
-            const response = await updateChildAPI(id, fieldValues, imageFile);
-    
-            console.log("Phản hồi từ API:", response); // Thêm dòng này để xem phản hồi
-            console.log(response.status);
-            if (response.message === 'Updated Successfully') {
-                
-                message.success('Cập nhật thông tin trẻ em thành công');
-                await fetchChildrenData(id); 
-                setIsEditing(false);
-            } else {
-                message.error('Cập nhật thất bại. Vui lòng thử lại.');
-            }
-            
-        } catch (error) {
-            console.error('Error updating Children Information:', error);
-            if (error.response && error.response.data) {
-                message.error(`Đã có lỗi xảy ra: ${error.response.data.message}`);
-            } else {
-                message.error('Đã có lỗi xảy ra trong quá trình cập nhật. Vui lòng thử lại.');
-            }
-        }
-    };
-    
-    
-    
-    
-
-    const handleDelete = async () => {
-        setIsModalVisible(false);
-        try {
-            await deleteChildren(id);
-            message.success('Xóa thông tin trẻ em thành công');
-
-        } catch (error) {
-            console.error('Error deleting Children:', error);
-        }
-    };
-
-    const showDeleteModal = () => {
-        setIsModalVisible(true);
-    };
-
-    const handleCancel = () => {
-        setIsModalVisible(false);
-    };
 
     if (loading) {
         return (
@@ -166,124 +35,98 @@ const ChildrenInformation = () => {
         );
     }
 
+    //handle change children service status
+    const handleChangeServiceStatus = async (serviceName) => {
+        setUpdating(true);
+        try {
+            await updateServiceStatus(id, serviceName);
+            message.success("Cập nhật thành công");
+            fetchChildrenData(id);
+        } catch (error) {
+            console.error('Error changing service status:', error);
+            message.error("Cập nhật thất bại");
+        } finally {
+            setUpdating(false);
+        }
+    };
     return (
         <div className="container">
             <Card style={{ marginTop: 20 }}>
                 <Row gutter={[16, 16]}>
-                    <Col xs={24} sm={8} className='d-flex flex-column align-items-center'>
-                    {isEditing ? (
-                            <UploadImage
-                            onImageChange={handleImageChange}
-                            >
-                            </UploadImage>
-                        ) : (
-                            <Avatar size={256} src={childrenData?.imageUrl || "/image/5856.jpg"} />
-                        )}
+                    <Col xs={24} sm={8} className='d-flex flex-column align-items-center justify-content-center'>
+                        <Avatar size={256} src={childrenData?.imageUrl || "/image/5856.jpg"} />
                     </Col>
                     <Col xs={24} sm={16}>
-                        <Descriptions title="Thông tin trẻ em" bordered>
-                            <Descriptions.Item label="Tên trẻ em" span={3}>
-                                {isEditing ? (
-                                    <Input
-                                        value={fieldValues.childName}
-                                        onChange={(e) => handleInputChange('childName', e.target.value)}
-                                    />
-                                ) : (
-                                    <span>{childrenData?.childName}</span>
-                                )}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Tuổi" span={3}>
-                                {isEditing ? (
-                                    <Input
-                                        type="number"
-                                        value={fieldValues.childAge}
-                                        onChange={(e) => handleInputChange('childAge', e.target.value)}
-                                    />
-                                ) : (
-                                    <span>{childrenData?.childAge}</span>
-                                )}
+                        <Row justify="space-between" className='mb-3'>
+                            <Col>
+                                <Title level={5}>Thông tin cá nhân</Title>
+                            </Col>
+                            <Col>
+                                <Button type="link" icon={<EditOutlined />} >
+                                    Chỉnh sửa thông tin
+                                </Button>
+                            </Col>
+                        </Row>
+                        <Descriptions bordered column={6}>
+                            <Descriptions.Item label="Họ và tên" span={6}>
+                                <span>{childrenData?.childName}</span>
                             </Descriptions.Item>
                             <Descriptions.Item label="Ngày sinh" span={3}>
-                                {isEditing ? (
-                                    <DatePicker
-                                        value={fieldValues.childBirthDate ? moment(fieldValues.childBirthDate) : null}
-                                        onChange={(date, dateString) => handleInputChange('childBirthDate', dateString)}
-                                        format="YYYY-MM-DD" // Định dạng ngày cần hiển thị
-                                    />
-                                ) : (
-                                    <span>{childrenData?.childBirthDate}</span>
-                                )}
+                                <span>{childrenData?.childBirthDate}</span>
                             </Descriptions.Item>
-                            <Descriptions.Item label="Địa chỉ" span={3}>
-                                {isEditing ? (
-                                    <Input
-                                        value={fieldValues.childAddress}
-                                        onChange={(e) => handleInputChange('childAddress', e.target.value)}
-                                    />
-                                ) : (
-                                    <span>{childrenData?.childAddress}</span>
-                                )}
+                            <Descriptions.Item label="Giới tính" span={3}>
+                                <span>{childrenData?.gender === 'female' ? "Nữ" : "Nam"}</span>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Nơi khai sinh" span={6} >
+                                <span>{childrenData?.birthAddress}</span>
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Nơi ở hiện tại" span={6} >
+                                <span>{childrenData?.childAddress}</span>
                             </Descriptions.Item>
                             <Descriptions.Item label="Đăng ký nội trú" span={3}>
                                 <Switch
-                                    checked={fieldValues.isRegisterForBoarding}
-                                    onClick={showModalForBoarding}
+                                    checked={childrenData?.isRegisteredForBoarding}
+                                    loading={updating}
+                                    onChange={() => handleChangeServiceStatus('boarding')}
                                 />
                             </Descriptions.Item>
-                            <Descriptions.Item label="Đăng ký xe đưa đón" span={3}>
+                            <Descriptions.Item label="Đăng ký xe" span={3}>
                                 <Switch
-                                    checked={fieldValues.isRegisterForTransport}
-                                    onClick={showModalForTransport}
+                                    checked={childrenData?.isRegisteredForTransport}
+                                    loading={updating}
+                                    onChange={() => handleChangeServiceStatus('transport')}
                                 />
                             </Descriptions.Item>
-                            <Descriptions.Item label="Quan hệ" span={3}>
-
-                                <Collapse defaultActiveKey={['1']} onChange={onChange}>
-                                    {childrenData?.relationships?.map((rel, index) => {
-
-                                        return (
-                                            <Panel header={`Phụ huynh ${index + 1}`} key={rel.parentId}>
-                                                <p>
-                                                    <strong>Quan hệ:</strong> {rel.relationship} <br />
-                                                    <strong>Tên phụ huynh:</strong> {rel.parent ? rel.parent.fullName : 'Không tìm thấy tên'} <br />
-                                                    <strong>Đại diện:</strong> {rel.isRepresentative ? 'Có' : 'Không'}
-                                                </p>
-                                            </Panel>
-                                        );
-                                    }) || <p>Không có thông tin quan hệ</p>}
-                                </Collapse>
-
-                            </Descriptions.Item>
-
                         </Descriptions>
                     </Col>
                 </Row>
                 <Divider />
-                <Row justify="space-between">
-                    <Button type="primary" onClick={isEditing ? handleSave : handleEditClick}>
-                        {isEditing ? 'Lưu' : 'Sửa Thông Tin'}
-                    </Button>
-                    <Button type="danger" onClick={showDeleteModal}>
-                        Xóa
-                    </Button>
+                <Row justify="space-between" className='mb-3'>
+                    <Col>
+                        <Title level={5}>Thông tin phụ huynh</Title>
+                    </Col>
+                    <Col>
+                        <Button type="link" icon={<EditOutlined />} >
+                            Chỉnh sửa thông tin
+                        </Button>
+                    </Col>
                 </Row>
+                <Descriptions bordered column={6}>
+                    <Descriptions.Item label="Họ và tên cha" span={3}>
+                        <span>{childrenData?.fatherName}</span>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Số điện thoại " span={3}>
+                        <span>{childrenData?.fatherPhone}</span>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Họ và tên mẹ" span={3}>
+                        <span>{childrenData?.motherName}</span>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Số điện thoại " span={3}>
+                        <span>{childrenData?.motherPhone}</span>
+                    </Descriptions.Item>
+                </Descriptions>
             </Card>
-            <Modal
-                title="Thay đổi trạng thái đăng ký"
-                open={isModalVisible}
-                onOk={handleOk}
-                onCancel={handleCancel}
-            >
-                <p>
-                    {updateType === 'boarding'
-                        ? fieldValues.isRegisterForBoarding
-                            ? 'Bạn có muốn hủy đăng ký nội trú?'
-                            : 'Bạn có muốn đăng ký nội trú?'
-                        : fieldValues.isRegisterForTransport
-                            ? 'Bạn có muốn hủy đăng ký xe đưa đón?'
-                            : 'Bạn có muốn đăng ký xe đưa đón?'}
-                </p>
-            </Modal>
+
         </div>
     );
 };

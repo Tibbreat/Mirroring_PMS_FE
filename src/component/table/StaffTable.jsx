@@ -9,7 +9,7 @@ const StaffTable = ({ data }) => {
             dataIndex: 'fullName',
             key: 'fullName',
             render: (text, record) => (
-                <Link to={`/pms/manage/staff/${record.id}`} className="text-blue-2" style={{ textDecoration: "none" }}>
+                <Link to={`/pms/manage/staff/${record.id}`} style={{ textDecoration: "none" }}>
                     {text}
                 </Link>
             ),

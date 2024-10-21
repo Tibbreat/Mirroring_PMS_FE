@@ -1,48 +1,9 @@
 import axios from '../../axios.customize';
 
-
-
-// API để thêm trẻ
-export const addChildAPI = async (
-    childImage,
-    addChildrenRequest,
-    addUserRequest1,
-    addUserRequest2
-) => {
-    const formData = new FormData();
-
-    // Thêm hình ảnh trẻ
-    if (childImage) {
-        formData.append('childImage', childImage);
-    }
-
-    // Thêm dữ liệu cho AddChildrenRequest
-    formData.append('request', new Blob([JSON.stringify(addChildrenRequest)], { type: 'application/json' }));
-
-    // Thêm dữ liệu cho AddUserRequest phụ huynh 1
-    if (addUserRequest1) {
-        formData.append('request1', new Blob([JSON.stringify(addUserRequest1)], { type: 'application/json' }));
-    }
-
-    // Thêm dữ liệu cho AddUserRequest phụ huynh 2
-    if (addUserRequest2) {
-        formData.append('request2', new Blob([JSON.stringify(addUserRequest2)], { type: 'application/json' }));
-    }
-
-    // Gọi API để thêm trẻ
-    const response = await axios.post('/pms/children/add', formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-        },
-    });
-
-    return response.data;
+export const addChildren = async (formData) => {
+  return axios.post('/pms/children/new-children', formData);
 };
 
-
-
-
-// Get children with filters (pagination, fullname, classId)
 export const getChildrenAPI = async (page, fullname, classId) => {
     const params = new URLSearchParams();
 
@@ -61,63 +22,14 @@ export const getChildrenAPI = async (page, fullname, classId) => {
 };
 
 
-// Get child details by ID
 export const getChildDetailAPI = async (childId) => {
-    const URL = `/pms/children/children-detail/${childId}`;
+    const URL = `/pms/children/${childId}`;
     return await axios.get(URL);
 };
 
-// Update transport registration status
-export const updateTransportRegistrationAPI = async (childId, isRegisteredForTransport) => {
-    const URL = `/pms/children/update-transport/${childId}?isRegisteredForTransport=${isRegisteredForTransport}`;
+
+
+export const updateServiceStatus = async (childrenId, serviceName) => {
+    const URL = `/pms/children/service/${childrenId}/${serviceName}`;
     return await axios.put(URL);
-};
-
-// Update boarding registration status
-export const updateBoardingRegistrationAPI = async (childId, isRegisteredForBoarding) => {
-    const URL = `/pms/children/update-boarding/${childId}?isRegisteredForBoarding=${isRegisteredForBoarding}`;
-    return await axios.put(URL);
-};
-
-// Update child information with optional image
-export const updateChildAPI = async (childId, updateData, image = null) => {
-    const formData = new FormData();
-
-    // Đính kèm đối tượng JSON cập nhật thông tin trẻ em
-    formData.append('updateRequest', new Blob([JSON.stringify(updateData)], { type: 'application/json' }));
-
-    // Nếu có ảnh, đính kèm vào form
-    if (image) {
-        formData.append('image', image);
-    }
-
-    // URL API tương ứng
-    const URL = `/pms/children/change-information/${childId}`;
-
-    try {
-        // Gửi yêu cầu PUT với dữ liệu multipart/form-data
-        const response = await axios.put(URL, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-
-        return response;
-    } catch (error) {
-        console.error('Error in updateChildAPI:', error);
-        throw error; // Ném lỗi để xử lý ở `handleSave`
-    }
-};
-
-
-// Get children by class ID (with pagination)
-export const getChildrenByClassAPI = async (classId, page) => {
-    const URL = `/pms/children/children-by-class/${classId}?page=${page}`;
-    return await axios.get(URL);
-};
-
-// Get children by class ID (without pagination)
-export const getChildrenByClassWithoutPaginationAPI = async (classId) => {
-    const URL = `/pms/children/class/${classId}`;
-    return await axios.get(URL);
-};
+}

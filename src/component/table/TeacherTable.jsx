@@ -9,7 +9,7 @@ const TeacherTable = ({ data }) => {
             dataIndex: 'fullName',
             key: 'fullName',
             render: (text, record) => (
-                <Link to={`/pms/manage/teacher/${record.id}`} className="text-blue-2" style={{ textDecoration: "none" }}>
+                <Link to={`/pms/manage/teacher/${record.id}`}  style={{ textDecoration: "none" }}>
                     {text}
                 </Link>
             ),

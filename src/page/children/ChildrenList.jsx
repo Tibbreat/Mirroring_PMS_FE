@@ -16,7 +16,7 @@ const ChildrenList = () => {
     const fetchChildrenList = useCallback(async (page) => {
         setLoading(true);
         try {
-            const response = await getChildrenAPI(page, null); // isActive is null here
+            const response = await getChildrenAPI(page, null); 
             setChildrenList(response.data.listData);
             setTotal(response.data.total);
         } catch (error) {

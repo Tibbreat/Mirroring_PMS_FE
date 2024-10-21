@@ -4,7 +4,7 @@ import { UploadOutlined } from '@ant-design/icons';
 
 const UploadImage = ({ onImageChange }) => {
     const [imageUrl, setImageUrl] = useState(null);
-    const fileInputRef = useRef(null); // Create a ref for the input file element
+    const fileInputRef = useRef(null); 
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -12,7 +12,7 @@ const UploadImage = ({ onImageChange }) => {
             const reader = new FileReader();
             reader.onload = () => {
                 setImageUrl(reader.result);
-                onImageChange(file); // Pass the selected file to the parent component
+                onImageChange(file); 
             };
             reader.readAsDataURL(file);
         }
@@ -31,7 +31,7 @@ const UploadImage = ({ onImageChange }) => {
                             src={imageUrl}
                             alt="Preview"
                             className="img-thumbnail"
-                            style={{ maxWidth: '100%', height: 'auto' }}
+                            style={{ maxWidth: '50%', height: 'auto' }}
                         />
                     </div>
                 )}

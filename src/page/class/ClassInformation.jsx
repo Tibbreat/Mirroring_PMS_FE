@@ -4,7 +4,6 @@ import { useParams } from 'react-router-dom';
 import { changeClassInformationAPI, changeClassStatusAPI, getClassBaseOnClassId, getTeacherOfClass } from '../../services/services.class';
 import moment from 'moment';
 import Title from 'antd/es/typography/Title';
-import { getChildrenByClassAPI } from '../../services/service.children';
 import { ChildrenTable } from '../../component/table/ChildrenTable';
 import Modal from 'antd/es/modal/Modal';
 import { getUserOpnionAPI } from '../../services/services.user';

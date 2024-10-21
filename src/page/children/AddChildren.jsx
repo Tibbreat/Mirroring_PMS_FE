@@ -1,310 +1,212 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Button, Card, Col, DatePicker, Divider, Form, Input, message, Row, Select } from 'antd';
-import moment from 'moment';
-import { addChildAPI } from '../../services/service.children'; 
-import { AuthContext } from '../../component/context/auth.context';
+import React, { useContext, useState } from 'react';
+import { Form, Input, Button, DatePicker, Select, Card, Row, Col, message, Spin } from 'antd';
+import { addChildren } from '../../services/service.children';
 import UploadImage from '../../component/input/UploadImage';
-import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../component/context/auth.context';
 
 const { Option } = Select;
 
 const AddChildren = () => {
-    const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
-    const { user } = useContext(AuthContext);
-    const [parents, setParents] = useState([{ id: '', fullName: '', idCardNumber: '', address: '', phone: '', isRepresentative: false }]);
     const [imageFile, setImageFile] = useState(null);
-    const navigate = useNavigate();
-
-    // Hàm để thêm phụ huynh
-    const addParent = () => {
-        setParents([...parents, { id: '', fullName: '', idCardNumber: '', address: '', phone: '', isRepresentative: false }]);
-    };
+    const { user } = useContext(AuthContext);
+    const [loading, setLoading] = useState(false); // Add loading state
 
     const handleImageChange = (file) => {
         setImageFile(file);
     };
-    const handleSubmit = async (values) => {
-        setLoading(true);
-        try {
-            // Chuẩn bị dữ liệu cho AddChildrenRequest
-            const addChildrenRequest = {
-                childName: values.childName,
-                childAge: values.childAge,
-                childBirthDate: values.childBirthDate.format('YYYY-MM-DD'),
-                childAddress: values.childAddress,
-                people: values.people,
-                birthAddress: values.birthAddress,
-                nationality: values.nationality,
-                identificationNumber: values.identificationNumber,
-                createdById: user.id, // ID của người tạo
-                relationships: [
-                    {
-                        relationship: 'Bố',
-                        isRepresentative: values.father.isRepresentative,
-                        parent: {
-                            fullName: values.father.fullName,
-                            idCardNumber: values.father.idCardNumber,
-                            address: values.father.address,
-                            phone: values.father.phone,
-                            role: 'PARENT', // Auto set role là PARENT
-                        },
-                    },
-                    {
-                        relationship: 'Mẹ',
-                        isRepresentative: values.mother.isRepresentative,
-                        parent: {
-                            fullName: values.mother.fullName,
-                            idCardNumber: values.mother.idCardNumber,
-                            address: values.mother.address,
-                            phone: values.mother.phone,
-                            role: 'PARENT', 
-                        },
-                    },
-                ],
-            }; 
-            const addUserRequest1 = {
-                fullName: values.father.fullName,
-                idCardNumber: values.father.idCardNumber,
-                address: values.father.address,
-                phone: values.father.phone,
-                role: 'PARENT', 
-            };
 
-         
-            const addUserRequest2 = {
-                fullName: values.mother.fullName,
-                idCardNumber: values.mother.idCardNumber,
-                address: values.mother.address,
-                phone: values.mother.phone,
-                role: 'PARENT', 
-            };
+    const onFinish = async (values) => {
+        const formattedValues = {
+            ...values,
+            childBirthDate: values.childBirthDate ? values.childBirthDate.format('YYYY-MM-DD') : null,
+            createdBy: user.id,
+        };
 
-            const response = await addChildAPI(
-                imageFile,            
-                addChildrenRequest,   
-                addUserRequest1,      
-                addUserRequest2       
-            );
-            console.log(response);
-            message.success('Thêm học sinh thành công');
-            form.resetFields();
-            setImageFile(""); 
-            navigate('/pms/manage/children');
-        } catch (error) {
+        const formData = new FormData();
+        formData.append('children', new Blob([JSON.stringify(formattedValues)], { type: 'application/json' }));
 
-            message.error('Lỗi khi thêm trẻ: ' + (error.response?.data?.message || error.message));
-        } finally {
-            setLoading(false);
+        if (!imageFile) {
+            message.error('Vui lòng chọn ảnh');
+        } else {
+            formData.append('image', imageFile);
+            setLoading(true); // Set loading to true when starting to process the form
+            try {
+                const response = await addChildren(formData);
+                console.log(response);
+                message.success('Thêm trẻ thành công!');
+                form.resetFields();
+                setImageFile(null);
+            } catch (error) {
+                console.error('Error:', error);
+                message.error('Có lỗi xảy ra!');
+            } finally {
+                setLoading(false); // Set loading to false after processing completes
+            }
         }
     };
 
     return (
-        <div className="container">
-            <Card title="Thêm trẻ mới" style={{ marginTop: 20 }}>
-                <Form form={form} onFinish={handleSubmit} layout="vertical">
+        <div className="container" style={{ padding: '24px' }}>
+            <Card title="Thêm trẻ mới" bordered={false}>
+                <Form form={form} layout="vertical" onFinish={onFinish}>
                     <Row gutter={16}>
-                        {/* Field Tên trẻ */}
-                        <Col xs={24} md={12}>
-                            <Form.Item
-                                label="Tên trẻ"
-                                name="childName"
-                                rules={[{ required: true, message: 'Vui lòng nhập tên trẻ' }]}
-                            >
-                                <Input placeholder="Nhập tên trẻ" style={{ width: '80%' }} />
+                        <Col xs={24} md={8}>
+                            <Form.Item name="image">
+                                <UploadImage onImageChange={handleImageChange} disabled={loading} />
                             </Form.Item>
                         </Col>
-                        {/* Field Ngày sinh */}
-                        <Col xs={24} md={12}>
-                            <Form.Item
-                                label="Ngày sinh"
-                                name="childBirthDate"
-                                rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
-                            >
-                                <DatePicker
-                                    format="DD-MM-YYYY"
-                                    placeholder="Chọn ngày sinh"
-                                    style={{ width: '80%' }} // Phóng to chiều cao DatePicker
-                                />
-                            </Form.Item>
-                        </Col>
-                        {/* Field Địa chỉ */}
-                        <Col xs={24} md={12}>
-                            <Form.Item
-                                label="Địa chỉ"
-                                name="childAddress"
-                                rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
-                            >
-                                <Input placeholder="Nhập địa chỉ" style={{ width: '80%' }} />
-                            </Form.Item>
-                        </Col>
-                        <Col xs={24} md={12}>
-                            <Form.Item
-                                label="Tuổi"
-                                name="childAge"
-                                rules={[{ required: true, message: 'Vui lòng nhập tuổi' }]}
-                            >
-                                <Input placeholder="Nhập tuổi" style={{ width: '80%' }} />
-                            </Form.Item>
-                        </Col>
-                        {/* Field Nơi khai sinh */}
-                        <Col xs={24} md={12}>
-                            <Form.Item
-                                label="Nơi khai sinh"
-                                name="birthAddress"
-                                rules={[{ required: true, message: 'Vui lòng nhập nơi khai sinh' }]}
-                            >
-                                <Input placeholder="Nhập nơi khai sinh" style={{ width: '80%' }} />
-                            </Form.Item>
-                        </Col>
-                        {/* Field Dân tộc */}
-                        <Col xs={24} md={12}>
-                            <Form.Item
-                                label="Dân tộc"
-                                name="people"
-                                rules={[{ required: true, message: 'Vui lòng nhập dân tộc' }]}
-                            >
-                                <Input placeholder="Nhập dân tộc" style={{ width: '80%' }} />
-                            </Form.Item>
-                        </Col>
-                        {/* Field Quốc tịch */}
-                        <Col xs={24} md={12}>
-                            <Form.Item
-                                label="Quốc tịch"
-                                name="nationality"
-                                rules={[{ required: true, message: 'Vui lòng nhập quốc tịch' }]}
-                            >
-                                <Input placeholder="Nhập quốc tịch" style={{ width: '80%' }} />
-                            </Form.Item>
-                        </Col>
-                        {/* Field Số định danh */}
-                        <Col xs={24} md={12}>
-                            <Form.Item
-                                label="Số định danh"
-                                name="identificationNumber"
-                                rules={[{ required: true, message: 'Vui lòng nhập số định danh' }]}
-                            >
-                                <Input placeholder="Nhập số định danh của trẻ" style={{ width: '80%' }} />
-                            </Form.Item>
-                        </Col>
-                        {/* Field Ảnh trẻ */}
-                        <Col xs={24} md={12}>
-                            <div className="col-4 d-flex justify-content-center align-items-center">
-                                <UploadImage onImageChange={handleImageChange} />
-                            </div>
+                        <Col xs={24} md={16}>
+                            {/* Form content for child information */}
+                            <Row gutter={16}>
+                                <Col xs={24} md={8}>
+                                    <Form.Item
+                                        name="childName"
+                                        label="Tên trẻ em"
+                                        rules={[{ required: true, message: 'Vui lòng nhập tên trẻ em' }]}
+                                    >
+                                        <Input placeholder="Nhập tên trẻ em" disabled={loading} />
+                                    </Form.Item>
+                                </Col>
+                                <Col xs={24} md={8}>
+                                    <Form.Item
+                                        name="childBirthDate"
+                                        label="Ngày sinh"
+                                        rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
+                                    >
+                                        <DatePicker style={{ width: '100%' }} placeholder="Chọn ngày sinh" disabled={loading} />
+                                    </Form.Item>
+                                </Col>
+                                <Col xs={24} md={8}>
+                                    <Form.Item
+                                        name="gender"
+                                        label="Giới tính"
+                                        rules={[{ required: true, message: 'Vui lòng chọn giới tính' }]}
+                                    >
+                                        <Select placeholder="Chọn giới tính" disabled={loading}>
+                                            <Option value="male">Nam</Option>
+                                            <Option value="female">Nữ</Option>
+                                        </Select>
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row gutter={16}>
+                                <Col xs={24} md={12}>
+                                    <Form.Item
+                                        name="nationality"
+                                        label="Quốc tịch"
+                                        rules={[{ required: true, message: 'Không được để trống' }]}
+                                    >
+                                        <Input placeholder="Quốc tịch" disabled={loading} />
+                                    </Form.Item>
+                                </Col>
+                                <Col xs={24} md={12}>
+                                    <Form.Item
+                                        name="religion"
+                                        label="Tôn giáo"
+                                        rules={[{ required: true, message: 'Không được để trống' }]}
+                                    >
+                                        <Input placeholder="Tôn giáo" disabled={loading} />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row gutter={16}>
+                                <Col xs={24} md={24}>
+                                    <Form.Item
+                                        name="birthAddress"
+                                        label="Địa chỉ khai sinh"
+                                        rules={[{ required: true, message: 'Vui lòng nhập địa chỉ khai sinh' }]}
+                                    >
+                                        <Input placeholder="Nhập địa chỉ khai sinh" disabled={loading} />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                            <Row gutter={16}>
+                                <Col xs={24} md={24}>
+                                    <Form.Item
+                                        name="childAddress"
+                                        label="Địa chỉ hiện tại"
+                                        rules={[{ required: true, message: 'Vui lòng nhập địa chỉ hiện tại' }]}
+                                    >
+                                        <Input placeholder="Nhập địa chỉ hiện tại" disabled={loading} />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
                         </Col>
                     </Row>
-                    <Divider />
-                    <Card title="Thông tin phụ huynh" style={{ marginTop: 20 }}>
-                        {/* Thông tin Bố */}
+
+                    {/* Thông tin bố mẹ */}
+                    <Card title="Thông tin bố" bordered={false} style={{ marginTop: 20 }}>
                         <Row gutter={16}>
-                            <Col xs={24} md={12}>
+                            <Col xs={24} md={8}>
                                 <Form.Item
-                                    label="Tên Bố"
                                     name={['father', 'fullName']}
-                                    rules={[{ required: true, message: 'Vui lòng nhập tên Bố' }]}
+                                    label="Họ và tên"
+                                    rules={[{ required: true, message: 'Vui lòng nhập tên bố' }]}
                                 >
-                                    <Input placeholder="Nhập tên Bố" style={{ width: '80%' }} />
+                                    <Input placeholder="Nhập tên bố" disabled={loading} />
                                 </Form.Item>
                             </Col>
-                            <Col xs={24} md={12}>
+                            <Col xs={24} md={8}>
                                 <Form.Item
-                                    label="Số định danh Bố"
-                                    name={['father', 'idCardNumber']}
-                                    rules={[{ required: true, message: 'Vui lòng nhập số định danh Bố' }]}
-                                >
-                                    <Input placeholder="Nhập số định danh Bố" style={{ width: '80%' }} />
-                                </Form.Item>
-                            </Col>
-                            <Col xs={24} md={12}>
-                                <Form.Item
-                                    label="Address"
-                                    name={['father', 'address']}
-                                    rules={[{ required: true, message: 'Vui lòng nhập địa chỉ Bố' }]}
-                                >
-                                    <Input placeholder="Nhập địa chỉ Bố" style={{ width: '80%' }} />
-                                </Form.Item>
-                            </Col>
-                            <Col xs={24} md={12}>
-                                <Form.Item
-                                    label="Phone"
                                     name={['father', 'phone']}
-                                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
+                                    label="Số điện thoại"
+                                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại bố' }]}
                                 >
-                                    <Input placeholder="Nhập số điện thoại" style={{ width: '80%' }} />
+                                    <Input placeholder="Nhập số điện thoại bố" disabled={loading} />
                                 </Form.Item>
                             </Col>
-                            {/* Thông tin khác... */}
-                            <Col xs={24} md={12}>
+                            <Col xs={24} md={8}>
                                 <Form.Item
-                                    label="Người đại diện"
-                                    name={['father', 'isRepresentative']}
-                                    rules={[{ required: true }]}
+                                    name={['father', 'idCardNumber']}
+                                    label="Số CMND/CCCD"
+                                    rules={[{ required: true, message: 'Vui lòng nhập số CMND/CCCD bố' }]}
                                 >
-                                    <Select placeholder="Chọn" style={{ width: '80%' }}>
-                                        <Option value={true}>Có</Option>
-                                        <Option value={false}>Không</Option>
-                                    </Select>
-                                </Form.Item>
-                            </Col>
-                        </Row>
-                        {/* Thông tin Mẹ */}
-                        <Row gutter={16}>
-                            <Col xs={24} md={12}>
-                                <Form.Item
-                                    label="Tên Mẹ"
-                                    name={['mother', 'fullName']}
-                                    rules={[{ required: true, message: 'Vui lòng nhập tên Mẹ' }]}
-                                >
-                                    <Input placeholder="Nhập tên Mẹ" style={{ width: '80%' }} />
-                                </Form.Item>
-                            </Col>
-                            <Col xs={24} md={12}>
-                                <Form.Item
-                                    label="Số định danh Mẹ"
-                                    name={['mother', 'idCardNumber']}
-                                    rules={[{ required: true, message: 'Vui lòng nhập số định danh Mẹ' }]}
-                                >
-                                    <Input placeholder="Nhập số định danh Mẹ" style={{ width: '80%' }} />
-                                </Form.Item>
-                            </Col>
-                            <Col xs={24} md={12}>
-                                <Form.Item
-                                    label="Address"
-                                    name={['mother', 'address']}
-                                    rules={[{ required: true, message: 'Vui lòng nhập địa chỉ Mẹ' }]}
-                                >
-                                    <Input placeholder="Nhập địa chỉ Mẹ" style={{ width: '80%' }} />
-                                </Form.Item>
-                            </Col>
-                            <Col xs={24} md={12}>
-                                <Form.Item
-                                    label="Phone"
-                                    name={['mother', 'phone']}
-                                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
-                                >
-                                    <Input placeholder="Nhập số điện thoại" style={{ width: '80%' }} />
-                                </Form.Item>
-                            </Col>
-                            {/* Thông tin khác... */}
-                            <Col xs={24} md={12}>
-                                <Form.Item
-                                    label="Người đại diện"
-                                    name={['mother', 'isRepresentative']}
-                                    rules={[{ required: true }]}
-                                >
-                                    <Select placeholder="Chọn" style={{ width: '80%' }}>
-                                        <Option value={true}>Có</Option>
-                                        <Option value={false}>Không</Option>
-                                    </Select>
+                                    <Input placeholder="Nhập số CMND/CCCD bố" disabled={loading} />
                                 </Form.Item>
                             </Col>
                         </Row>
                     </Card>
-                    <Divider />
-                    <Button type="primary" htmlType="submit" loading={loading}>
-                        Thêm trẻ
-                    </Button>
+
+                    <Card title="Thông tin mẹ" bordered={false} style={{ marginTop: 20 }}>
+                        <Row gutter={16}>
+                            <Col xs={24} md={8}>
+                                <Form.Item
+                                    name={['mother', 'fullName']}
+                                    label="Họ và tên"
+                                    rules={[{ required: true, message: 'Vui lòng nhập tên mẹ' }]}
+                                >
+                                    <Input placeholder="Nhập tên mẹ" disabled={loading} />
+                                </Form.Item>
+                            </Col>
+                            <Col xs={24} md={8}>
+                                <Form.Item
+                                    name={['mother', 'phone']}
+                                    label="Số điện thoại"
+                                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại mẹ' }]}
+                                >
+                                    <Input placeholder="Nhập số điện thoại mẹ" disabled={loading} />
+                                </Form.Item>
+                            </Col>
+                            <Col xs={24} md={8}>
+                                <Form.Item
+                                    name={['mother', 'idCardNumber']}
+                                    label="Số CMND/CCCD"
+                                    rules={[{ required: true, message: 'Vui lòng nhập số CMND/CCCD mẹ' }]}
+                                >
+                                    <Input placeholder="Nhập số CMND/CCCD mẹ" disabled={loading} />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                    </Card>
+
+                    <Form.Item>
+                        <Spin spinning={loading}>
+                            <Button type="primary" htmlType="submit" style={{ width: '100%' }} disabled={loading}>
+                                Thêm trẻ em
+                            </Button>
+                        </Spin>
+                    </Form.Item>
                 </Form>
             </Card>
         </div>

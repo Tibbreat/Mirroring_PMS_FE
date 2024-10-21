@@ -4,11 +4,11 @@ import { Link } from "react-router-dom";
 export const ProviderTable = ({ data, currentPage, total, setCurrentPage, providerType }) => {
     const columns = [
         {
-            title: providerType === 'food' ? 'Nhà cung cấp Thực phẩm' : 'Nhà cung cấp Vận chuyển',
+            title: "Tên công ty/đối tác",
             dataIndex: 'providerName',
             key: 'providerName',
             render: (text, record) => (
-                <Link to={`/pms/manage/provider/${providerType}/${record.id}`} className="text-blue-2" style={{ textDecoration: "none" }}>
+                <Link to={`/pms/manage/provider/${providerType}/${record.id}`}  style={{ textDecoration: "none" }}>
                     {text}
                 </Link>
             ),
@@ -20,14 +20,19 @@ export const ProviderTable = ({ data, currentPage, total, setCurrentPage, provid
             render: (text) => `${text}`,
         },
         {
-            title: 'Số đăng kí',
-            dataIndex: 'providerRegisterNumber',
-            key: 'providerRegisterNumber',
+            title: 'Mã số thuế',
+            dataIndex: 'providerTaxCode',
+            key: 'providerTaxCode',
         },
         {
             title: 'Email',
             dataIndex: 'providerEmail',
             key: 'providerEmail',
+        },
+        {
+            title: 'Người đại diện',
+            dataIndex: 'representativeName',
+            key: 'representativeName',
         },
         {
             title: 'Trạng thái',
@@ -52,12 +57,6 @@ export const ProviderTable = ({ data, currentPage, total, setCurrentPage, provid
                 dataSource={data}
                 pagination={false}
                 rowKey="id"
-            />
-            <Pagination
-                current={currentPage}
-                total={total}
-                onChange={handlePageChange}
-                style={{ marginTop: '16px', textAlign: 'center' }}
             />
         </div>
     );

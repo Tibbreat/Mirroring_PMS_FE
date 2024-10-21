@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { HomeOutlined, UserOutlined, UsergroupAddOutlined, AimOutlined, DashboardOutlined, ReconciliationOutlined, UserAddOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useContext } from 'react';
+import { HomeOutlined, UserOutlined, UsergroupAddOutlined, AimOutlined, DashboardOutlined, ReconciliationOutlined, UserAddOutlined, SettingOutlined } from '@ant-design/icons';
 import { Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
+
 
 const items = [
     {
@@ -44,18 +45,67 @@ const items = [
         icon: <UserAddOutlined />,
         label: 'Trẻ',
     },
-    {
-        key: '7',
-        icon: <AimOutlined />,
-        label: 'Trò chuyện',
-    },
 ];
 
+
+
 const Sidebar = () => {
+    const { user } = useContext(AuthContext);
     const [openKeys, setOpenKeys] = useState([]);
     const [selectedKey, setSelectedKey] = useState();
     const navigate = useNavigate();
     const location = useLocation();
+
+    const items = [
+        {
+            key: '1',
+            icon: <DashboardOutlined />,
+            label: 'Trang chủ',
+        },
+        {
+            key: '2',
+            icon: <UserOutlined />,
+            label: 'Giáo viên',
+        },
+        {
+            key: '3',
+            icon: <UsergroupAddOutlined />,
+            label: 'Nhân viên',
+        },
+        {
+            key: '4',
+            icon: <HomeOutlined />,
+            label: 'Lớp',
+        },
+        {
+            key: '5',
+            icon: <ReconciliationOutlined />,
+            label: 'Đối tác',
+            children: [
+                {
+                    key: '51',
+                    label: 'Thực phẩm',
+                },
+                {
+                    key: '52',
+                    label: 'Vận chuyển',
+                }
+            ],
+        },
+        {
+            key: '6',
+            icon: <UserAddOutlined />,
+            label: 'Trẻ',
+        },
+    ];
+
+    if (user.role === "ADMIN") {
+        items.push({
+            key: '7',
+            icon: <SettingOutlined />,
+            label: 'Cài đặt thông tin',
+        });
+    }
 
     useEffect(() => {
         // Update selected key based on current location path
@@ -73,9 +123,10 @@ const Sidebar = () => {
             setSelectedKey('52');
         } else if (location.pathname.includes('/children')) {
             setSelectedKey('6');
-        } else if (location.pathname.includes('/chatting')) {
-            setSelectedKey('7');}
-        else {
+
+        } else if (location.pathname.includes('/settings')) {
+            setSelectedKey('7');
+        } else {
             setSelectedKey(undefined);
         }
     }, [location.pathname]);
@@ -108,7 +159,8 @@ const Sidebar = () => {
                 navigate('/pms/manage/children');
                 break;
             case '7':
-                navigate('/pms/manage/chatting');
+
+                navigate('/pms/manage/settings');
                 break;
             default:
                 break;

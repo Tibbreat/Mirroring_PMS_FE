@@ -8,6 +8,7 @@ import moment from "moment";
 import { ClassTable } from "../../component/table/ClassTable";
 
 const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 const ClassList = () => {
     const [classes, setClasses] = useState([]);
@@ -62,23 +63,25 @@ const ClassList = () => {
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
+            const [openingDay, closingDay] = values.dateRange || [];
             const payload = {
                 ...values,
-                openingDay: values.openingDay ? values.openingDay.format('YYYY-MM-DD') : null,
-                closingDay: values.closingDay ? values.closingDay.format('YYYY-MM-DD') : null,
+                openingDay: openingDay ? openingDay.format('YYYY-MM-DD') : null,
+                closingDay: closingDay ? closingDay.format('YYYY-MM-DD') : null,
                 createdBy: user.id,
+                schoolYear: moment(openingDay).year() + ' - ' + moment(closingDay).year(),
             };
             console.log('Payload to send to BE:', payload);
-
+        
             try {
                 const response = await addClassAPI(payload);
                 console.log('Response from BE:', response);
-                fetchClasses(currentPage); // Refresh the class list
-                setIsModalOpen(false); // Close the modal
+                fetchClasses(currentPage); 
+                setIsModalOpen(false); 
                 notification.success({
                     message: "Thêm lớp thành công",
                 });
-                form.resetFields(); // Clear the form fields
+                form.resetFields(); 
             } catch (error) {
                 console.error('Error adding class:', error);
                 notification.error({
@@ -94,7 +97,6 @@ const ClassList = () => {
             });
         }
     };
-
 
     const handleCancel = () => {
         setIsModalOpen(false);
@@ -160,8 +162,7 @@ const ClassList = () => {
                 ]}
                 width={800}
             >
-                <Form form={form}
-                    layout="vertical">
+                <Form form={form} layout="vertical">
                     <Row gutter={16}>
                         <Col span={12}>
                             <Form.Item
@@ -188,75 +189,30 @@ const ClassList = () => {
                         </Col>
                     </Row>
                     <Row gutter={16}>
-                        <Col span={12}>
+                        <Col span={24}>
                             <Form.Item
-                                name="openingDay"
-                                label="Ngày khai giảng"
-                                rules={[
-                                    { required: true, message: 'Vui lòng chọn ngày khai giảng' },
-                                    ({ getFieldValue }) => ({
-                                        validator(_, value) {
-                                            const today = moment().startOf('day');
-                                            if (!value || value.isAfter(today)) {
-                                                return Promise.resolve();
-                                            }
-                                            return Promise.reject(new Error('Ngày khai giảng phải lớn hơn ngày hiện tại ít nhất 1 ngày'));
-                                        },
-                                    }),
-                                ]}
+                                name="dateRange"
+                                label="Ngày khai giảng và ngày bế giảng"
+                                rules={[{ required: true, message: 'Vui lòng chọn khoảng thời gian' }]}
                             >
-                                <DatePicker
+                                <RangePicker
                                     style={{ width: '100%' }}
-                                    disabledDate={(current) => current && current.isBefore(moment().add(1, 'days').startOf('day'))}
-                                    format="DD/MM/YYYY"
-                                />
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item
-                                name="closingDay"
-                                label="Ngày bế giảng"
-                                rules={[
-                                    { required: true, message: 'Vui lòng chọn ngày bế giảng' },
-                                    ({ getFieldValue }) => ({
-                                        validator(_, value) {
-                                            if (!value || value.isAfter(getFieldValue('openingDay'))) {
-                                                return Promise.resolve();
-                                            }
-                                            return Promise.reject(new Error('Ngày bế giảng phải lớn hơn ngày khai giảng'));
-                                        },
-                                    }),
-                                ]}
-                            >
-                                <DatePicker
-                                    style={{ width: '100%' }}
-                                    disabledDate={(current) => {
-                                        const openingDay = form.getFieldValue('openingDay');
-                                        return current && current.isBefore(moment(openingDay).endOf('day'));
-                                    }}
+                                    disabledDate={(current) => current && current.isBefore(moment().startOf('day'))}
                                     format="DD/MM/YYYY"
                                 />
                             </Form.Item>
                         </Col>
                     </Row>
-
                     <Row gutter={16}>
                         <Col span={12}>
                             <Form.Item
                                 name="teacherId"
-                                label="Danh sách giáo viên"
+                                label="Chọn giáo viên"
                                 rules={[{ required: true, message: 'Vui lòng chọn giáo viên' }]}
                             >
                                 <Select
-                                    mode="multiple"
                                     style={{ width: '100%' }}
-                                    placeholder="Nhập danh sách giáo viên"
-                                    maxTagCount={2}
-                                    onChange={(value) => {
-                                        if (value.length > 2) {
-                                            value.pop();
-                                        }
-                                    }}
+                                    placeholder="Chọn giáo viên"
                                 >
                                     {teachers.map((teacher) => (
                                         <Option key={teacher.id} value={teacher.id}>
@@ -266,6 +222,7 @@ const ClassList = () => {
                                 </Select>
                             </Form.Item>
                         </Col>
+
                         <Col span={12}>
                             <Form.Item
                                 name="managerId"
