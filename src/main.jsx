@@ -47,7 +47,7 @@ const App = () => (
           </PrivateRoute>
         </AuthWrapper>
       }>
-        <Route index path="dashboard" element={<Dashboard />} />
+        <Route index path="dashboard" element={<Dashboard />}/>
         <Route path="teacher" element={<TeacherList />} />
         <Route path="teacher/:id" element={<TeacherInformation />} />
         <Route path="class" element={<ClassList />} />

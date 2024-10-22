@@ -1,13 +1,18 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Spin, Tag, Row, Col, Avatar, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, Form } from 'antd';
+import { Spin, Row, Col, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, Form, notification, DatePicker } from 'antd';
 import { useParams } from 'react-router-dom';
-import { getFoodProviderDetailAPI } from '../../../services/service.foodprovider';
+import { getFoodProviderDetailAPI, getFoodRequestsAPI, requestFoodAPI } from '../../../services/service.foodprovider';
 import Title from 'antd/es/typography/Title';
 import { EditOutlined, PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { AuthContext } from '../../../component/context/auth.context';
+import moment from 'moment';
+import { FoodRequestTable } from '../../../component/table/FoodRequestTable';
 
 const FoodProviderInformation = () => {
     const [provider, setProvider] = useState(null);
+    const [foodRequest, setFoodRequest] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const { id } = useParams();
     const [form] = Form.useForm();
@@ -19,7 +24,6 @@ const FoodProviderInformation = () => {
         try {
             const response = await getFoodProviderDetailAPI(id);
             setProvider(response.data);
-
         } catch (error) {
             console.error('Error fetching provider:', error);
         } finally {
@@ -27,26 +31,64 @@ const FoodProviderInformation = () => {
         }
     };
 
+    const fetchfoodRequestItems = async (id) => {
+        try {
+            const response = await getFoodRequestsAPI(id, currentPage);
+            setFoodRequest(response.data.listData);
+            setTotal(response.data.total);
+        } catch (error) {
+            console.error('Error fetching provider:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
     const handleCancel = () => {
         setIsModalVisible(false);
     };
 
-    const handleOk = () => {
-        form.validateFields()
-            .then(values => {
-                console.log('Yêu cầu thực phẩm:', values.foodRequestItems);
-                setIsModalVisible(false);
-                // form.resetFields();
-            })
-            .catch(info => {
-                console.log('Validate Failed:', info);
+    const handleOk = async () => {
+        try {
+            const values = await form.validateFields();
+    
+            values.dayNeeded = values.dayNeeded ? moment(values.dayNeeded).format('YYYY-MM-DD') : null;
+    
+            const payload = {
+                ...values,
+                providerId: id,
+                createdBy: user?.id
+            };
+    
+            const foodRequestItems = form.getFieldValue('foodRequestItems') || [];
+    
+            if (foodRequestItems.length === 0) {
+                message.warning('Không có thực phẩm nào được yêu cầu');
+                return;
+            }
+    
+            const response = await requestFoodAPI(payload);
+            setIsModalVisible(false);
+            fetchfoodRequestItems(id, currentPage);
+            form.resetFields();
+            notification.success({
+                message: 'Tạo yêu cầu thành công',
+                description: 'Vui lòng chờ xác nhận từ quản trị viên'
             });
+        } catch (error) {
+            console.error('Error creating food request:', error);
+            message.error('Có lỗi xảy ra, vui lòng thử lại sau');
+        }
     };
+    
 
     useEffect(() => {
         fetchFoodProvider(id);
+        fetchfoodRequestItems(id);
     }, [id]);
 
+
+    const disablePastDates = (current) => {
+        return current && current < moment().startOf('day');
+    };
     if (loading) {
         return (
             <div className='d-flex justify-content-center align-items-center' style={{ height: '100vh' }}>
@@ -116,6 +158,7 @@ const FoodProviderInformation = () => {
                             </Button>
                         </Col>
                     </Row>
+                    <FoodRequestTable data={foodRequest} total={total} providerId={id} currentPage={currentPage} />
                 </Col>
             </Card>
 
@@ -129,6 +172,18 @@ const FoodProviderInformation = () => {
                 width={1000}
             >
                 <Form form={form} layout="vertical">
+                    <Form.Item
+                        name="dayNeeded"
+                        label="Ngày cần thực phẩm"
+                        rules={[{ required: true, message: 'Vui lòng chọn ngày cần thực phẩm' }]}
+                    >
+                        <DatePicker
+                            style={{ width: '100%' }}
+                            format="DD-MM-YYYY"
+                            placeholder="Chọn ngày"
+                            disabledDate={disablePastDates}
+                        />
+                    </Form.Item>
                     <Form.List name="foodRequestItems">
                         {(fields, { add, remove }) => (
                             <>
