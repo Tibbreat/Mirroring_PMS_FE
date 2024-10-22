@@ -76,7 +76,7 @@ const Dashboard = () => {
                         </Card>
                     </div>
                 </Col>
-                <FloatButton />
+               
             </Row>
         </div>
     );
