@@ -1,7 +1,7 @@
 import axios from '../../axios.customize';
 
 export const getUsersAPI = async (page, role, isActive) => {
-    const params = new URLSearchParams();
+    let params = new URLSearchParams();
 
     if (page) {
         params.append('page', page);
@@ -32,5 +32,9 @@ export const changeUserStatusAPI = async (userId) => {
 
 export const getUserOpnionAPI = async (role) => {
     const URL = `/pms/users/options?role=${role}`;
+    return axios.get(URL);
+}
+export const getUserOpnionWithUserNameAPI = async (role) => {
+    const URL = `/pms/users/option-username?role=${role}`;
     return axios.get(URL);
 }

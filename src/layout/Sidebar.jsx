@@ -4,6 +4,52 @@ import { Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../component/context/auth.context';
 
+
+const items = [
+    {
+        key: '1',
+        icon: <DashboardOutlined />,
+        label: 'Trang chủ',
+    },
+    {
+        key: '2',
+        icon: <UserOutlined />,
+        label: 'Giáo viên',
+    },
+    {
+        key: '3',
+        icon: <UsergroupAddOutlined />,
+        label: 'Nhân viên',
+    },
+    {
+        key: '4',
+        icon: <HomeOutlined />,
+        label: 'Lớp',
+    },
+    {
+        key: '5',
+        icon: <ReconciliationOutlined />,
+        label: 'Đối tác',
+        children: [
+            {
+                key: '51',
+                label: 'Thực phẩm',
+            },
+            {
+                key: '52',
+                label: 'Vận chuyển',
+            }
+        ],
+    },
+    {
+        key: '6',
+        icon: <UserAddOutlined />,
+        label: 'Trẻ',
+    },
+];
+
+
+
 const Sidebar = () => {
     const { user } = useContext(AuthContext);
     const [openKeys, setOpenKeys] = useState([]);
@@ -78,6 +124,7 @@ const Sidebar = () => {
             setSelectedKey('52');
         } else if (location.pathname.includes('/children')) {
             setSelectedKey('6');
+
         } else if (location.pathname.includes('/settings')) {
             setSelectedKey('7');
         } else {
@@ -113,6 +160,7 @@ const Sidebar = () => {
                 navigate('/pms/manage/children');
                 break;
             case '7':
+
                 navigate('/pms/manage/settings');
                 break;
             default:

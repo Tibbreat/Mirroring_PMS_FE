@@ -31,6 +31,7 @@ import Error404 from './page/errors/Error404';
 import Error500 from './page/errors/Error500';
 import ChildrenList from './page/children/ChildrenList';
 import AddChildren from './page/children/AddChildren';
+
 import AddTransportProvider from './page/supplier/transport-provider/AddTransportProvider';
 
 
@@ -64,7 +65,9 @@ const App = () => (
 
         <Route path="children" element={<ChildrenList />} />
         <Route path="children/add-children" element={<AddChildren />} />
+
         {/* <Route path="settings" element={<SchoolInformation />} /> */}
+
       </Route>
 
       <Route path="/403" element={<Error403 />} />
