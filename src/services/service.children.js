@@ -1,7 +1,7 @@
 import axios from '../../axios.customize';
 
 export const addChildren = async (formData) => {
-  return axios.post('/pms/children/new-children', formData);
+    return axios.post('/pms/children/new-children', formData);
 };
 
 export const getChildrenAPI = async (page, fullname, classId) => {
@@ -29,7 +29,8 @@ export const getChildDetailAPI = async (childId) => {
 
 
 
-export const updateServiceStatus = async (childrenId, serviceName) => {
+export const updateServiceStatus = async (childrenId, serviceName, vehicleId = null) => {
     const URL = `/pms/children/service/${childrenId}/${serviceName}`;
-    return await axios.put(URL);
-}
+    const params = vehicleId ? { vehicleId } : {};
+    return await axios.put(URL, null, { params });
+};

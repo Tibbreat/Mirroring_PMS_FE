@@ -1,15 +1,21 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Spin, Row, Col, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, List, Collapse, Avatar, DatePicker } from 'antd';
+import { Spin, Row, Col, Button, Modal, message, Card, Descriptions, Divider, Switch, Avatar, List, Radio, Table } from 'antd';
 import { useParams } from 'react-router-dom';
 import { getChildDetailAPI, updateServiceStatus } from '../../services/service.children';
 import moment from 'moment/moment';
 import Title from 'antd/es/typography/Title';
 import { EditOutlined } from '@ant-design/icons';
+import { getAvailableVehicles } from '../../services/service.vehicle';
 
 const ChildrenInformation = () => {
     const [childrenData, setChildrenData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
+    const [isBoardingModalVisible, setIsBoardingModalVisible] = useState(false);
+    const [isTransportModalVisible, setIsTransportModalVisible] = useState(false);
+    const [isVehicleModalVisible, setIsVehicleModalVisible] = useState(false);
+    const [availableVehicles, setAvailableVehicles] = useState([]);
+    const [selectedVehicle, setSelectedVehicle] = useState(null);
 
     const { id } = useParams();
     const fetchChildrenData = async (id) => {
@@ -23,9 +29,122 @@ const ChildrenInformation = () => {
             setLoading(false);
         }
     };
+
+    const fetchAvailableVehicles = async () => {
+        try {
+            const response = await getAvailableVehicles();
+            setAvailableVehicles(response.data);
+        } catch (error) {
+            console.error('Error fetching available vehicles:', error);
+        }
+    };
+
+    const columns = [
+        {
+            title: 'Tên phương tiện',
+            dataIndex: 'vehicleName',
+            key: 'vehicleName',
+        },
+        {
+            title: 'Số chỗ',
+            dataIndex: 'numberOfSeats',
+            key: 'numberOfSeats',
+        },
+        {
+            title: 'Chỗ trống',
+            dataIndex: 'availableSeats',
+            key: 'availableSeats',
+        },
+        {
+            title: 'Điểm đón',
+            dataIndex: 'pickUpLocation',
+            key: 'pickUpLocation',
+        },
+        {
+            title: 'Thời gian khởi hành',
+            dataIndex: 'timeStart',
+            key: 'timeStart',
+        },
+        {
+            title: 'Chọn',
+            key: 'select',
+            render: (text, record) => (
+                <Radio.Group
+                    onChange={handleVehicleSelect}
+                    value={selectedVehicle}
+                >
+                    <Radio value={record.id}>Chọn</Radio>
+                </Radio.Group>
+            ),
+        },
+    ];
+
     useEffect(() => {
         fetchChildrenData(id);
     }, [id]);
+
+    const handleChangeServiceStatus = async (serviceName) => {
+        setUpdating(true);
+        try {
+            if (selectedVehicle === null) {
+                message.error("Vui lòng chọn phương tiện");
+                return;
+            }
+            await updateServiceStatus(id, serviceName, selectedVehicle);
+            setIsVehicleModalVisible(false);
+            message.success("Đăng ký thành công");
+
+            fetchChildrenData(id);
+        } catch (error) {
+            console.error('Error changing service status:', error);
+            message.error("Đăng ký thất bại");
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const handleBoardingSwitchChange = () => {
+        setIsBoardingModalVisible(true);
+    };
+
+    const handleTransportSwitchChange = () => {
+        if (!childrenData?.isRegisteredForTransport) {
+            fetchAvailableVehicles();
+            setIsVehicleModalVisible(true);
+        } else {
+            setIsTransportModalVisible(true);
+        }
+    };
+
+    const handleConfirmBoarding = () => {
+        handleChangeServiceStatus('boarding');
+        setIsBoardingModalVisible(false);
+    };
+
+    const handleConfirmTransport = () => {
+        handleChangeServiceStatus('transport');
+        setIsTransportModalVisible(false);
+    };
+
+    const handleConfirmVehicle = () => {
+        handleChangeServiceStatus('transport');
+    };
+
+    const handleCancelBoarding = () => {
+        setIsBoardingModalVisible(false);
+    };
+
+    const handleCancelTransport = () => {
+        setIsTransportModalVisible(false);
+    };
+
+    const handleCancelVehicle = () => {
+        setIsVehicleModalVisible(false);
+    };
+
+    const handleVehicleSelect = (e) => {
+        setSelectedVehicle(e.target.value);
+    };
 
     if (loading) {
         return (
@@ -35,20 +154,6 @@ const ChildrenInformation = () => {
         );
     }
 
-    //handle change children service status
-    const handleChangeServiceStatus = async (serviceName) => {
-        setUpdating(true);
-        try {
-            await updateServiceStatus(id, serviceName);
-            message.success("Cập nhật thành công");
-            fetchChildrenData(id);
-        } catch (error) {
-            console.error('Error changing service status:', error);
-            message.error("Cập nhật thất bại");
-        } finally {
-            setUpdating(false);
-        }
-    };
     return (
         <div className="container">
             <Card style={{ marginTop: 20 }}>
@@ -87,14 +192,14 @@ const ChildrenInformation = () => {
                                 <Switch
                                     checked={childrenData?.isRegisteredForBoarding}
                                     loading={updating}
-                                    onChange={() => handleChangeServiceStatus('boarding')}
+                                    onChange={handleBoardingSwitchChange}
                                 />
                             </Descriptions.Item>
                             <Descriptions.Item label="Đăng ký xe" span={3}>
                                 <Switch
                                     checked={childrenData?.isRegisteredForTransport}
                                     loading={updating}
-                                    onChange={() => handleChangeServiceStatus('transport')}
+                                    onChange={handleTransportSwitchChange}
                                 />
                             </Descriptions.Item>
                         </Descriptions>
@@ -126,6 +231,45 @@ const ChildrenInformation = () => {
                     </Descriptions.Item>
                 </Descriptions>
             </Card>
+
+            <Modal
+                title="Xác nhận thay đổi"
+                visible={isBoardingModalVisible}
+                onOk={handleConfirmBoarding}
+                onCancel={handleCancelBoarding}
+                okText="Xác nhận"
+                cancelText="Đóng"
+            >
+                <p>Bạn có chắc chắn muốn thay đổi trạng thái đăng ký nội trú?</p>
+            </Modal>
+
+            <Modal
+                title="Xác nhận thay đổi"
+                visible={isTransportModalVisible}
+                onOk={handleConfirmTransport}
+                onCancel={handleCancelTransport}
+                okText="Xác nhận"
+                cancelText="Đóng"
+            >
+                <p>Bạn có chắc chắn muốn hủy đăng ký xe đưa đón?</p>
+            </Modal>
+
+            <Modal
+                title="Chọn phương tiện"
+                open={isVehicleModalVisible}
+                onOk={handleConfirmVehicle}
+                onCancel={handleCancelVehicle}
+                okText="Xác nhận"
+                cancelText="Đóng"
+                width={800}
+            >
+                <Table
+                    dataSource={availableVehicles}
+                    columns={columns}
+                    rowKey="id"
+                    pagination={false}
+                />
+            </Modal>
 
         </div>
     );

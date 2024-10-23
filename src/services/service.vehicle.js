@@ -8,6 +8,9 @@ export const getVehicles = async (transportProviderId, page) => {
     return await axios.get(`/pms/vehicle/provider/${transportProviderId}?page=${page}`);
 };
 
+export const getAvailableVehicles = async () => {
+    return await axios.get(`/pms/vehicle/available`);
+};
 export const getVehicleDetail = async (vehicleId) => {
 
 };
