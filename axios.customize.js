@@ -1,11 +1,9 @@
 import axios from 'axios';
 
 const instance = axios.create({
-    // baseURL: 'http://157.66.27.65:9999',
-    baseURL: 'http://localhost:8080',
-// });
+    baseURL: 'http://157.66.27.65:9999',  // Đảm bảo endpoint API dùng HTTPS
+    // Không cần httpsAgent vì trình duyệt tự quản lý SSL
 });
-
 
 instance.interceptors.request.use(
     (config) => {
