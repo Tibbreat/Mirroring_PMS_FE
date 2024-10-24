@@ -16,8 +16,10 @@ export const StaffList = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [imageFile, setImageFile] = useState(null);
+    const [form] = Form.useForm(); // Initialize the form instance
 
     const { user } = useContext(AuthContext);
+    
     const fetchStaff = useCallback(async (page) => {
         setLoading(true);
         try {
@@ -29,7 +31,7 @@ export const StaffList = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [user.schoolId]);
 
     useEffect(() => {
         fetchStaff(currentPage);
@@ -37,6 +39,8 @@ export const StaffList = () => {
 
     const handleCancel = () => {
         setIsModalOpen(false);
+        form.resetFields();  // Reset form fields when modal is closed
+        setImageFile(null);  // Reset image file when modal is closed
     };
 
     const handleImageChange = (file) => {
@@ -44,7 +48,7 @@ export const StaffList = () => {
     };
 
     const handleOk = async (values) => {
-        const { fullName, idCardNumber, address, phone, dob, role, schoolId } = values;
+        const { fullName, idCardNumber, address, phone, dob, role } = values;
 
         // Create a FormData object to handle multipart form data
         const formData = new FormData();
@@ -63,22 +67,26 @@ export const StaffList = () => {
         formData.append('user', new Blob([JSON.stringify(userData)], { type: 'application/json' }));
 
         // Append the image file if it exists
-        if (imageFile) {
+        if (!imageFile) {
+            message.error("Vui lòng cung cấp ảnh thẻ");
+        } else {
             formData.append('image', imageFile);
-        }
+            try {
+                await addUserAPI(formData);
+                message.success('Nhân viên đã được thêm thành công.');
 
-        try {
-            // Send the FormData to the API
-            await addUserAPI(formData);
-            message.success('Nhân viên đã được thêm thành công.');
-            setIsModalOpen(false);
-            fetchStaff(currentPage); // Refresh the staff list
-        } catch (error) {
-            message.error('Có lỗi xảy ra khi thêm nhân viên.');
-            console.error('Error adding user:', error);
+                // Reset the form fields
+                form.resetFields();
+                setImageFile(null);  // Reset the image file
+
+                setIsModalOpen(false);
+                fetchStaff(currentPage); // Refresh the staff list
+            } catch (error) {
+                message.error('Có lỗi xảy ra khi thêm nhân viên.');
+                console.error('Error adding user:', error);
+            }
         }
     };
-
 
     return (
         <Card style={{ margin: 20 }}>
@@ -139,6 +147,7 @@ export const StaffList = () => {
                             <Form
                                 layout="vertical"
                                 onFinish={handleOk}
+                                form={form}  // Bind form instance to the form
                             >
                                 <Card title="Thông tin cá nhân" bordered={false}>
                                     <Row gutter={[16, 16]}>
