@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import Sidebar from './layout/Sidebar';
 import Navbar from './layout/Navbar';
 import { Outlet } from 'react-router-dom';
-import { Drawer, FloatButton, Layout } from 'antd';
+import { Button, Drawer, FloatButton, Layout } from 'antd';
 
 import "./assets/style.css"
 import { MessageOutlined } from '@ant-design/icons';
@@ -41,27 +41,14 @@ const ManageSite = () => {
           </div>
         </Content>
         <FloatButton
-          icon={<MessageOutlined />}  // Use the icon here
-          style={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-            width: 50,
-            height: 50,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderRadius: '50%',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-          }}
+          className="position-fixed rounded-circle d-flex justify-content-center align-items-center shadow"
           onClick={showChat}
-          badge={{ dot: true }}
-        />
-
-          <div>
+          icon={<MessageOutlined />}
+        >
+        </FloatButton>
+        <div>
           <ChatDrawer isVisible={isChatVisible} onClose={closeChat} />
-          </div>
-       
+        </div>
       </Layout>
     </Layout>
   );

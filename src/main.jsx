@@ -33,6 +33,7 @@ import ChildrenList from './page/children/ChildrenList';
 import AddChildren from './page/children/AddChildren';
 
 import AddTransportProvider from './page/supplier/transport-provider/AddTransportProvider';
+import { SchoolInformation } from './page/school/SchoolInformation';
 
 
 const App = () => (
@@ -66,7 +67,7 @@ const App = () => (
         <Route path="children" element={<ChildrenList />} />
         <Route path="children/add-children" element={<AddChildren />} />
 
-        {/* <Route path="settings" element={<SchoolInformation />} /> */}
+        <Route path="settings" element={<SchoolInformation />} />
 
       </Route>
 

@@ -13,10 +13,7 @@ const PrivateRoute = ({ role, children }) => {
     const fetchUserInfo = async () => {
         try {
             const response = await getAccountAPI();
-            setUser({
-                id: response.data.id,
-                role: response.data.role,
-            });
+            setUser(response.data);
             console.log("User info:", response.data);
             setIsAuthenticated(true);
         } catch (error) {

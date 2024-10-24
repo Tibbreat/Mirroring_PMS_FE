@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { Drawer, List, Avatar, Input, Typography, Button, Modal, Select, message } from 'antd';
+import { Drawer, List, Avatar, Input, Typography, Button, Modal, Select, message, Divider } from 'antd';
 import { database, ref, onValue, set } from '../../services/firebaseConfig';
 import { AuthContext } from '../context/auth.context';
 import { getUserAPI, getUserOpnionWithUserNameAPI } from '../../services/services.user';
 import { v4 as uuidv4 } from 'uuid';
+import { SendOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { Search, TextArea } = Input;
 const { Text } = Typography;
@@ -152,7 +153,6 @@ const ChatDrawer = ({ isVisible, onClose }) => {
     boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)',
   });
 
-
   return (
     <Drawer
       title={isChatOpen ? `Đang trò chuyện với ${activeChat?.fullName}` : 'Đoạn chat'}
@@ -162,18 +162,36 @@ const ChatDrawer = ({ isVisible, onClose }) => {
         setIsChatOpen(false);
       }}
       open={isVisible}
-      width={500} // Moderate drawer width
-      bodyStyle={{ padding: 0 }} // Remove any additional padding on the drawer to prevent unnecessary scrollbars
+      width={500}
+
     >
       {!isChatOpen && (
         <>
-          <Button type="primary" onClick={showCreateChatModal} style={{ marginBottom: 16, display: 'block', margin: '0 auto' }}>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={showCreateChatModal}
+            className='create-chat-button mb-3 d-block mx-auto btn-success'
+          // style={{  display: 'block', margin: '0 auto' }}
+          >
             Tạo đoạn chat mới
           </Button>
 
-          <Modal title="Tạo đoạn chat mới" visible={isModalVisible} onOk={handleCreateChat} onCancel={() => setIsModalVisible(false)} okText="Tạo đoạn chat" cancelText="Hủy">
+          <Modal
+            title="Tạo đoạn chat mới"
+            visible={isModalVisible}
+            onOk={handleCreateChat}
+            onCancel={() => setIsModalVisible(false)}
+            okText="Tạo đoạn chat"
+            cancelText="Hủy"
+          >
             <p>Chọn người dùng để tạo đoạn chat:</p>
-            <Select style={{ width: '100%' }} placeholder="Chọn người dùng" value={selectedUser} onChange={(value) => setSelectedUser(value)}>
+            <Select
+              style={{ width: '100%' }}
+              placeholder="Chọn người dùng"
+              value={selectedUser}
+              onChange={(value) => setSelectedUser(value)}
+            >
               {users.map((userOption) => (
                 <Select.Option key={userOption.id} value={userOption.id}>
                   {userOption.username}
@@ -186,7 +204,11 @@ const ChatDrawer = ({ isVisible, onClose }) => {
             itemLayout="horizontal"
             dataSource={chatDetails}
             renderItem={(chat) => (
-              <List.Item key={chat.chatId} style={{ padding: '10px 0' }} onClick={() => handleChatSelect(chat)}>
+              <List.Item
+                key={chat.chatId}
+                style={{ padding: '10px 20px', cursor: 'pointer' }}
+                onClick={() => handleChatSelect(chat)}
+              >
                 <List.Item.Meta
                   avatar={<Avatar src={chat.avatar} />}
                   title={<Text strong>{chat.fullName}</Text>}
@@ -210,10 +232,10 @@ const ChatDrawer = ({ isVisible, onClose }) => {
       )}
 
       {isChatOpen && activeChat && (
-        <div style={{ height: 'calc(100vh - 160px)', overflow: 'auto', padding: '10px'}}>
+        <div style={{ height: 'calc(100vh - 160px)', overflow: 'auto', padding: '10px' }}>
           {activeChat.messages.map((msg, index) => (
-            <div key={index} style={getMessageBubbleStyle(msg.senderId)}> {/* Determine alignment */}
-              <div style={getMessageStyle(msg.senderId)}> {/* Apply styles */}
+            <div key={index} style={getMessageBubbleStyle(msg.senderId)}>
+              <div style={getMessageStyle(msg.senderId)}>
                 <Text>{msg.content}</Text>
                 <br />
                 <Text type="secondary" style={{ fontSize: '12px' }}>
@@ -224,21 +246,23 @@ const ChatDrawer = ({ isVisible, onClose }) => {
           ))}
           <div ref={chatEndRef} />
         </div>
-
       )}
 
       {isChatOpen && activeChat && (
-        <div style={{ padding: '10px', borderTop: '1px solid #f0f0f0' }}>
+        <div style={{ padding: '10px', borderTop: '1px solid #f0f0f0', backgroundColor: '#fafafa' }}>
           <TextArea
             rows={2}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Nhập tin nhắn..."
+            autoSize={{ minRows: 2, maxRows: 6 }}
+            style={{ borderRadius: '10px' }}
           />
           <Button
             type="primary"
+            icon={<SendOutlined />}
             onClick={sendMessage}
-            style={{ marginTop: 8, width: '100%' }}
+            style={{ marginTop: 8, width: '100%', borderRadius: '10px' }}
           >
             Gửi tin nhắn
           </Button>

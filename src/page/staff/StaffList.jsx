@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
-import { getUsersAPI } from "../../services/services.user";
-import { Button, Card, Col, Input, Modal, Pagination, Row, Select, Spin, DatePicker } from "antd";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { getUsersAPI, addUserAPI } from "../../services/services.user"; // Make sure addUserAPI is implemented
+import { Button, Card, Col, Input, Modal, Pagination, Row, Select, Spin, DatePicker, Form, message } from "antd";
 import StaffTable from "../../component/table/StaffTable";
 import NoData from "../../component/no-data-page/NoData";
 import UploadImage from "../../component/input/UploadImage";
+import moment from "moment"; // Import for handling date formatting
+import { AuthContext } from "../../component/context/auth.context";
 
 const { Option } = Select;
 
@@ -14,16 +16,12 @@ export const StaffList = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [imageFile, setImageFile] = useState(null);
-    const [staffName, setStaffName] = useState('');
-    const [staffPhone, setStaffPhone] = useState('');
-    const [staffDob, setStaffDob] = useState(null);
-    const [idCardNumber, setIdCardNumber] = useState('');
-    const [staffAddress, setStaffAddress] = useState('');
 
+    const { user } = useContext(AuthContext);
     const fetchStaff = useCallback(async (page) => {
         setLoading(true);
         try {
-            const response = await getUsersAPI(page, ["KITCHEN_MANAGER", "CLASS_MANAGER", "TRANSPORT_MANAGER"], null);
+            const response = await getUsersAPI(user.schoolId, page, ["KITCHEN_MANAGER", "CLASS_MANAGER", "TRANSPORT_MANAGER"], null);
             setStaff(response.data.listData);
             setTotal(response.data.total);
         } catch (error) {
@@ -39,30 +37,48 @@ export const StaffList = () => {
 
     const handleCancel = () => {
         setIsModalOpen(false);
-        setStaffName('');
-        setStaffPhone('');
-        setStaffDob(null);
-        setIdCardNumber('');
-        setStaffAddress('');
-        setImageFile(null);
     };
 
     const handleImageChange = (file) => {
         setImageFile(file);
     };
 
-    const handleOk = () => {
-        // Add your logic to handle form submission here
-        console.log({
-            staffName,
-            staffPhone,
-            staffDob,
+    const handleOk = async (values) => {
+        const { fullName, idCardNumber, address, phone, dob, role, schoolId } = values;
+
+        // Create a FormData object to handle multipart form data
+        const formData = new FormData();
+
+        // Append user data as JSON
+        const userData = {
+            fullName,
             idCardNumber,
-            staffAddress,
-            imageFile
-        });
-        handleCancel();
+            address,
+            phone,
+            role,
+            dob: dob ? moment(dob).format("YYYY-MM-DD") : null,
+            schoolId: user?.schoolId
+        };
+
+        formData.append('user', new Blob([JSON.stringify(userData)], { type: 'application/json' }));
+
+        // Append the image file if it exists
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+
+        try {
+            // Send the FormData to the API
+            await addUserAPI(formData);
+            message.success('Nhân viên đã được thêm thành công.');
+            setIsModalOpen(false);
+            fetchStaff(currentPage); // Refresh the staff list
+        } catch (error) {
+            message.error('Có lỗi xảy ra khi thêm nhân viên.');
+            console.error('Error adding user:', error);
+        }
     };
+
 
     return (
         <Card style={{ margin: 20 }}>
@@ -112,76 +128,107 @@ export const StaffList = () => {
                 open={isModalOpen}
                 onCancel={handleCancel}
                 footer={null}
-                width={800}
+                width={1000}
             >
-                <div className="container row">
-                    <div className="col-4 d-flex justify-content-center align-items-center">
-                        <UploadImage onImageChange={handleImageChange} />
-                    </div>
-                    <div className="col-8">
-                        <div className="row">
-                            <div className="col-md-6 mb-3">
-                                <label htmlFor="staffName" className="form-label">Tên nhân viên</label>
-                                <Input
-                                    placeholder="Nhập tên nhân viên"
-                                    value={staffName}
-                                    onChange={(e) => setStaffName(e.target.value)}
-                                />
-                            </div>
-                            <div className="col-md-6 mb-3">
-                                <label htmlFor="staffPhone" className="form-label">Số điện thoại</label>
-                                <Input
-                                    placeholder="Nhập số điện thoại"
-                                    value={staffPhone}
-                                    onChange={(e) => setStaffPhone(e.target.value)}
-                                />
-                            </div>
-                        </div>
+                <div className="container">
+                    <Row gutter={[16, 16]} align="middle">
+                        <Col span={8} className="d-flex justify-content-center">
+                            <UploadImage onImageChange={handleImageChange} />
+                        </Col>
+                        <Col span={16}>
+                            <Form
+                                layout="vertical"
+                                onFinish={handleOk}
+                            >
+                                <Card title="Thông tin cá nhân" bordered={false}>
+                                    <Row gutter={[16, 16]}>
+                                        <Col span={8}>
+                                            <Form.Item
+                                                label="Họ và tên"
+                                                name="fullName"
+                                                rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
+                                            >
+                                                <Input placeholder="Nhập họ và tên" />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={8}>
+                                            <Form.Item
+                                                label="Số điện thoại"
+                                                name="phone"
+                                                rules={[{ required: true, pattern: /^\d{10}$/, message: 'Số điện thoại phải gồm 10 chữ số' }]}
+                                            >
+                                                <Input placeholder="Nhập số điện thoại" />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={8}>
+                                            <Form.Item
+                                                label="Chức vụ"
+                                                name="role"
+                                                rules={[{ required: true, message: 'Vui lòng chọn chức vụ' }]}
+                                            >
+                                                <Select placeholder="Chọn vai trò" style={{ width: '100%' }}>
+                                                    <Option value="CLASS_MANAGER">Quản lý lớp</Option>
+                                                    <Option value="KITCHEN_MANAGER">Quản lý bếp</Option>
+                                                    <Option value="TRANSPORT_MANAGER">Quản lý dịch vụ đưa đón</Option>
+                                                </Select>
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                </Card>
 
-                        <div className="row">
-                            <div className="col-md-6 mb-3">
-                                <label htmlFor="staffDob" className="form-label">Ngày sinh</label>
-                                <DatePicker
-                                    style={{ width: '100%' }}
-                                    value={staffDob}
-                                    onChange={(date) => setStaffDob(date)}
-                                    format="DD-MM-YYYY"
-                                />
-                            </div>
-                            <div className="col-md-6 mb-3">
-                                <label htmlFor="idCardNumber" className="form-label">CMT/CCCD</label>
-                                <Input
-                                    placeholder="Nhập CMT/CCCD"
-                                    value={idCardNumber}
-                                    onChange={(e) => setIdCardNumber(e.target.value)}
-                                />
-                            </div>
-                        </div>
+                                {/* Additional Information Section */}
+                                <Card title="Thông tin bổ sung" bordered={false} style={{ marginTop: 20 }}>
+                                    <Row gutter={[16, 16]}>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="Ngày sinh"
+                                                name="dob"
+                                                rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
+                                            >
+                                                <DatePicker
+                                                    style={{ width: '100%' }}
+                                                    format="DD-MM-YYYY"
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="CMT/CCCD"
+                                                name="idCardNumber"
+                                                rules={[{ required: true, pattern: /^\d{12}$/, message: 'CMT/CCCD phải gồm 12 chữ số' }]}
+                                            >
+                                                <Input placeholder="Nhập CMT/CCCD" />
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                    <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+                                        <Col span={24}>
+                                            <Form.Item
+                                                label="Địa chỉ"
+                                                name="address"
+                                                rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
+                                            >
+                                                <Input placeholder="Nhập địa chỉ" />
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                </Card>
 
-                        <div className="row">
-                            <div className="col-md-12 mb-3">
-                                <label htmlFor="staffAddress" className="form-label">Địa chỉ</label>
-                                <Input
-                                    placeholder="Nhập địa chỉ"
-                                    value={staffAddress}
-                                    onChange={(e) => setStaffAddress(e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="row mt-4">
-                            <div className="col-md-12 d-flex justify-content-center">
-                                <Button type="primary" onClick={handleOk} style={{ width: '120px' }}>
-                                    Thêm
-                                </Button>
-                                <Button onClick={handleCancel} style={{ width: '120px', marginLeft: '10px' }}>
-                                    Hủy
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
+                                {/* Action Buttons */}
+                                <Row justify="center" style={{ marginTop: 30 }}>
+                                    <Button type="primary" htmlType="submit" style={{ width: '120px' }}>
+                                        Thêm
+                                    </Button>
+                                    <Button onClick={handleCancel} style={{ width: '120px', marginLeft: '10px' }}>
+                                        Hủy
+                                    </Button>
+                                </Row>
+                            </Form>
+                        </Col>
+                    </Row>
                 </div>
             </Modal>
+
         </Card>
     );
 };

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Card, Spin, message, Button, Input, Form, Typography, Space } from 'antd';
+import { Card, Spin, message, Button, Input, Form, Typography, Space, Row, Col, Divider } from 'antd';
 import { getSchoolInformationAPI, updateSchoolInformationAPI } from '../../services/service.school';
 import { AuthContext } from '../../component/context/auth.context';
-
+import { EditOutlined } from '@ant-design/icons';
 const { Title } = Typography;
 
 export const SchoolInformation = () => {
@@ -12,13 +12,12 @@ export const SchoolInformation = () => {
     const { user } = useContext(AuthContext);
     const [form] = Form.useForm();
 
-    // Fetch school info on component mount
     useEffect(() => {
         const fetchSchoolInfo = async () => {
             try {
                 const response = await getSchoolInformationAPI(user.id);
                 setSchoolInfo(response.data);
-                form.setFieldsValue(response.data); // Populate form with fetched data
+                form.setFieldsValue(response.data);
             } catch (error) {
                 console.error('Error fetching school information:', error);
                 message.error('Không thể lấy thông tin trường học');
@@ -30,18 +29,16 @@ export const SchoolInformation = () => {
         fetchSchoolInfo();
     }, [user.id, form]);
 
-    // Enable edit mode
     const handleEditClick = () => {
         setIsEditing(true);
     };
 
-    // Save updated information
     const handleSaveClick = async () => {
         try {
             const values = await form.validateFields();
-            await updateSchoolInformationAPI(user.id, values); // Call API to update
-            setSchoolInfo(values); // Update local state with new data
-            setIsEditing(false); // Exit edit mode
+            await updateSchoolInformationAPI(user.id, values);
+            setSchoolInfo(values);
+            setIsEditing(false);
             message.success('Thông tin trường học đã được cập nhật');
         } catch (error) {
             console.error('Error updating school information:', error);
@@ -49,10 +46,9 @@ export const SchoolInformation = () => {
         }
     };
 
-    // Cancel editing
     const handleCancelClick = () => {
-        setIsEditing(false); // Exit edit mode
-        form.setFieldsValue(schoolInfo); // Reset form values to original data
+        setIsEditing(false);
+        form.setFieldsValue(schoolInfo);
     };
 
     if (loading) {
@@ -66,45 +62,71 @@ export const SchoolInformation = () => {
     return (
         <div className="container">
             <Card
-                title={<Title level={3}>Thông tin trường học</Title>}
+
                 style={{ marginTop: 20 }}
                 extra={
-                    isEditing ? (
-                        <Space>
-                            <Button type="primary" onClick={handleSaveClick}>
-                                Lưu
+                    !isEditing && (
+                        <>
+                            <Button type="link" icon={<EditOutlined />} onClick={handleEditClick} >
+                                Chỉnh sửa thông tin
                             </Button>
-                            <Button onClick={handleCancelClick}>Hủy</Button>
-                        </Space>
-                    ) : (
-                        <Button type="primary" onClick={handleEditClick}>
-                            Chỉnh sửa
-                        </Button>
+                        </>
                     )
+
                 }
             >
                 <Form form={form} layout="vertical">
-                    <Form.Item label="Tên trường" name="schoolName">
-                        <Input disabled={!isEditing} />
+                    <Title level={5}>Thông tin chung</Title>
+                    <Row gutter={16}>
+                        <Col span={24}>
+                            <Form.Item label="Tên trường" name="schoolName">
+                                <Input disabled={!isEditing} />
+                            </Form.Item>
+                        </Col>
+
+                        <Col span={12}>
+                            <Form.Item label="Số điện thoại" name="phoneContact">
+                                <Input disabled={!isEditing} />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="Email" name="emailContact">
+                                <Input disabled={!isEditing} />
+                            </Form.Item>
+                        </Col>
+                        <Col span={24}>
+                            <Form.Item label="Địa chỉ" name="address">
+                                <Input disabled={!isEditing} />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Divider />
+                    <Title level={5}>Hiệu trưởng</Title>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item label="Họ và tên">
+                                <Input value={schoolInfo?.principal?.fullName} disabled={!isEditing} />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="Số điện thoại liên hệ">
+                                <Input value={schoolInfo?.principal?.phone} disabled={!isEditing} />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Form.Item>
+                        {isEditing && (
+                            <div className="d-flex justify-content-center gap-2">
+                                <Button type="primary" className='btn-success' onClick={handleSaveClick}>
+                                    Lưu
+                                </Button>
+                                <Button onClick={handleCancelClick}>Hủy</Button>
+                            </div>
+                        )}
                     </Form.Item>
 
-                    <Form.Item label="Địa chỉ" name="address">
-                        <Input disabled={!isEditing} />
-                    </Form.Item>
-
-                    <Form.Item label="Số điện thoại" name="phoneContact">
-                        <Input disabled={!isEditing} />
-                    </Form.Item>
-
-                    <Form.Item label="Email" name="emailContact">
-                        <Input disabled={!isEditing} />
-                    </Form.Item>
-
-                    <Form.Item label="Hiệu trưởng">
-                        <Input value={schoolInfo?.principal?.fullName} disabled />
-                    </Form.Item>
                 </Form>
             </Card>
-        </div>
+        </div >
     );
 };
