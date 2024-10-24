@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Drawer, List, Avatar, Input, Typography, Button, Modal, Select, message, Divider } from 'antd';
 import { database, ref, onValue, set } from '../../services/firebaseConfig';
 import { AuthContext } from '../context/auth.context';
-import { getUserAPI, getUserOpnionWithUserNameAPI } from '../../services/services.user';
+import { getParentWithUserNameAPI, getUserAPI, getUserOpnionWithUserNameAPI } from '../../services/services.user';
 import { v4 as uuidv4 } from 'uuid';
 import { SendOutlined, PlusOutlined } from '@ant-design/icons';
 
@@ -63,10 +63,10 @@ const ChatDrawer = ({ isVisible, onClose }) => {
     });
   }, [user.id]);
 
-  const showCreateChatModal = async () => {
+  const showCreateChatModal = async (id) => {
     setIsModalVisible(true);
     try {
-      const response = await getUserOpnionWithUserNameAPI('PARENT');
+      const response = await getParentWithUserNameAPI(user.id);
       setUsers(response.data);
     } catch (error) {
       message.error('Lỗi khi tải danh sách người dùng.');
@@ -78,16 +78,24 @@ const ChatDrawer = ({ isVisible, onClose }) => {
     onValue(chatRef, (snapshot) => {
       const chatData = snapshot.val();
       if (chatData) {
+        // Gộp tin nhắn từ sender1 và sender2
+        const messages = [
+          ...Object.entries(chatData.sender1?.contents || {}).map(([id, msg]) => ({ ...msg, messageId: id })),
+          ...Object.entries(chatData.sender2?.contents || {}).map(([id, msg]) => ({ ...msg, messageId: id })),
+        ];
+  
+        messages.sort((a, b) => a.time - b.time); // Sắp xếp tin nhắn theo thời gian
         setActiveChat({
           ...chat,
           sender1: chatData.sender1,
           sender2: chatData.sender2,
-          messages: [...Object.values(chatData.sender1?.contents || {}), ...Object.values(chatData.sender2?.contents || {})],
+          messages,
         });
       }
     });
     setIsChatOpen(true);
   };
+  
 
   const handleCreateChat = () => {
     if (!selectedUser) {
@@ -115,43 +123,40 @@ const ChatDrawer = ({ isVisible, onClose }) => {
 
   const sendMessage = () => {
     if (!newMessage.trim()) return;
+  
+    // Kiểm tra xem người dùng hiện tại là sender1 hay sender2
     const senderKey = user.id === activeChat.sender1?.id ? 'sender1' : 'sender2';
     const messageId = uuidv4();
     const messageRef = ref(database, `chats/${activeChat.chatId}/${senderKey}/contents/${messageId}`);
+    
+    // Thêm tin nhắn vào Firebase
     set(messageRef, {
       content: newMessage,
       time: Date.now(),
     }).then(() => {
       setNewMessage('');
+      // Cập nhật lại tin nhắn sau khi gửi
       const chatRef = ref(database, `chats/${activeChat.chatId}`);
       onValue(chatRef, (snapshot) => {
         const updatedChatData = snapshot.val();
-        const updatedMessages = [...Object.values(updatedChatData.sender1?.contents || {}), ...Object.values(updatedChatData.sender2?.contents || {})];
+        const updatedMessages = [
+          ...Object.entries(updatedChatData.sender1?.contents || {}).map(([id, msg]) => ({ ...msg, messageId: id })),
+          ...Object.entries(updatedChatData.sender2?.contents || {}).map(([id, msg]) => ({ ...msg, messageId: id })),
+        ];
         updatedMessages.sort((a, b) => a.time - b.time);
         setActiveChat((prevChat) => ({
           ...prevChat,
           messages: updatedMessages,
         }));
-        scrollToBottom(); // Ensure scroll to bottom
+        scrollToBottom(); // Cuộn xuống cuối tin nhắn
       });
     });
   };
+  
+
 
   // Styling for messages based on who sent them
-  const getMessageBubbleStyle = (messageSender) => ({
-    justifyContent: messageSender === user.id ? 'flex-end' : 'flex-start', // Align right for user, left for others
-    marginBottom: '10px',
-  });
 
-  const getMessageStyle = (messageSender) => ({
-    backgroundColor: messageSender === user.id ? '#DCF8C6' : '#FFFFFF', // Green for the logged-in user, white for others
-    color: '#000',
-    padding: '10px 20px',
-    borderRadius: messageSender === user.id ? '20px 20px 0px 20px' : '20px 20px 20px 0px', // Different border radii based on sender
-    maxWidth: '50%', // Restrict width
-    wordWrap: 'break-word',
-    boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)',
-  });
 
   return (
     <Drawer
@@ -232,18 +237,27 @@ const ChatDrawer = ({ isVisible, onClose }) => {
       )}
 
       {isChatOpen && activeChat && (
-        <div style={{ height: 'calc(100vh - 160px)', overflow: 'auto', padding: '10px' }}>
-          {activeChat.messages.map((msg, index) => (
-            <div key={index} style={getMessageBubbleStyle(msg.senderId)}>
-              <div style={getMessageStyle(msg.senderId)}>
-                <Text>{msg.content}</Text>
-                <br />
-                <Text type="secondary" style={{ fontSize: '12px' }}>
-                  {new Date(msg.time).toLocaleTimeString()}
-                </Text>
-              </div>
-            </div>
-          ))}
+        <div className={`messages`} style={{ height: 'calc(100vh - 160px)', overflow: 'auto', padding: '10px' }}>
+          <div className="chat-messages">
+            {activeChat.messages.map((msg, index) => {
+              const isSender1 = Object.keys(activeChat.sender1?.contents || {}).includes(msg.messageId);
+              const sender = isSender1 ? activeChat.sender1 : activeChat.sender2;
+              const isCurrentUserSender = sender.id === user.id;
+
+              return (
+                <div key={index} className={`message-container ${isCurrentUserSender ? 'message-right' : 'message-left'}`}>
+                  <div className="message-bubble">
+                    <Text>{msg.content}</Text>
+                    <br />
+                    <Text type="secondary" style={{ fontSize: '12px' }}>
+                      {new Date(msg.time).toLocaleTimeString()}
+                    </Text>
+                  </div>
+                </div>
+              );
+            })}
+
+          </div>
           <div ref={chatEndRef} />
         </div>
       )}
