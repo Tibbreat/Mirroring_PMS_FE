@@ -61,41 +61,35 @@ const ClassList = () => {
     }, [currentPage, fetchClasses, fetchTeachers, fetchClassManager]);
 
     const handleOk = async () => {
+
+        const values = await form.validateFields();
+        const [openingDay, closingDay] = values.dateRange || [];
+        const payload = {
+            ...values,
+            openingDay: openingDay ? openingDay.format('YYYY-MM-DD') : null,
+            closingDay: closingDay ? closingDay.format('YYYY-MM-DD') : null,
+            createdBy: user.id,
+            schoolYear: moment(openingDay).year() + ' - ' + moment(closingDay).year(),
+        };
+        console.log('Payload to send to BE:', payload);
+
         try {
-            const values = await form.validateFields();
-            const [openingDay, closingDay] = values.dateRange || [];
-            const payload = {
-                ...values,
-                openingDay: openingDay ? openingDay.format('YYYY-MM-DD') : null,
-                closingDay: closingDay ? closingDay.format('YYYY-MM-DD') : null,
-                createdBy: user.id,
-                schoolYear: moment(openingDay).year() + ' - ' + moment(closingDay).year(),
-            };
-            console.log('Payload to send to BE:', payload);
-        
-            try {
-                const response = await addClassAPI(payload);
-                console.log('Response from BE:', response);
-                fetchClasses(currentPage); 
-                setIsModalOpen(false); 
-                notification.success({
-                    message: "Thêm lớp thành công",
-                });
-                form.resetFields(); 
-            } catch (error) {
-                console.error('Error adding class:', error);
-                notification.error({
-                    message: "Lỗi khi thêm lớp",
-                    description: error.message,
-                });
-            }
+            const response = await addClassAPI(payload);
+            console.log('Response from BE:', response);
+            fetchClasses(currentPage);
+            setIsModalOpen(false);
+            notification.success({
+                message: "Thêm lớp thành công",
+            });
+            form.resetFields();
         } catch (error) {
-            console.error('Form validation failed:', error);
+            console.error('Error adding class:', error);
             notification.error({
-                message: "Form validation failed",
-                description: "Vui lòng kiểm tra lại các trường nhập liệu.",
+                message: "Lỗi khi thêm lớp",
+                description: error.message,
             });
         }
+
     };
 
     const handleCancel = () => {
@@ -133,12 +127,6 @@ const ClassList = () => {
             ) : classes.length > 0 ? (
                 <>
                     <ClassTable data={classes} />
-                    <Pagination
-                        current={currentPage}
-                        total={total}
-                        onChange={(page) => setCurrentPage(page)}
-                        style={{ textAlign: 'center', marginTop: 20 }}
-                    />
                 </>
             ) : (
                 <div className="d-flex justify-content-center align-items-center">
@@ -168,7 +156,10 @@ const ClassList = () => {
                             <Form.Item
                                 name="className"
                                 label="Tên lớp"
-                                rules={[{ required: true, message: 'Vui lòng nhập tên lớp' }]}
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập tên lớp' },
+                                    { pattern: /^[a-zA-Z0-9\s]{3,50}$/, message: 'Tên lớp phải từ 3 đến 50 ký tự, chỉ gồm chữ, số và khoảng trắng' }
+                                ]}
                             >
                                 <Input placeholder="Nhập tên lớp" />
                             </Form.Item>
@@ -197,7 +188,10 @@ const ClassList = () => {
                             >
                                 <RangePicker
                                     style={{ width: '100%' }}
-                                    disabledDate={(current) => current && current.isBefore(moment().startOf('day'))}
+                                    disabledDate={(current) => {
+                                        // Không cho chọn ngày hôm nay và 7 ngày kế tiếp
+                                        return current && current.isBefore(moment().add(7, 'days').endOf('day'));
+                                    }}
                                     format="DD/MM/YYYY"
                                 />
                             </Form.Item>
@@ -243,6 +237,7 @@ const ClassList = () => {
                         </Col>
                     </Row>
                 </Form>
+
             </Modal>
         </Card>
     );

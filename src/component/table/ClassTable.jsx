@@ -86,7 +86,12 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
             <Table
                 columns={columns}
                 dataSource={data}
-                pagination={false}
+                pagination={{
+                    current: currentPage,
+                    pageSize: pageSize,
+                    total: total,
+                    onChange: onPageChange,
+                }}
                 rowKey="id"
             />
         </div>

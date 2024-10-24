@@ -1,9 +1,22 @@
 import React from 'react';
 import { Link } from "react-router-dom";
-import { Table, Tag } from "antd";
+import { Avatar, Table, Tag } from "antd";
 
-const StaffTable = ({ data }) => {
+const roleMapping = {
+    CLASS_MANAGER: 'Quản lý lớp',
+    KITCHEN_MANAGER: 'Quản lý bếp',
+    TRANSPORT_MANAGER: 'Quản lý dịch vụ đưa đón',
+    // Bổ sung các role khác nếu cần
+};
+
+const StaffTable = ({ data, currentPage, pageSize, total, onPageChange }) => {
     const columns = [
+        {
+            title: '',
+            dataIndex: 'imageLink',
+            key: 'imageLink',
+            render: (url) => url ? <Avatar width={50} src={url} /> : 'Không có ảnh',
+        },
         {
             title: 'Tên đầy đủ',
             dataIndex: 'fullName',
@@ -31,6 +44,12 @@ const StaffTable = ({ data }) => {
             render: (text) => text || "N/A",
         },
         {
+            title: 'Chức vụ',
+            dataIndex: 'role',
+            key: 'role',
+            render: (text) => roleMapping[text] || "N/A",  
+        },
+        {
             title: 'Trạng thái',
             dataIndex: 'isActive',
             key: 'isActive',
@@ -44,11 +63,15 @@ const StaffTable = ({ data }) => {
 
     return (
         <div>
-            
             <Table
                 columns={columns}
                 dataSource={data}
-                pagination={false}
+                pagination={{
+                    current: currentPage,
+                    pageSize: pageSize,
+                    total: total,
+                    onChange: onPageChange,
+                }}
                 rowKey="id"
             />
         </div>

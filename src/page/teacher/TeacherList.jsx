@@ -1,9 +1,11 @@
-import { useCallback, useState, useEffect } from "react";
-import NoData from "../../component/no-data-page/NoData";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { getUsersAPI, addUserAPI } from "../../services/services.user"; // Ensure addUserAPI is implemented
+import { Button, Card, Col, Input, Modal, Pagination, Row, Select, Spin, DatePicker, Form, message } from "antd";
 import TeacherTable from "../../component/table/TeacherTable";
-import { getUsersAPI, addUserAPI } from "../../services/services.user";
-import { Pagination, Spin, Card, Row, Col, Input, Select, Button, Modal, DatePicker, notification } from "antd";
+import NoData from "../../component/no-data-page/NoData";
 import UploadImage from "../../component/input/UploadImage";
+import moment from "moment"; 
+import { AuthContext } from "../../component/context/auth.context";
 
 const { Option } = Select;
 
@@ -13,85 +15,83 @@ const TeacherList = () => {
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [teacherName, setTeacherName] = useState('');
-    const [teacherPhone, setTeacherPhone] = useState('');
-    const [teacherDob, setTeacherDob] = useState(null);
-    const [idCardNumber, setIdCardNumber] = useState('');
-    const [teacherAddress, setTeacherAddress] = useState('');
     const [imageFile, setImageFile] = useState(null);
+    const [form] = Form.useForm(); // Initialize the form instance
 
-    const handleOk = async () => {
-        if (!teacherName || !teacherPhone || !teacherDob || !idCardNumber || !teacherAddress || !imageFile) {
-            notification.error({
-                message: 'Lỗi',
-                description: 'Vui lòng điền đầy đủ thông tin',
-            });
-            return;
-        }
+    const { user } = useContext(AuthContext);
 
-        const userData = new FormData();
-        userData.append('user', new Blob([JSON.stringify({
-            fullName: teacherName,
-            phone: teacherPhone,
-            birthday: teacherDob.format('YYYY-MM-DD'),
-            idCardNumber: idCardNumber,
-            address: teacherAddress,
-            role: 'TEACHER'
-        })], { type: 'application/json' }));
-        userData.append('image', imageFile);
-
+    const fetchTeachers = useCallback(async (page) => {
+        setLoading(true);
         try {
-            const response = await addUserAPI(userData);
-            notification.success({
-                message: 'Thành công',
-                description: 'Thêm giáo viên mới thành công',
-            });
-            
-            handleCancel();
+            const response = await getUsersAPI(user.schoolId, page, ["TEACHER"], null);
+            setTeachers(response.data.listData);
+            setTotal(response.data.total);
         } catch (error) {
-            console.error('Error adding teacher:', error);
-            notification.error({
-                message: 'Lỗi',
-                description: 'Đã xảy ra lỗi khi thêm giáo viên.',
-            });
+            console.error("Error fetching teachers:", error);
+        } finally {
+            setLoading(false);
         }
-    };
+    }, [user.schoolId]);
+
+    useEffect(() => {
+        fetchTeachers(currentPage);
+    }, [currentPage, fetchTeachers]);
 
     const handleCancel = () => {
         setIsModalOpen(false);
-        setTeacherName('');
-        setTeacherPhone('');
-        setTeacherDob(null);
-        setIdCardNumber('');
-        setTeacherAddress('');
-        setImageFile(null);
+        form.resetFields();  // Reset form fields when modal is closed
+        setImageFile(null);  // Reset image file when modal is closed
     };
 
     const handleImageChange = (file) => {
         setImageFile(file);
     };
 
-    const fetchTeachers = useCallback(async (page) => {
-        setLoading(true);
-        try {
-            const response = await getUsersAPI(page, ["TEACHER"], null);
-            setTeachers(response.data.listData)
-            setTotal(response.data.total);
-        } catch (error) {
-            console.error('Error fetching teachers:', error);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+    const handleOk = async (values) => {
+        const { fullName, idCardNumber, address, phone, dob } = values;
 
-    useEffect(() => {
-        fetchTeachers(currentPage);
-    }, [currentPage, fetchTeachers]);
+        // Create a FormData object to handle multipart form data
+        const formData = new FormData();
+
+        // Append teacher data as JSON
+        const teacherData = {
+            fullName,
+            idCardNumber,
+            address,
+            phone,
+            dob: dob ? moment(dob).format("YYYY-MM-DD") : null,
+            role: "TEACHER",
+            schoolId: user?.schoolId
+        };
+
+        formData.append('user', new Blob([JSON.stringify(teacherData)], { type: 'application/json' }));
+
+        // Append the image file if it exists
+        if (!imageFile) {
+            message.error("Vui lòng cung cấp ảnh thẻ");
+        } else {
+            formData.append('image', imageFile);
+            try {
+                await addUserAPI(formData);
+                message.success('Giáo viên đã được thêm thành công.');
+
+                // Reset the form fields
+                form.resetFields();
+                setImageFile(null);  // Reset the image file
+
+                setIsModalOpen(false);
+                fetchTeachers(currentPage); // Refresh the teacher list
+            } catch (error) {
+                message.error('Có lỗi xảy ra khi thêm giáo viên.');
+                console.error('Error adding teacher:', error);
+            }
+        }
+    };
 
     return (
         <Card style={{ margin: 20 }}>
             <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
-                <Col xs={24} sm={16}>
+                <Col xs={24} sm={8}>
                     <Input.Search
                         placeholder="Nhập tên giáo viên cần tìm"
                         enterButton
@@ -108,7 +108,6 @@ const TeacherList = () => {
                 </div>
             ) : teachers.length > 0 ? (
                 <>
-
                     <TeacherTable data={teachers} />
                     <Pagination
                         current={currentPage}
@@ -130,74 +129,92 @@ const TeacherList = () => {
                 open={isModalOpen}
                 onCancel={handleCancel}
                 footer={null}
-                width={800}
+                width={1000}
             >
-                <div className="container row">
-                    <div className="col-4 d-flex justify-content-center align-items-center">
-                        <UploadImage onImageChange={handleImageChange} />
-                    </div>
-                    <div className="col-8">
-                        <div className="row">
-                            <div className="col-md-6 mb-3">
-                                <label htmlFor="teacherName" className="form-label">Tên giáo viên</label>
-                                <Input
-                                    placeholder="Nhập tên giáo viên"
-                                    value={teacherName}
-                                    onChange={(e) => setTeacherName(e.target.value)}
-                                />
-                            </div>
-                            <div className="col-md-6 mb-3">
-                                <label htmlFor="teacherPhone" className="form-label">Số điện thoại</label>
-                                <Input
-                                    placeholder="Nhập số điện thoại"
-                                    value={teacherPhone}
-                                    onChange={(e) => setTeacherPhone(e.target.value)}
-                                />
-                            </div>
-                        </div>
+                <div className="container">
+                    <Row gutter={[16, 16]} align="middle">
+                        <Col span={8} className="d-flex justify-content-center">
+                            <UploadImage onImageChange={handleImageChange} />
+                        </Col>
+                        <Col span={16}>
+                            <Form
+                                layout="vertical"
+                                onFinish={handleOk}
+                                form={form}  // Bind form instance to the form
+                            >
+                                <Card title="Thông tin cá nhân" bordered={false}>
+                                    <Row gutter={[16, 16]}>
+                                        <Col span={8}>
+                                            <Form.Item
+                                                label="Họ và tên"
+                                                name="fullName"
+                                                rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
+                                            >
+                                                <Input placeholder="Nhập họ và tên" />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={8}>
+                                            <Form.Item
+                                                label="Số điện thoại"
+                                                name="phone"
+                                                rules={[{ required: true, pattern: /^\d{10}$/, message: 'Số điện thoại phải gồm 10 chữ số' }]}
+                                            >
+                                                <Input placeholder="Nhập số điện thoại" />
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                </Card>
 
-                        <div className="row">
-                            <div className="col-md-6 mb-3">
-                                <label htmlFor="teacherDob" className="form-label">Ngày sinh</label>
-                                <DatePicker
-                                    style={{ width: '100%' }}
-                                    value={teacherDob}
-                                    onChange={(date) => setTeacherDob(date)}
-                                    format="DD-MM-YYYY"
-                                />
-                            </div>
-                            <div className="col-md-6 mb-3">
-                                <label htmlFor="idCardNumber" className="form-label">CMT/CCCD</label>
-                                <Input
-                                    placeholder="Nhập CMT/CCCD"
-                                    value={idCardNumber}
-                                    onChange={(e) => setIdCardNumber(e.target.value)}
-                                />
-                            </div>
-                        </div>
+                                {/* Additional Information Section */}
+                                <Card title="Thông tin bổ sung" bordered={false} style={{ marginTop: 20 }}>
+                                    <Row gutter={[16, 16]}>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="Ngày sinh"
+                                                name="dob"
+                                                rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
+                                            >
+                                                <DatePicker
+                                                    style={{ width: '100%' }}
+                                                    format="DD-MM-YYYY"
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="CMT/CCCD"
+                                                name="idCardNumber"
+                                                rules={[{ required: true, pattern: /^\d{12}$/, message: 'CMT/CCCD phải gồm 12 chữ số' }]}
+                                            >
+                                                <Input placeholder="Nhập CMT/CCCD" />
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                    <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+                                        <Col span={24}>
+                                            <Form.Item
+                                                label="Địa chỉ"
+                                                name="address"
+                                                rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
+                                            >
+                                                <Input placeholder="Nhập địa chỉ" />
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                </Card>
 
-                        <div className="row">
-                            <div className="col-md-12 mb-3">
-                                <label htmlFor="teacherAddress" className="form-label">Địa chỉ</label>
-                                <Input
-                                    placeholder="Nhập địa chỉ"
-                                    value={teacherAddress}
-                                    onChange={(e) => setTeacherAddress(e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="row mt-4">
-                            <div className="col-md-12 d-flex justify-content-center">
-                                <Button type="primary" onClick={handleOk} style={{ width: '120px' }}>
-                                    Thêm
-                                </Button>
-                                <Button onClick={handleCancel} style={{ width: '120px', marginLeft: '10px' }}>
-                                    Hủy
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
+                                {/* Action Buttons */}
+                                <Row justify="center" style={{ marginTop: 30 }}>
+                                    <Button type="primary" htmlType="submit" style={{ width: '120px' }}>
+                                        Thêm
+                                    </Button>
+                                    <Button onClick={handleCancel} style={{ width: '120px', marginLeft: '10px' }}>
+                                        Hủy
+                                    </Button>
+                                </Row>
+                            </Form>
+                        </Col>
+                    </Row>
                 </div>
             </Modal>
         </Card>

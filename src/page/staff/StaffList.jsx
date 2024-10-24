@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { getUsersAPI, addUserAPI } from "../../services/services.user"; // Make sure addUserAPI is implemented
-import { Button, Card, Col, Input, Modal, Pagination, Row, Select, Spin, DatePicker, Form, message } from "antd";
+import { Button, Card, Col, Input, Modal, Row, Select, Spin, Form, message, DatePicker } from "antd";
 import StaffTable from "../../component/table/StaffTable";
 import NoData from "../../component/no-data-page/NoData";
 import UploadImage from "../../component/input/UploadImage";
@@ -16,6 +16,7 @@ export const StaffList = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [imageFile, setImageFile] = useState(null);
+    const [pageSize] = useState(10);  // Number of staff per page
     const [form] = Form.useForm(); // Initialize the form instance
 
     const { user } = useContext(AuthContext);
@@ -115,12 +116,12 @@ export const StaffList = () => {
                 </div>
             ) : staff.length > 0 ? (
                 <>
-                    <StaffTable data={staff} />
-                    <Pagination
-                        current={currentPage}
+                    <StaffTable
+                        data={staff}
+                        currentPage={currentPage}
+                        pageSize={pageSize}
                         total={total}
-                        onChange={(page) => setCurrentPage(page)}
-                        style={{ textAlign: 'center', marginTop: 20 }}
+                        onPageChange={(page) => setCurrentPage(page)}
                     />
                 </>
             ) : (
@@ -164,8 +165,7 @@ export const StaffList = () => {
                                             <Form.Item
                                                 label="Số điện thoại"
                                                 name="phone"
-                                                rules={[{ required: true, pattern: /^\d{10}$/, message: 'Số điện thoại phải gồm 10 chữ số' }]}
-                                            >
+                                                rules={[{ required: true, pattern: /^\d{10}$/, message: 'Số điện thoại phải gồm 10 chữ số' }]}>
                                                 <Input placeholder="Nhập số điện thoại" />
                                             </Form.Item>
                                         </Col>
@@ -173,8 +173,7 @@ export const StaffList = () => {
                                             <Form.Item
                                                 label="Chức vụ"
                                                 name="role"
-                                                rules={[{ required: true, message: 'Vui lòng chọn chức vụ' }]}
-                                            >
+                                                rules={[{ required: true, message: 'Vui lòng chọn chức vụ' }]}>
                                                 <Select placeholder="Chọn vai trò" style={{ width: '100%' }}>
                                                     <Option value="CLASS_MANAGER">Quản lý lớp</Option>
                                                     <Option value="KITCHEN_MANAGER">Quản lý bếp</Option>
@@ -192,20 +191,17 @@ export const StaffList = () => {
                                             <Form.Item
                                                 label="Ngày sinh"
                                                 name="dob"
-                                                rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
-                                            >
+                                                rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}>
                                                 <DatePicker
                                                     style={{ width: '100%' }}
-                                                    format="DD-MM-YYYY"
-                                                />
+                                                    format="DD-MM-YYYY" />
                                             </Form.Item>
                                         </Col>
                                         <Col span={12}>
                                             <Form.Item
                                                 label="CMT/CCCD"
                                                 name="idCardNumber"
-                                                rules={[{ required: true, pattern: /^\d{12}$/, message: 'CMT/CCCD phải gồm 12 chữ số' }]}
-                                            >
+                                                rules={[{ required: true, pattern: /^\d{12}$/, message: 'CMT/CCCD phải gồm 12 chữ số' }]}>
                                                 <Input placeholder="Nhập CMT/CCCD" />
                                             </Form.Item>
                                         </Col>
@@ -215,15 +211,12 @@ export const StaffList = () => {
                                             <Form.Item
                                                 label="Địa chỉ"
                                                 name="address"
-                                                rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
-                                            >
+                                                rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}>
                                                 <Input placeholder="Nhập địa chỉ" />
                                             </Form.Item>
                                         </Col>
                                     </Row>
                                 </Card>
-
-                                {/* Action Buttons */}
                                 <Row justify="center" style={{ marginTop: 30 }}>
                                     <Button type="primary" htmlType="submit" style={{ width: '120px' }}>
                                         Thêm
@@ -237,7 +230,6 @@ export const StaffList = () => {
                     </Row>
                 </div>
             </Modal>
-
         </Card>
     );
 };

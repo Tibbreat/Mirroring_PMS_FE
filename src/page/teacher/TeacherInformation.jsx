@@ -58,18 +58,12 @@ const TeacherInformation = () => {
         setIsModalVisible(false);
     };
 
-    const handleEditClick = () => {
-        setIsEditing(true);
-    };
-
+  
     const handleInputChange = (field, value) => {
         setFieldValues({ ...fieldValues, [field]: value });
     };
 
-    const handleSave = () => {
-        setIsEditing(false);
-        // Here you can add logic to save the updated field values to the backend if needed
-    };
+   
 
     if (loading) {
         return (
@@ -83,9 +77,9 @@ const TeacherInformation = () => {
         <div className='container'>
             <Card style={{ marginTop: 20 }}>
                 <Row gutter={[16, 16]}>
-                    <Col xs={24} sm={8} className='d-flex flex-column align-items-center'>
-                        <Avatar size={256} src={teacher?.imageLink || "/image/5856.jpg"} />
-                        <Tag color={teacher.isActive ? 'green' : 'red'}>
+                    <Col xs={24} sm={8} className='d-flex flex-column align-items-center justify-content-center'>
+                        <Avatar size={128} src={teacher?.imageLink || "/image/5856.jpg"} />
+                        <Tag className='mt-2' color={teacher.isActive ? 'green' : 'red'}>
                             {teacher.isActive ? 'Đang hoạt động' : 'Ngưng hoạt động'}
                         </Tag>
                     </Col>
@@ -100,44 +94,11 @@ const TeacherInformation = () => {
                             <Descriptions.Item label="Mã nhân viên">{teacher?.id}</Descriptions.Item>
                             <Descriptions.Item label="Account">{teacher?.username}</Descriptions.Item>
                             <Descriptions.Item label="E-mail">{teacher?.email}</Descriptions.Item>
-                            <Descriptions.Item label="Số điện thoại">
-                                {isEditing ? (
-                                    <Input
-                                        value={fieldValues.phone}
-                                        onChange={(e) => handleInputChange('phone', e.target.value)}
-                                    />
-                                ) : (
-                                    <span>{teacher?.phone}</span>
-                                )}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="CCCD/CMT">
-                                {isEditing ? (
-                                    <Input
-                                        value={fieldValues.idCardNumber}
-                                        onChange={(e) => handleInputChange('idCardNumber', e.target.value)}
-                                    />
-                                ) : (
-                                    <span>{teacher?.idCardNumber}</span>
-                                )}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Địa chỉ" span={2}>
-                                {isEditing ? (
-                                    <Input
-                                        value={fieldValues.address}
-                                        onChange={(e) => handleInputChange('address', e.target.value)}
-                                    />
-                                ) : (
-                                    <span>{teacher?.address}</span>
-                                )}
-                            </Descriptions.Item>
+                            <Descriptions.Item label="Số điện thoại">{teacher?.phone}</Descriptions.Item>
+                            <Descriptions.Item label="CCCD/CMT">{teacher?.idCardNumber}</Descriptions.Item>
+                            <Descriptions.Item label="Địa chỉ" span={2}>{teacher?.address}</Descriptions.Item>
                         </Descriptions>
-                        <Row justify="center">
-                            <Col>
-                                <Button type="primary" onClick={isEditing ? handleSave : handleEditClick} style={{ marginTop: 10 }}>
-                                    {isEditing ? 'Lưu' : 'Chỉnh sửa'}
-                                </Button>
-                            </Col>
-                        </Row>
+                       
                     </Col>
                 </Row>
                 <Divider />
