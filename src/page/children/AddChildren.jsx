@@ -46,6 +46,14 @@ const AddChildren = () => {
         }
     };
 
+    const renderFormItem = (name, label, placeholder, rules, component = <Input />, span = 8) => (
+        <Col xs={24} md={span}>
+            <Form.Item name={name} label={label} rules={rules}>
+                {React.cloneElement(component, { placeholder, disabled: loading })}
+            </Form.Item>
+        </Col>
+    );
+
     return (
         <div className="container" style={{ padding: '24px' }}>
             <Card title="Thêm trẻ mới" bordered={false}>
@@ -58,78 +66,122 @@ const AddChildren = () => {
                         </Col>
                         <Col xs={24} md={16}>
                             <Row gutter={16}>
-                                <Col xs={24} md={8}>
-                                    <Form.Item
-                                        name="childName"
-                                        label="Tên trẻ em"
-                                        rules={[{ required: true, message: 'Vui lòng nhập tên trẻ em' }]}
-                                    >
-                                        <Input placeholder="Nhập tên trẻ em" disabled={loading} />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} md={8}>
-                                    <Form.Item
-                                        name="childBirthDate"
-                                        label="Ngày sinh"
-                                        rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
-                                    >
-                                        <DatePicker style={{ width: '100%' }} placeholder="Chọn ngày sinh" disabled={loading} />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} md={8}>
-                                    <Form.Item
-                                        name="gender"
-                                        label="Giới tính"
-                                        rules={[{ required: true, message: 'Vui lòng chọn giới tính' }]}
-                                    >
-                                        <Select placeholder="Chọn giới tính" disabled={loading}>
-                                            <Option value="male">Nam</Option>
-                                            <Option value="female">Nữ</Option>
-                                        </Select>
-                                    </Form.Item>
-                                </Col>
+                                {renderFormItem(
+                                    'childName',
+                                    'Tên trẻ',
+                                    'Nhập tên trẻ',
+                                    [
+                                        { required: true, message: 'Vui lòng nhập tên trẻ' },
+                                        { pattern: /^[a-zA-ZÀ-ỹ\s]{3,50}$/, message: 'Tên phải từ 3 đến 50 ký tự, chỉ gồm chữ cái và khoảng trắng' },
+                                        ({ getFieldValue }) => ({
+                                            validator(_, value) {
+                                                if (!value || value.trim().length !== 0) {
+                                                    return Promise.resolve();
+                                                }
+                                                return Promise.reject(new Error('Tên trẻ không được để trống'));
+                                            },
+                                        }),
+                                    ]
+                                )}
+                                {renderFormItem(
+                                    'childBirthDate',
+                                    'Ngày sinh',
+                                    'Chọn ngày sinh',
+                                    [{ required: true, message: 'Vui lòng chọn ngày sinh' }],
+                                    <DatePicker style={{ width: '100%' }} />
+                                )}
+                                {renderFormItem(
+                                    'gender',
+                                    'Giới tính',
+                                    'Chọn giới tính',
+                                    [{ required: true, message: 'Vui lòng chọn giới tính' }],
+                                    <Select>
+                                        <Option value="male">Nam</Option>
+                                        <Option value="female">Nữ</Option>
+                                    </Select>
+                                )}
                             </Row>
                             <Row gutter={16}>
-                                <Col xs={24} md={12}>
-                                    <Form.Item
-                                        name="nationality"
-                                        label="Quốc tịch"
-                                        rules={[{ required: true, message: 'Không được để trống' }]}
-                                    >
-                                        <Input placeholder="Quốc tịch" disabled={loading} />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} md={12}>
-                                    <Form.Item
-                                        name="religion"
-                                        label="Tôn giáo"
-                                        rules={[{ required: true, message: 'Không được để trống' }]}
-                                    >
-                                        <Input placeholder="Tôn giáo" disabled={loading} />
-                                    </Form.Item>
-                                </Col>
+                                {renderFormItem(
+                                    'nationality',
+                                    'Quốc tịch',
+                                    'Nhập quốc tịch',
+                                    [
+                                        { required: true, message: 'Vui lòng nhập quốc tịch' },
+                                        { pattern: /^[a-zA-ZÀ-ỹ\s]{3,20}$/, message: 'Quốc tịch phải từ 3 đến 20 ký tự, chỉ gồm chữ cái và khoảng trắng' },
+                                        ({ getFieldValue }) => ({
+                                            validator(_, value) {
+                                                if (!value || value.trim().length !== 0) {
+                                                    return Promise.resolve();
+                                                }
+                                                return Promise.reject(new Error('Quốc tịch không được để trống'));
+                                            },
+                                        }),
+                                    ],
+                                    <Input />,
+                                    12
+                                )}
+                                {renderFormItem(
+                                    'religion',
+                                    'Tôn giáo',
+                                    'Nhập tôn giáo',
+                                    [
+                                        { required: true, message: 'Vui lòng nhập tôn giáo' },
+                                        { pattern: /^[a-zA-ZÀ-ỹ\s]{3,20}$/, message: 'Tôn giáo phải từ 3 đến 20 ký tự, chỉ gồm chữ cái và khoảng trắng' },
+                                        ({ getFieldValue }) => ({
+                                            validator(_, value) {
+                                                if (!value || value.trim().length !== 0) {
+                                                    return Promise.resolve();
+                                                }
+                                                return Promise.reject(new Error('Tôn giáo không được để trống'));
+                                            },
+                                        }),
+                                    ],
+                                    <Input />,
+                                    12
+                                )}
                             </Row>
                             <Row gutter={16}>
-                                <Col xs={24} md={24}>
-                                    <Form.Item
-                                        name="birthAddress"
-                                        label="Địa chỉ khai sinh"
-                                        rules={[{ required: true, message: 'Vui lòng nhập địa chỉ khai sinh' }]}
-                                    >
-                                        <Input placeholder="Nhập địa chỉ khai sinh" disabled={loading} />
-                                    </Form.Item>
-                                </Col>
+                                {renderFormItem(
+                                    'birthAddress',
+                                    'Địa chỉ khai sinh',
+                                    'Nhập địa chỉ khai sinh',
+                                    [
+                                        { required: true, message: 'Vui lòng nhập địa chỉ khai sinh' },
+                                        { pattern: /^.{10,200}$/, message: 'Địa chỉ phải từ 10 đến 200 ký tự' },
+                                        ({ getFieldValue }) => ({
+                                            validator(_, value) {
+                                                if (!value || value.trim().length !== 0) {
+                                                    return Promise.resolve();
+                                                }
+                                                return Promise.reject(new Error('Địa chỉ khai sinh không được để trống'));
+                                            },
+                                        }),
+                                    ],
+                                    <Input />,
+                                    24
+                                )}
                             </Row>
                             <Row gutter={16}>
-                                <Col xs={24} md={24}>
-                                    <Form.Item
-                                        name="childAddress"
-                                        label="Địa chỉ hiện tại"
-                                        rules={[{ required: true, message: 'Vui lòng nhập địa chỉ hiện tại' }]}
-                                    >
-                                        <Input placeholder="Nhập địa chỉ hiện tại" disabled={loading} />
-                                    </Form.Item>
-                                </Col>
+                                {renderFormItem(
+                                    'childAddress',
+                                    'Địa chỉ hiện tại',
+                                    'Nhập địa chỉ hiện tại',
+                                    [
+                                        { required: true, message: 'Vui lòng nhập địa chỉ hiện tại' },
+                                        { pattern: /^.{10,200}$/, message: 'Địa chỉ phải từ 10 đến 200 ký tự' },
+                                        ({ getFieldValue }) => ({
+                                            validator(_, value) {
+                                                if (!value || value.trim().length !== 0) {
+                                                    return Promise.resolve();
+                                                }
+                                                return Promise.reject(new Error('Địa chỉ hiện tại không được để trống'));
+                                            },
+                                        }),
+                                    ],
+                                    <Input />,
+                                    24
+                                )}
                             </Row>
                         </Col>
                     </Row>
@@ -137,68 +189,82 @@ const AddChildren = () => {
                     {/* Thông tin bố mẹ */}
                     <Card title="Thông tin bố" bordered={false} style={{ marginTop: 20 }}>
                         <Row gutter={16}>
-                            <Col xs={24} md={8}>
-                                <Form.Item
-                                    name={['father', 'fullName']}
-                                    label="Họ và tên"
-                                    rules={[{ required: true, message: 'Vui lòng nhập tên bố' }]}
-                                >
-                                    <Input placeholder="Nhập tên bố" disabled={loading} />
-                                </Form.Item>
-                            </Col>
-                            <Col xs={24} md={8}>
-                                <Form.Item
-                                    name={['father', 'phone']}
-                                    label="Số điện thoại"
-                                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại bố' }]}
-                                >
-                                    <Input placeholder="Nhập số điện thoại bố" disabled={loading} />
-                                </Form.Item>
-                            </Col>
-                            <Col xs={24} md={8}>
-                                <Form.Item
-                                    name={['father', 'idCardNumber']}
-                                    label="Số CMND/CCCD"
-                                    rules={[{ required: true, message: 'Vui lòng nhập số CMND/CCCD bố' }]}
-                                >
-                                    <Input placeholder="Nhập số CMND/CCCD bố" disabled={loading} />
-                                </Form.Item>
-                            </Col>
+                            {renderFormItem(
+                                ['father', 'fullName'],
+                                'Họ và tên',
+                                'Nhập tên bố',
+                                [{ required: true, message: 'Vui lòng nhập tên bố' }]
+                            )}
+                            {renderFormItem(
+                                ['father', 'phone'],
+                                'Số điện thoại',
+                                'Nhập số điện thoại bố',
+                                [{ required: true, message: 'Vui lòng nhập số điện thoại bố' }]
+                            )}
+                            {renderFormItem(
+                                ['father', 'idCardNumber'],
+                                'Số CMND/CCCD',
+                                'Nhập số CMND/CCCD bố',
+                                [{ required: true, message: 'Vui lòng nhập số CMND/CCCD bố' }]
+                            )}
                         </Row>
                     </Card>
 
                     <Card title="Thông tin mẹ" bordered={false} style={{ marginTop: 20 }}>
                         <Row gutter={16}>
-                            <Col xs={24} md={8}>
-                                <Form.Item
-                                    name={['mother', 'fullName']}
-                                    label="Họ và tên"
-                                    rules={[{ required: true, message: 'Vui lòng nhập tên mẹ' }]}
-                                >
-                                    <Input placeholder="Nhập tên mẹ" disabled={loading} />
-                                </Form.Item>
-                            </Col>
-                            <Col xs={24} md={8}>
-                                <Form.Item
-                                    name={['mother', 'phone']}
-                                    label="Số điện thoại"
-                                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại mẹ' }]}
-                                >
-                                    <Input placeholder="Nhập số điện thoại mẹ" disabled={loading} />
-                                </Form.Item>
-                            </Col>
-                            <Col xs={24} md={8}>
-                                <Form.Item
-                                    name={['mother', 'idCardNumber']}
-                                    label="Số CMND/CCCD"
-                                    rules={[{ required: true, message: 'Vui lòng nhập số CMND/CCCD mẹ' }]}
-                                >
-                                    <Input placeholder="Nhập số CMND/CCCD mẹ" disabled={loading} />
-                                </Form.Item>
-                            </Col>
+                            {renderFormItem(
+                                ['mother', 'fullName'],
+                                'Họ và tên',
+                                'Nhập tên mẹ',
+                                [
+                                    { required: true, message: 'Vui lòng nhập tên mẹ' },
+                                    { pattern: /^[a-zA-ZÀ-ỹ\s]{3,50}$/, message: 'Tên phải từ 3 đến 50 ký tự, chỉ gồm chữ cái và khoảng trắng' },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            if (!value || value.trim().length !== 0) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error('Tên mẹ không được để trống'));
+                                        },
+                                    }),
+                                ]
+                            )}
+                            {renderFormItem(
+                                ['mother', 'phone'],
+                                'Số điện thoại',
+                                'Nhập số điện thoại mẹ',
+                                [
+                                    { required: true, message: 'Vui lòng nhập số điện thoại mẹ' },
+                                    { pattern: /^[0-9]{10,11}$/, message: 'Số điện thoại phải có 10 đến 11 chữ số' },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            if (!value || value.trim().length !== 0) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error('Số điện thoại không được để trống'));
+                                        },
+                                    }),
+                                ]
+                            )}
+                            {renderFormItem(
+                                ['mother', 'idCardNumber'],
+                                'Số CMND/CCCD',
+                                'Nhập số CMND/CCCD mẹ',
+                                [
+                                    { required: true, message: 'Vui lòng nhập số CMND/CCCD mẹ' },
+                                    { pattern: /^[0-9]{9,12}$/, message: 'Số CMND/CCCD phải có từ 9 đến 12 chữ số' },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            if (!value || value.trim().length !== 0) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error('Số CMND/CCCD không được để trống'));
+                                        },
+                                    }),
+                                ]
+                            )}
                         </Row>
                     </Card>
-
                     <Form.Item>
                         <Spin spinning={loading}>
                             <Button type="primary" htmlType="submit" style={{ width: '100%' }} disabled={loading}>

@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { addClassAPI, getClassesAPI } from "../../services/services.class";
-import { Pagination, Spin, Card, Row, Col, Input, Select, Button, Modal, Form, DatePicker, notification, message } from "antd";
+import { Pagination, Spin, Card, Row, Col, Input, Select, Button, Modal, Form, DatePicker, notification } from "antd";
 import { getUserOpnionAPI } from "../../services/services.user";
 import NoData from "../../component/no-data-page/NoData";
 import { AuthContext } from "../../component/context/auth.context";
@@ -19,14 +19,12 @@ const ClassList = () => {
     const [form] = Form.useForm();
     const [teachers, setTeachers] = useState([]);
     const [classManager, setClassManager] = useState([]);
-
     const { user } = useContext(AuthContext);
 
     const fetchClasses = useCallback(async (page) => {
         setLoading(true);
         try {
             const response = await getClassesAPI(page, null, null);
-
             setClasses(response.data.listData);
             setTotal(response.data.total);
         } catch (error) {
@@ -61,35 +59,26 @@ const ClassList = () => {
     }, [currentPage, fetchClasses, fetchTeachers, fetchClassManager]);
 
     const handleOk = async () => {
-
-        const values = await form.validateFields();
-        const [openingDay, closingDay] = values.dateRange || [];
-        const payload = {
-            ...values,
-            openingDay: openingDay ? openingDay.format('YYYY-MM-DD') : null,
-            closingDay: closingDay ? closingDay.format('YYYY-MM-DD') : null,
-            createdBy: user.id,
-            schoolYear: moment(openingDay).year() + ' - ' + moment(closingDay).year(),
-        };
-        console.log('Payload to send to BE:', payload);
-
         try {
-            const response = await addClassAPI(payload);
-            console.log('Response from BE:', response);
+            const values = await form.validateFields();
+            const [openingDay, closingDay] = values.dateRange || [];
+            const payload = {
+                ...values,
+                openingDay: openingDay ? openingDay.format('YYYY-MM-DD') : null,
+                closingDay: closingDay ? closingDay.format('YYYY-MM-DD') : null,
+                createdBy: user.id,
+                schoolYear: `${moment(openingDay).year()} - ${moment(closingDay).year()}`,
+                schoolId: user.schoolId,
+            };
+            await addClassAPI(payload);
             fetchClasses(currentPage);
             setIsModalOpen(false);
-            notification.success({
-                message: "Thêm lớp thành công",
-            });
+            notification.success({ message: "Thêm lớp thành công" });
             form.resetFields();
         } catch (error) {
             console.error('Error adding class:', error);
-            notification.error({
-                message: "Lỗi khi thêm lớp",
-                description: error.message,
-            });
+            notification.error({ message: "Lỗi khi thêm lớp", description: error.message });
         }
-
     };
 
     const handleCancel = () => {
@@ -108,7 +97,6 @@ const ClassList = () => {
                         <Option value="4 - 5">4 - 5 tuổi</Option>
                     </Select>
                 </Col>
-
                 <Col xs={24} sm={16}>
                     <Input.Search
                         placeholder="Nhập tên lớp cần tìm"
@@ -125,14 +113,12 @@ const ClassList = () => {
                     <Spin size="large" />
                 </div>
             ) : classes.length > 0 ? (
-                <>
-                    <ClassTable data={classes} />
-                </>
+                <ClassTable data={classes} />
             ) : (
                 <div className="d-flex justify-content-center align-items-center">
                     <NoData
-                        title={"Không có lớp nào"}
-                        subTitle={"Danh sách lớp sẽ xuất hiện khi bạn thêm dữ liệu vào hệ thống"}
+                        title="Không có lớp nào"
+                        subTitle="Danh sách lớp sẽ xuất hiện khi bạn thêm dữ liệu vào hệ thống"
                     />
                 </div>
             )}
@@ -141,12 +127,8 @@ const ClassList = () => {
                 open={isModalOpen}
                 onCancel={handleCancel}
                 footer={[
-                    <Button key="cancel" onClick={handleCancel}>
-                        Hủy
-                    </Button>,
-                    <Button key="submit" type="primary" onClick={handleOk}>
-                        Thêm
-                    </Button>
+                    <Button key="cancel" onClick={handleCancel}>Hủy</Button>,
+                    <Button key="submit" type="primary" onClick={handleOk}>Thêm</Button>
                 ]}
                 width={800}
             >
@@ -158,7 +140,15 @@ const ClassList = () => {
                                 label="Tên lớp"
                                 rules={[
                                     { required: true, message: 'Vui lòng nhập tên lớp' },
-                                    { pattern: /^[a-zA-Z0-9\s]{3,50}$/, message: 'Tên lớp phải từ 3 đến 50 ký tự, chỉ gồm chữ, số và khoảng trắng' }
+                                    { pattern: /^[a-zA-Z0-9À-ỹ\s]{3,50}$/, message: 'Tên lớp phải từ 3 đến 50 ký tự, chỉ gồm chữ cái, số và khoảng trắng' },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            if (!value || value.trim().length !== 0) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error('Tên lớp không được để trống'));
+                                        },
+                                    }),
                                 ]}
                             >
                                 <Input placeholder="Nhập tên lớp" />
@@ -171,10 +161,10 @@ const ClassList = () => {
                                 rules={[{ required: true, message: 'Vui lòng nhập tuổi' }]}
                             >
                                 <Select placeholder="Chọn lứa tuổi">
-                                    <Select.Option value="1-2">1 - 2 tuổi</Select.Option>
-                                    <Select.Option value="2-3">2 - 3 tuổi</Select.Option>
-                                    <Select.Option value="3-4">3 - 4 tuổi</Select.Option>
-                                    <Select.Option value="4-5">4 - 5 tuổi</Select.Option>
+                                    <Option value="1-2">1 - 2 tuổi</Option>
+                                    <Option value="2-3">2 - 3 tuổi</Option>
+                                    <Option value="3-4">3 - 4 tuổi</Option>
+                                    <Option value="4-5">4 - 5 tuổi</Option>
                                 </Select>
                             </Form.Item>
                         </Col>
@@ -188,10 +178,7 @@ const ClassList = () => {
                             >
                                 <RangePicker
                                     style={{ width: '100%' }}
-                                    disabledDate={(current) => {
-                                        // Không cho chọn ngày hôm nay và 7 ngày kế tiếp
-                                        return current && current.isBefore(moment().add(7, 'days').endOf('day'));
-                                    }}
+                                    disabledDate={(current) => current && current.isBefore(moment().add(7, 'days').endOf('day'))}
                                     format="DD/MM/YYYY"
                                 />
                             </Form.Item>
@@ -204,10 +191,7 @@ const ClassList = () => {
                                 label="Chọn giáo viên"
                                 rules={[{ required: true, message: 'Vui lòng chọn giáo viên' }]}
                             >
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder="Chọn giáo viên"
-                                >
+                                <Select placeholder="Chọn giáo viên" style={{ width: '100%' }}>
                                     {teachers.map((teacher) => (
                                         <Option key={teacher.id} value={teacher.id}>
                                             {teacher.username}
@@ -216,17 +200,13 @@ const ClassList = () => {
                                 </Select>
                             </Form.Item>
                         </Col>
-
                         <Col span={12}>
                             <Form.Item
                                 name="managerId"
                                 label="Quản lý lớp"
                                 rules={[{ required: true, message: 'Vui lòng chọn quản lý lớp' }]}
                             >
-                                <Select
-                                    style={{ width: '100%' }}
-                                    placeholder="Nhập danh sách quản lý lớp"
-                                >
+                                <Select placeholder="Nhập danh sách quản lý lớp" style={{ width: '100%' }}>
                                     {classManager.map((manager) => (
                                         <Option key={manager.id} value={manager.id}>
                                             {manager.username}
@@ -237,7 +217,6 @@ const ClassList = () => {
                         </Col>
                     </Row>
                 </Form>
-
             </Modal>
         </Card>
     );

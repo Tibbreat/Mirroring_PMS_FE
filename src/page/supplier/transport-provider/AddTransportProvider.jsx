@@ -34,7 +34,7 @@ const AddTransportProvider = () => {
     const handleConfirm = async () => {
         console.log('Form Values:', formValues);
         try {
-            const response = await addtransportProviderAPI(formValues);
+            await addtransportProviderAPI(formValues);
             message.success('Đã xác nhận thông tin nhà cung cấp vận chuyển!');
             setIsReviewModalVisible(false);
         } catch (error) {
@@ -57,7 +57,15 @@ const AddTransportProvider = () => {
                             label="Tên công ty"
                             rules={[
                                 { required: true, message: 'Vui lòng nhập tên công ty' },
-                                { pattern: /^[a-zA-Z0-9À-ỹ\s]{2,100}$/, message: 'Tên công ty phải từ 2 đến 100 ký tự và chỉ bao gồm chữ cái, số, và khoảng trắng.' }
+                                { pattern: /^[a-zA-Z0-9À-ỹ\s]{2,100}$/, message: 'Tên công ty phải từ 2 đến 100 ký tự và chỉ bao gồm chữ cái, số, và khoảng trắng.' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || value.trim().length !== 0) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('Tên công ty không được để trống'));
+                                    },
+                                }),
                             ]}
                         >
                             <Input placeholder="Tên công ty" />
@@ -69,7 +77,15 @@ const AddTransportProvider = () => {
                             label="Mã số thuế"
                             rules={[
                                 { required: true, message: 'Vui lòng nhập mã số thuế' },
-                                { pattern: /^\d{10,13}$/, message: 'Mã số thuế phải từ 10 đến 13 chữ số.' }
+                                { pattern: /^\d{10,13}$/, message: 'Mã số thuế phải từ 10 đến 13 chữ số.' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || value.trim().length !== 0) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('Mã số thuế không được để trống'));
+                                    },
+                                }),
                             ]}
                         >
                             <Input placeholder="Mã số thuế" />
@@ -81,7 +97,15 @@ const AddTransportProvider = () => {
                             label="Điện thoại"
                             rules={[
                                 { required: true, message: 'Vui lòng nhập số điện thoại' },
-                                { pattern: /^(?:\+84|0)?[3|5|7|8|9]\d{8}$/, message: 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng +84 hoặc 03, 05, 07, 08, 09.' }
+                                { pattern: /^[0-9]{8,10}$/, message: 'Số điện thoại phải gồm từ 8 đến 10 chữ số.' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || value.trim().length !== 0) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('Số điện thoại không được để trống'));
+                                    },
+                                }),
                             ]}
                         >
                             <Input placeholder="Số điện thoại" />
@@ -93,7 +117,15 @@ const AddTransportProvider = () => {
                             label="Email"
                             rules={[
                                 { required: true, message: 'Vui lòng nhập email' },
-                                { type: 'email', message: 'Email không hợp lệ.' }
+                                { type: 'email', message: 'Email không hợp lệ.' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || value.trim().length !== 0) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('Email không được để trống'));
+                                    },
+                                }),
                             ]}
                         >
                             <Input placeholder="Email" />
@@ -105,7 +137,15 @@ const AddTransportProvider = () => {
                             label="Địa chỉ"
                             rules={[
                                 { required: true, message: 'Vui lòng nhập địa chỉ' },
-                                { pattern: /^[a-zA-Z0-9À-ỹ\s,.-]{5,200}$/, message: 'Địa chỉ phải từ 5 đến 200 ký tự và chỉ bao gồm chữ cái, số, và các dấu câu.' }
+                                { pattern: /^[a-zA-Z0-9À-ỹ\s,.-]{5,200}$/, message: 'Địa chỉ phải từ 5 đến 200 ký tự và chỉ bao gồm chữ cái, số, và các dấu câu.' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || value.trim().length !== 0) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('Địa chỉ không được để trống'));
+                                    },
+                                }),
                             ]}
                         >
                             <Input placeholder="Địa chỉ" />
@@ -117,7 +157,15 @@ const AddTransportProvider = () => {
                             label="Người đại diện"
                             rules={[
                                 { required: true, message: 'Vui lòng nhập tên người đại diện' },
-                                { pattern: /^[a-zA-ZÀ-ỹ\s]{2,50}$/, message: 'Tên người đại diện chỉ được chứa chữ cái và khoảng trắng, từ 2 đến 50 ký tự.' }
+                                { pattern: /^[a-zA-ZÀ-ỹ\s]{2,50}$/, message: 'Tên người đại diện chỉ được chứa chữ cái và khoảng trắng, từ 2 đến 50 ký tự.' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || value.trim().length !== 0) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('Tên người đại diện không được để trống'));
+                                    },
+                                }),
                             ]}
                         >
                             <Input placeholder="Người đại diện" />
@@ -129,7 +177,15 @@ const AddTransportProvider = () => {
                             label="Chức vụ"
                             rules={[
                                 { required: true, message: 'Vui lòng nhập chức vụ' },
-                                { pattern: /^[a-zA-Z0-9À-ỹ\s]{2,50}$/, message: 'Chức vụ chỉ được chứa chữ cái, số và khoảng trắng, từ 2 đến 50 ký tự.' }
+                                { pattern: /^[a-zA-Z0-9À-ỹ\s]{2,50}$/, message: 'Chức vụ chỉ được chứa chữ cái, số và khoảng trắng, từ 2 đến 50 ký tự.' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || value.trim().length !== 0) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('Chức vụ không được để trống'));
+                                    },
+                                }),
                             ]}
                         >
                             <Input placeholder="Chức vụ" />
@@ -164,7 +220,15 @@ const AddTransportProvider = () => {
                             label="Số tài khoản"
                             rules={[
                                 { required: true, message: 'Vui lòng nhập số tài khoản' },
-                                { pattern: /^\d{6,20}$/, message: 'Số tài khoản phải từ 6 đến 20 chữ số.' }
+                                { pattern: /^\d{6,20}$/, message: 'Số tài khoản phải từ 6 đến 20 chữ số.' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || value.trim().length !== 0) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('Số tài khoản không được để trống'));
+                                    },
+                                }),
                             ]}
                         >
                             <Input placeholder="Số tài khoản" />
@@ -176,7 +240,15 @@ const AddTransportProvider = () => {
                             label="Tên người thụ hưởng"
                             rules={[
                                 { required: true, message: 'Vui lòng nhập tên người thụ hưởng' },
-                                { pattern: /^[a-zA-ZÀ-ỹ\s]{2,50}$/, message: 'Tên người thụ hưởng chỉ được chứa chữ cái và khoảng trắng, từ 2 đến 50 ký tự.' }
+                                { pattern: /^[a-zA-ZÀ-ỹ\s]{2,50}$/, message: 'Tên người thụ hưởng chỉ được chứa chữ cái và khoảng trắng, từ 2 đến 50 ký tự.' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || value.trim().length !== 0) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('Tên người thụ hưởng không được để trống'));
+                                    },
+                                }),
                             ]}
                         >
                             <Input placeholder="Tên người thụ hưởng" />
