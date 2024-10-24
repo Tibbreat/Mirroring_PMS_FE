@@ -8,6 +8,7 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
 
+    // Define columns for the table
     const columns = [
         {
             title: 'Tên lớp',
@@ -60,25 +61,32 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
         },
     ];
 
+    // If the user has the role "ADMIN", add the "Hành động" column
     if (user.role === "ADMIN") {
         columns.push({
             title: 'Hành động',
             key: 'action',
             render: (text, record) => (
-                <Button color="primary" variant="outlined" onClick={() => onAttendance(record.id)}>
+                <Button type="primary" onClick={() => onAttendance(record.id)}>
                     Điểm danh
                 </Button>
             ),
         });
     }
 
+    // Handle page change for pagination
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
 
+    // Redirect to the attendance page for the class
     const onAttendance = (id) => {
         navigate(`/pms/manage/class/attendance/${id}`);
-        console.log(id);
+    };
+
+    // Pagination handler for table
+    const onPageChange = (page) => {
+        handlePageChange(page);
     };
 
     return (
@@ -88,7 +96,7 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
                 dataSource={data}
                 pagination={{
                     current: currentPage,
-                    pageSize: pageSize,
+                    pageSize: 10,
                     total: total,
                     onChange: onPageChange,
                 }}
