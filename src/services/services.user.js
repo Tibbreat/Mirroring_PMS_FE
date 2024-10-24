@@ -38,3 +38,7 @@ export const getUserOpnionWithUserNameAPI = async (role) => {
     const URL = `/pms/users/option-username?role=${role}`;
     return axios.get(URL);
 }
+export const getParentWithUserNameAPI = async (teacherId) => {
+    const URL = `/pms/users/parents-by-teacher/${teacherId}`;
+    return axios.get(URL);
+}

@@ -40,15 +40,19 @@ const ManageSite = () => {
             <Outlet />
           </div>
         </Content>
-        <FloatButton
-          className="position-fixed rounded-circle d-flex justify-content-center align-items-center shadow"
-          onClick={showChat}
-          icon={<MessageOutlined />}
-        >
-        </FloatButton>
-        <div>
-          <ChatDrawer isVisible={isChatVisible} onClose={closeChat} />
-        </div>
+        {user?.role === 'TEACHER'  && (
+          <>
+            <FloatButton
+              className="position-fixed rounded-circle d-flex justify-content-center align-items-center shadow"
+              onClick={showChat}
+              icon={<MessageOutlined />}
+            >
+            </FloatButton>
+            <div>
+              <ChatDrawer isVisible={isChatVisible} onClose={closeChat} />
+            </div>
+          </>
+        )}
       </Layout>
     </Layout>
   );
