@@ -10,7 +10,7 @@ const AddChildren = () => {
     const [form] = Form.useForm();
     const [imageFile, setImageFile] = useState(null);
     const { user } = useContext(AuthContext);
-    const [loading, setLoading] = useState(false); // Add loading state
+    const [loading, setLoading] = useState(false);
 
     const handleImageChange = (file) => {
         setImageFile(file);
@@ -30,7 +30,7 @@ const AddChildren = () => {
             message.error('Vui lòng chọn ảnh');
         } else {
             formData.append('image', imageFile);
-            setLoading(true); // Set loading to true when starting to process the form
+            setLoading(true);
             try {
                 const response = await addChildren(formData);
                 console.log(response);
@@ -41,7 +41,7 @@ const AddChildren = () => {
                 console.error('Error:', error);
                 message.error('Có lỗi xảy ra!');
             } finally {
-                setLoading(false); // Set loading to false after processing completes
+                setLoading(false);
             }
         }
     };
@@ -57,7 +57,6 @@ const AddChildren = () => {
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={16}>
-                            {/* Form content for child information */}
                             <Row gutter={16}>
                                 <Col xs={24} md={8}>
                                     <Form.Item

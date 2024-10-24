@@ -51,31 +51,24 @@ const ListFoodProvider = () => {
     };
 
     const handleOk = async () => {
+
+        const values = await form.validateFields();
+        const payload = {
+            ...values,
+            createdBy: user.id
+        };
         try {
-            const values = await form.validateFields();
-            const payload = {
-                ...values,
-                createdBy: user.id
-            };
-            try {
-                const response = await addFoodProviderAPI(payload);
-                fetchProviders();
-                setIsModalOpen(false);
-                notification.success({
-                    message: "Thêm nhà đối tác thành công",
-                    description: `Đã thêm nhà cung cấp ${response.data.providerName}`
-                });
-                form.resetFields();
-            } catch (error) {
-                notification.error({
-                    message: "Thêm nhà đối tác thất bại"
-                });
-            }
+            const response = await addFoodProviderAPI(payload);
+            fetchProviders();
+            setIsModalOpen(false);
+            notification.success({
+                message: "Thêm nhà đối tác thành công",
+                description: `Đã thêm nhà cung cấp ${response.data.providerName}`
+            });
+            form.resetFields();
         } catch (error) {
-            console.error("Error adding provider:", error);
             notification.error({
-                message: "Thêm nhà đối tác thất bại",
-                description: "Vui lòng kiểm tra lại các trường nhập liệu.",
+                message: "Thêm nhà đối tác thất bại"
             });
         }
     };
@@ -138,7 +131,10 @@ const ListFoodProvider = () => {
                                 <Form.Item
                                     name="providerName"
                                     label="Tên công ty"
-                                    rules={[{ required: true, message: 'Vui lòng nhập tên công ty' }]}
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập tên công ty' },
+                                        { pattern: /^[a-zA-Z0-9À-ỹ\s]{2,100}$/, message: 'Tên công ty phải từ 2 đến 100 ký tự và chỉ bao gồm chữ cái, số, và khoảng trắng.' }
+                                    ]}
                                 >
                                     <Input placeholder="Tên công ty" />
                                 </Form.Item>
@@ -147,7 +143,10 @@ const ListFoodProvider = () => {
                                 <Form.Item
                                     name="providerTaxCode"
                                     label="Mã số thuế"
-                                    rules={[{ required: true, message: 'Vui lòng nhập mã số thuế' }]}
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập mã số thuế' },
+                                        { pattern: /^\d{10,13}$/, message: 'Mã số thuế phải từ 10 đến 13 chữ số.' }
+                                    ]}
                                 >
                                     <Input placeholder="Mã số thuế" />
                                 </Form.Item>
@@ -156,7 +155,10 @@ const ListFoodProvider = () => {
                                 <Form.Item
                                     name="providerPhone"
                                     label="Điện thoại"
-                                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập số điện thoại' },
+                                        { pattern: /^(?:\+84|0)?[3|5|7|8|9]\d{8}$/, message: 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng +84 hoặc 03, 05, 07, 08, 09.' }
+                                    ]}
                                 >
                                     <Input placeholder="Số điện thoại" />
                                 </Form.Item>
@@ -165,7 +167,10 @@ const ListFoodProvider = () => {
                                 <Form.Item
                                     name="providerEmail"
                                     label="Email"
-                                    rules={[{ required: true, message: 'Vui lòng nhập email' }]}
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập email' },
+                                        { type: 'email', message: 'Email không hợp lệ.' }
+                                    ]}
                                 >
                                     <Input placeholder="Email" />
                                 </Form.Item>
@@ -174,7 +179,10 @@ const ListFoodProvider = () => {
                                 <Form.Item
                                     name="providerAddress"
                                     label="Địa chỉ"
-                                    rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập địa chỉ' },
+                                        { pattern: /^[a-zA-Z0-9À-ỹ\s,.-]{5,200}$/, message: 'Địa chỉ phải từ 5 đến 200 ký tự và chỉ bao gồm chữ cái, số, và các dấu câu.' }
+                                    ]}
                                 >
                                     <Input placeholder="Địa chỉ" />
                                 </Form.Item>
@@ -183,7 +191,10 @@ const ListFoodProvider = () => {
                                 <Form.Item
                                     name="representativeName"
                                     label="Người đại diện"
-                                    rules={[{ required: true, message: 'Vui lòng nhập tên người đại diện' }]}
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập tên người đại diện' },
+                                        { pattern: /^[a-zA-ZÀ-ỹ\s]{2,50}$/, message: 'Tên người đại diện chỉ được chứa chữ cái và khoảng trắng, từ 2 đến 50 ký tự.' }
+                                    ]}
                                 >
                                     <Input placeholder="Người đại diện" />
                                 </Form.Item>
@@ -192,12 +203,15 @@ const ListFoodProvider = () => {
                                 <Form.Item
                                     name="representativePosition"
                                     label="Chức vụ"
-                                    rules={[{ required: true, message: 'Vui lòng nhập chức vụ' }]}
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập chức vụ' },
+                                        { pattern: /^[a-zA-Z0-9À-ỹ\s]{2,50}$/, message: 'Chức vụ chỉ được chứa chữ cái, số và khoảng trắng, từ 2 đến 50 ký tự.' }
+                                    ]}
                                 >
                                     <Input placeholder="Chức vụ" />
                                 </Form.Item>
                             </Col>
-                            <Col span={16}>
+                            <Col span={24}>
                                 <Form.Item
                                     name="bankName"
                                     label="Ngân hàng"
@@ -211,11 +225,26 @@ const ListFoodProvider = () => {
                                     </Select>
                                 </Form.Item>
                             </Col>
-                            <Col span={8}>
+                            <Col span={12}>
                                 <Form.Item
                                     name="bankAccountNumber"
                                     label="Số tài khoản"
-                                    type="number"
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập số tài khoản' },
+                                        { pattern: /^\d{6,20}$/, message: 'Số tài khoản phải từ 6 đến 20 chữ số.' }
+                                    ]}
+                                >
+                                    <Input placeholder="Số tài khoản" />
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item
+                                    name="beneficiaryName"
+                                    label="Tên người thụ hưởng"
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập tên người thụ hưởng' },
+                                        { pattern: /^[a-zA-ZÀ-ỹ\s]{2,50}$/, message: 'Tên người thụ hưởng chỉ được chứa chữ cái và khoảng trắng, từ 2 đến 50 ký tự.' }
+                                    ]}
                                 >
                                     <Input placeholder="Số tài khoản" />
                                 </Form.Item>

@@ -20,7 +20,7 @@ export const StaffList = () => {
     const [form] = Form.useForm(); // Initialize the form instance
 
     const { user } = useContext(AuthContext);
-    
+
     const fetchStaff = useCallback(async (page) => {
         setLoading(true);
         try {
@@ -146,17 +146,24 @@ export const StaffList = () => {
                         </Col>
                         <Col span={16}>
                             <Form
+                                form={form}
                                 layout="vertical"
                                 onFinish={handleOk}
-                                form={form}  // Bind form instance to the form
+                                initialValues={{
+                                    dob: moment(), // Optional default value
+                                }}
                             >
+                                {/* Thông tin cá nhân */}
                                 <Card title="Thông tin cá nhân" bordered={false}>
                                     <Row gutter={[16, 16]}>
                                         <Col span={8}>
                                             <Form.Item
                                                 label="Họ và tên"
                                                 name="fullName"
-                                                rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
+                                                rules={[
+                                                    { required: true, message: 'Vui lòng nhập họ và tên' },
+                                                    { pattern: /^[a-zA-ZÀ-ỹ\s]{2,50}$/, message: 'Họ và tên chỉ được chứa chữ cái và khoảng trắng, từ 2 đến 50 ký tự.' }
+                                                ]}
                                             >
                                                 <Input placeholder="Nhập họ và tên" />
                                             </Form.Item>
@@ -165,7 +172,11 @@ export const StaffList = () => {
                                             <Form.Item
                                                 label="Số điện thoại"
                                                 name="phone"
-                                                rules={[{ required: true, pattern: /^\d{10}$/, message: 'Số điện thoại phải gồm 10 chữ số' }]}>
+                                                rules={[
+                                                    { required: true, message: 'Vui lòng nhập số điện thoại' },
+                                                    { pattern: /^(\+84|0)?[3|5|7|8|9]\d{8}$/, message: 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng +84, 03, 05, 07, 08, 09.' }
+                                                ]}
+                                            >
                                                 <Input placeholder="Nhập số điện thoại" />
                                             </Form.Item>
                                         </Col>
@@ -173,7 +184,8 @@ export const StaffList = () => {
                                             <Form.Item
                                                 label="Chức vụ"
                                                 name="role"
-                                                rules={[{ required: true, message: 'Vui lòng chọn chức vụ' }]}>
+                                                rules={[{ required: true, message: 'Vui lòng chọn chức vụ' }]}
+                                            >
                                                 <Select placeholder="Chọn vai trò" style={{ width: '100%' }}>
                                                     <Option value="CLASS_MANAGER">Quản lý lớp</Option>
                                                     <Option value="KITCHEN_MANAGER">Quản lý bếp</Option>
@@ -184,24 +196,31 @@ export const StaffList = () => {
                                     </Row>
                                 </Card>
 
-                                {/* Additional Information Section */}
+                                {/* Thông tin bổ sung */}
                                 <Card title="Thông tin bổ sung" bordered={false} style={{ marginTop: 20 }}>
                                     <Row gutter={[16, 16]}>
                                         <Col span={12}>
                                             <Form.Item
                                                 label="Ngày sinh"
                                                 name="dob"
-                                                rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}>
+                                                rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
+                                            >
                                                 <DatePicker
                                                     style={{ width: '100%' }}
-                                                    format="DD-MM-YYYY" />
+                                                    format="DD-MM-YYYY"
+                                                    disabledDate={(current) => current && current.isAfter(moment().endOf('day'))}
+                                                />
                                             </Form.Item>
                                         </Col>
                                         <Col span={12}>
                                             <Form.Item
                                                 label="CMT/CCCD"
                                                 name="idCardNumber"
-                                                rules={[{ required: true, pattern: /^\d{12}$/, message: 'CMT/CCCD phải gồm 12 chữ số' }]}>
+                                                rules={[
+                                                    { required: true, message: 'Vui lòng nhập CMT/CCCD' },
+                                                    { pattern: /^\d{12}$/, message: 'CMT/CCCD phải gồm 12 chữ số.' }
+                                                ]}
+                                            >
                                                 <Input placeholder="Nhập CMT/CCCD" />
                                             </Form.Item>
                                         </Col>
@@ -211,12 +230,18 @@ export const StaffList = () => {
                                             <Form.Item
                                                 label="Địa chỉ"
                                                 name="address"
-                                                rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}>
+                                                rules={[
+                                                    { required: true, message: 'Vui lòng nhập địa chỉ' },
+                                                    { pattern: /^[a-zA-Z0-9À-ỹ\s,.-]{5,100}$/, message: 'Địa chỉ phải có từ 5 đến 100 ký tự và chỉ bao gồm chữ cái, số, và các dấu phẩy, dấu chấm, gạch ngang.' }
+                                                ]}
+                                            >
                                                 <Input placeholder="Nhập địa chỉ" />
                                             </Form.Item>
                                         </Col>
                                     </Row>
                                 </Card>
+
+                                {/* Hành động */}
                                 <Row justify="center" style={{ marginTop: 30 }}>
                                     <Button type="primary" htmlType="submit" style={{ width: '120px' }}>
                                         Thêm

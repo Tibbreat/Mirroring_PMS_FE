@@ -22,7 +22,7 @@ const Login = () => {
                     role: response.data.role,
                 });
                 navigate("/pms/manage/dashboard");
-            } 
+            }
         } catch (error) {
             console.log("Login error:", error);
             message.error(error?.data?.message || "Có lỗi xảy ra trong quá trình đăng nhập.");
@@ -54,16 +54,24 @@ const Login = () => {
                 >
                     <Form.Item
                         name="username"
-                        rules={[{ required: true, message: 'Vui lòng nhập tài khoản được cấp bởi quản trị viên!' }]}
+                        rules={[
+                            { required: true, message: 'Vui lòng nhập tài khoản được cấp bởi quản trị viên!' },
+                            { pattern: /^[a-zA-Z0-9._]{3,20}$/, message: 'Tên tài khoản phải từ 3 đến 20 ký tự và chỉ bao gồm chữ cái, số, dấu chấm hoặc gạch dưới.' }
+                        ]}
                     >
                         <Input placeholder="Username" />
                     </Form.Item>
+
                     <Form.Item
                         name="password"
-                        rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+                        rules={[
+                            { required: true, message: 'Vui lòng nhập mật khẩu!' },
+                            { pattern: /^\S{5,}$/, message: 'Mật khẩu phải có ít nhất 5 ký tự và không chứa khoảng trắng.' }
+                        ]}
                     >
                         <Input.Password placeholder="Password" />
                     </Form.Item>
+
                     <Form.Item className="text-center">
                         <Button type="primary" htmlType="submit" className="login-form-button" disabled={disable}>
                             Log in
