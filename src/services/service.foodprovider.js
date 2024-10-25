@@ -26,6 +26,6 @@ export const getFoodRequestItems = async (requestId) => {
     return await axios.get(`/pms/food-request/request/${requestId}`);
 };
 
-export const updateAcceptFoodRequestAPI = async (requestId, status) => {
-    return await axios.put(`/pms/food-request/accept/${requestId}?status=${status}`);
+export const updateAcceptFoodRequestAPI = async (requestId, status, data) => {
+    return await axios.put(`/pms/food-request/accept/${requestId}?status=${status}`, data);
 };

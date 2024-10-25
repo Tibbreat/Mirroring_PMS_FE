@@ -1,17 +1,21 @@
-import { Modal, Pagination, Table, Tag, Spin, message, Button } from 'antd';
+import { Modal, Pagination, Table, Tag, message, Button } from 'antd';
 import moment from 'moment';
 import { EyeOutlined } from '@ant-design/icons';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { getFoodRequestItems, getFoodRequestsAPI, updateAcceptFoodRequestAPI } from '../../services/service.foodprovider';
+import { AuthContext } from '../context/auth.context';
 
-export const FoodRequestTable = ({ currentPage, total, setCurrentPage, providerId }) => {
-    const [data, setData] = useState([]); // Thêm state để lưu trữ dữ liệu bảng
+export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPage, providerId }) => {
+    const [data, setData] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [items, setItems] = useState([]);
     const [loadingItems, setLoadingItems] = useState(false);
+    const [pdfPreviewVisible, setPdfPreviewVisible] = useState(false);
+    const [pdfBase64, setPdfBase64] = useState(null);
+    const { user } = useContext(AuthContext);
 
-
+    // Fetch requests for the current page
     const fetchFoodRequests = async (page) => {
         try {
             const response = await getFoodRequestsAPI(providerId, page);
@@ -21,10 +25,12 @@ export const FoodRequestTable = ({ currentPage, total, setCurrentPage, providerI
         }
     }
 
+    // Initial fetch and re-fetch on dependencies
     useEffect(() => {
         fetchFoodRequests(currentPage);
-    }, [currentPage]);
+    }, [currentPage, dataDefault]);
 
+    // Table columns for main food request table
     const columns = [
         {
             title: "Ngày tạo yêu cầu",
@@ -84,13 +90,14 @@ export const FoodRequestTable = ({ currentPage, total, setCurrentPage, providerI
         },
     ];
 
+    // Show request details in a modal
     const showRequestDetails = async (request) => {
         setSelectedRequest(request);
         setIsModalVisible(true);
         setLoadingItems(true);
         try {
             const response = await getFoodRequestItems(request.id);
-            setItems(response.data);  // Giả sử response.data là danh sách items
+            setItems(response.data);
         } catch (error) {
             console.error('Error fetching food request items:', error);
         } finally {
@@ -98,38 +105,61 @@ export const FoodRequestTable = ({ currentPage, total, setCurrentPage, providerI
         }
     };
 
+    // Close modal and reset state
     const handleModalClose = () => {
         setIsModalVisible(false);
         setSelectedRequest(null);
-        setItems([]); // Clear items khi đóng modal
+        setItems([]);
     };
 
+    // Handle approval action and preview PDF
     const handleOK = async () => {
         try {
-            const response = await updateAcceptFoodRequestAPI(selectedRequest.id, "APPROVED");
+            const requestData = {
+                schoolId: user.schoolId,
+                providerId: providerId
+            };
+
+            const response = await updateAcceptFoodRequestAPI(selectedRequest.id, "APPROVED", requestData);
+            console.log(response.data.pdfBase64);
+            if (response.data.pdfBase64) {
+                setPdfBase64(response.data.pdfBase64);
+                setPdfPreviewVisible(true);
+            }
+
             message.success("Yêu cầu đã được xác nhận và gửi đến đối tác");
-            fetchFoodRequests(currentPage);  // Fetch lại dữ liệu sau khi cập nhật thành công
+            fetchFoodRequests(currentPage);
             handleModalClose();
         } catch (error) {
             message.error("Có lỗi xảy ra khi xác nhận yêu cầu");
         }
     }
 
+
+    // Handle rejection action
     const handleReject = async () => {
         try {
-            const response = await updateAcceptFoodRequestAPI(selectedRequest.id, "CANCEL");
+            await updateAcceptFoodRequestAPI(selectedRequest.id, "CANCEL");
             message.success("Yêu cầu đã bị từ chối");
-            fetchFoodRequests(currentPage);  // Fetch lại dữ liệu sau khi từ chối
+            fetchFoodRequests(currentPage);
             handleModalClose();
         } catch (error) {
             message.error("Có lỗi xảy ra khi từ chối yêu cầu");
         }
     }
 
+    // Handle page change for pagination
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
 
+    // Close PDF Preview Modal
+    const handlePdfPreviewClose = () => {
+        setPdfPreviewVisible(false);
+        setPdfBase64(null);
+    };
+
+    // Columns for the items table within the modal
     const itemColumns = [
         {
             title: 'STT',
@@ -155,6 +185,7 @@ export const FoodRequestTable = ({ currentPage, total, setCurrentPage, providerI
 
     return (
         <div className="p-2">
+            {/* Main Table */}
             <Table
                 columns={columns}
                 dataSource={data}
@@ -168,6 +199,7 @@ export const FoodRequestTable = ({ currentPage, total, setCurrentPage, providerI
                 style={{ textAlign: 'center', marginTop: 20 }}
             />
 
+            {/* Modal for Request Details */}
             <Modal
                 title="Thông tin yêu cầu"
                 open={isModalVisible}
@@ -201,6 +233,24 @@ export const FoodRequestTable = ({ currentPage, total, setCurrentPage, providerI
                     pagination={false}
                     rowKey="itemId"
                 />
+            </Modal>
+
+            {/* PDF Preview Modal */}
+            <Modal
+                title="Hợp đồng"
+                open={pdfPreviewVisible}
+                onCancel={handlePdfPreviewClose}
+                footer={<Button onClick={handlePdfPreviewClose}>Đóng</Button>}
+                width={1000}
+            >
+                <object
+                    data={`data:application/pdf;base64,${pdfBase64}`}
+                    type="application/pdf"
+                    width="100%"
+                    height="500px"
+                >
+                    <p>Hợp đồng đã sẵn sàng. Hãy tải về <a href={`data:application/pdf;base64,${pdfBase64}`} download="document.pdf">tại đây</a>.</p>
+                </object>
             </Modal>
 
         </div>

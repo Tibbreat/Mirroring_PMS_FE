@@ -1,52 +1,76 @@
-import { Pagination, Tag, Table, Switch, Modal, Descriptions } from "antd";
-import { useState } from "react";
+import { Pagination, Tag, Table, Switch, Modal, Descriptions, Image, notification } from "antd";
+import { useEffect, useState } from "react";
 import { EyeOutlined } from '@ant-design/icons';
+import { changeStatusAPI, getVehicles } from "../../services/service.vehicle";
 
-export const VehicleTable = ({ data, currentPage, total, setCurrentPage }) => {
+export const VehicleTable = ({ dataDefault, providerId }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedVehicle, setSelectedVehicle] = useState(null);
+    const [data, setVehicle] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [total, setTotal] = useState(0);
+    const [pageSize] = useState(10); // Số lượng phương tiện trên mỗi trang
+
+    // Hàm fetch danh sách phương tiện
+    const fetchVehicle = async (providerId, page) => {
+        try {
+            const response = await getVehicles(providerId, page);
+            setVehicle(response.data.listData);
+            setTotal(response.data.total); // Tổng số lượng phương tiện
+        } catch (error) {
+            console.error("Failed to fetch vehicles:", error);
+        }
+    };
+
+    // Tải lại dữ liệu khi dataDefault hoặc providerId thay đổi
+    useEffect(() => {
+        fetchVehicle(providerId, currentPage);
+    }, [currentPage, providerId, dataDefault]);
 
     const columns = [
+        { title: 'Phương tiện', dataIndex: 'vehicleName', key: 'vehicleName' },
+        { title: 'Biển số xe', dataIndex: 'licensePlate', key: 'licensePlate' },
+        { title: 'Màu sắc', dataIndex: 'color', key: 'color', render: (text) => `${text}` },
+        { title: 'Số chỗ ngồi', dataIndex: 'numberOfSeats', key: 'numberOfSeats' },
+        { title: 'Nhãn hiệu', dataIndex: 'manufacturer', key: 'manufacturer' },
         {
-            title: 'Phương tiện',
-            dataIndex: 'vehicleName',
-            key: 'vehicleName',
-        },
-        {
-            title: 'Biển số xe',
-            dataIndex: 'licensePlate',
-            key: 'licensePlate',
-        },
-        {
-            title: 'Màu sắc',
-            dataIndex: 'color',
-            key: 'color',
-            render: (text) => `${text}`,
-        },
-        {
-            title: 'Số chỗ ngồi',
-            dataIndex: 'numberOfSeats',
-            key: 'numberOfSeats',
-        },
-        {
-            title: 'Nhãn hiệu',
-            dataIndex: 'manufacturer',
-            key: 'manufacturer',
-        },
-        {
-            title: 'Trạng thái',
-            dataIndex: 'isActive',
-            key: 'isActive',
-            render: (isActive) => (
-                <Switch checked={isActive} />
-            ),
+            title: 'Trạng thái', dataIndex: 'isActive', key: 'isActive', render: (isActive, record) => (
+                <Switch checked={isActive} onChange={() => confirmStatusChange(record)} />
+            )
         },
         {
             render: (record) => (
                 <EyeOutlined onClick={() => showVehicleDetails(record)} style={{ cursor: 'pointer' }} />
-            ),
-        },
+            )
+        }
     ];
+
+    const confirmStatusChange = (vehicle) => {
+        Modal.confirm({
+            title: 'Xác nhận thay đổi trạng thái',
+            content: `Bạn có chắc chắn muốn ${vehicle.isActive ? 'ngưng hoạt động' : 'kích hoạt'} phương tiện này không?`,
+            okText: 'Đồng ý',
+            cancelText: 'Đóng',
+            onOk: () => handleStatusChange(vehicle),
+        });
+    };
+
+    const handleStatusChange = async (vehicle) => {
+        try {
+            await changeStatusAPI(vehicle.id);
+            notification.success({
+                message: 'Cập nhật trạng thái thành công!',
+                description: vehicle.isActive ? 'Phương tiện hiện tại đã bị ngưng hoạt động.' : 'Phương tiện hiện tại được phép hoạt động.',
+            });
+            fetchVehicle(providerId, currentPage); // Refresh data after status change
+        } catch (error) {
+            notification.error({
+                message: 'Cập nhật trạng thái không thành công!',
+                description: 'Có lỗi xảy ra khi cập nhật trạng thái phương tiện.',
+                placement: 'bottomRight',
+            });
+        }
+    };
 
     const showVehicleDetails = (vehicle) => {
         setSelectedVehicle(vehicle);
@@ -54,10 +78,11 @@ export const VehicleTable = ({ data, currentPage, total, setCurrentPage }) => {
     };
 
     const handleModalClose = () => {
-        setIsModalVisible(false);     
-        setSelectedVehicle(null);     
+        setIsModalVisible(false);
+        setSelectedVehicle(null);
     };
 
+    // Xử lý thay đổi trang
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
@@ -67,16 +92,16 @@ export const VehicleTable = ({ data, currentPage, total, setCurrentPage }) => {
             <Table
                 columns={columns}
                 dataSource={data}
-                pagination={false}
+                pagination={false} // Tắt phân trang mặc định của Table
                 rowKey="id"
             />
             <Pagination
                 current={currentPage}
                 total={total}
+                pageSize={pageSize} // Số lượng mục mỗi trang
                 onChange={handlePageChange}
                 style={{ textAlign: 'center', marginTop: 20 }}
             />
-
             <Modal
                 title="Thông tin phương tiện"
                 open={isModalVisible}
@@ -100,6 +125,17 @@ export const VehicleTable = ({ data, currentPage, total, setCurrentPage }) => {
                         <Descriptions.Item span={6} label="Số điện thoại tài xế">{selectedVehicle.driverPhone}</Descriptions.Item>
                         <Descriptions.Item span={6} label="Địa điểm đón/trả trẻ">{selectedVehicle.pickUpLocation}</Descriptions.Item>
                         <Descriptions.Item span={6} label="Thời gian đón trẻ">{selectedVehicle.timeStart}</Descriptions.Item>
+                        <Descriptions.Item span={6} label="Hình ảnh phương tiện">
+                            {selectedVehicle.images && selectedVehicle.images.length > 0 ? (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                                    {selectedVehicle.images.map(image => (
+                                        <Image key={image.id} width={128} height={128} src={image.imageUrl} alt={image.imageType} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <span>Không có hình ảnh</span>
+                            )}
+                        </Descriptions.Item>
                     </Descriptions>
                 )}
             </Modal>

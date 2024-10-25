@@ -2,8 +2,9 @@ import { useCallback, useState, useEffect } from "react";
 import { Pagination, Spin, Card, Row, Col, Input, Select, Button, Form, Modal, notification } from "antd";
 import NoData from "../../../component/no-data-page/NoData";
 import { ProviderTable } from "../../../component/table/ProviderTable";
-import { addtransportProviderAPI, gettransportProvidersAPI } from "../../../services/service.transportprovider";
+import { gettransportProvidersAPI } from "../../../services/service.transportprovider";
 import { useNavigate } from "react-router-dom";
+import Loading from "../../common/Loading";
 
 
 
@@ -33,7 +34,7 @@ const ListTransportProvider = () => {
         fetchProvider(currentPage);
     }, [currentPage, fetchProvider]);
 
-    
+
 
     return (
         <Card style={{ margin: 20 }}>
@@ -50,14 +51,11 @@ const ListTransportProvider = () => {
                 <Button type="primary" onClick={() => navigate('/pms/manage/provider/transport/new-provider')} >Thêm đối tác</Button>
             </Col>
             {loading ? (
-                <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
-                    <Spin size="large" />
-                </div>
+                <Loading />
             ) : provider.length > 0 ? (
                 <>
 
-                    <ProviderTable data={provider}
-                        providerType="transport" />
+                    <ProviderTable data={provider} providerType="transport" />
                     <Pagination
                         current={currentPage}
                         total={total}

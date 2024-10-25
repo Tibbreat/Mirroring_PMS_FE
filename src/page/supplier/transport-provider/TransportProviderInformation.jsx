@@ -1,24 +1,28 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Spin, Row, Col, Button, Descriptions, Divider, Pagination, Card, Modal, Form, Input, TimePicker, Switch, notification } from 'antd';
+import { Row, Col, Button, Descriptions, Divider, Card, Modal, Form, Input, notification, Upload, Switch } from 'antd';
 import { useParams } from 'react-router-dom';
 import { gettransportProviderDetailAPI } from '../../../services/service.transportprovider';
 import Title from 'antd/es/typography/Title';
 import { VehicleTable } from '../../../component/table/VehicleTable';
-import { EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { EditOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { AuthContext } from '../../../component/context/auth.context';
 import { addVehicle, getVehicles } from '../../../services/service.vehicle';
+import Loading from '../../common/Loading';
 
 const TransportProviderInformation = () => {
     const [provider, setProvider] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const { id } = useParams();
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [vehicle, setVehicle] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [fileList, setFileList] = useState([]);
     const [form] = Form.useForm();
     const { user } = useContext(AuthContext);
 
+    // Fetch transport provider details
     const fetchTransportProvider = async (id) => {
         try {
             const response = await gettransportProviderDetailAPI(id);
@@ -33,51 +37,66 @@ const TransportProviderInformation = () => {
         try {
             const response = await getVehicles(id, page);
             setVehicle(response.data.listData);
-            setTotal(response.data.total);
+            setTotal(response.data.total); // Tổng số lượng phương tiện
         } catch (error) {
-            console.log(error);
+            console.error("Failed to fetch vehicles:", error);
         }
     };
+
     useEffect(() => {
         fetchTransportProvider(id);
         fetchVehicle(id, currentPage);
-    }, [id]);
+    }, [id, currentPage]);
 
+    // Handle vehicle addition
     const handleAddVehicle = async () => {
         try {
             const values = await form.validateFields();
-            const payload = {
+            setSaving(true);
+
+            const formData = new FormData();
+            formData.append("request", new Blob([JSON.stringify({
                 ...values,
                 createdBy: user?.id,
                 providerId: id
-            };
+            })], { type: "application/json" }));
+            fileList.forEach(file => {
+                formData.append("images", file.originFileObj);
+            });
 
-            console.log('Form Values:', payload);
-            await addVehicle(payload);
+            await addVehicle(formData);
+
             setIsModalVisible(false);
             form.resetFields();
+            setFileList([]); // Reset file list after submission
             notification.success({
                 message: 'Thêm phương tiện thành công',
                 placement: 'bottomRight',
             });
-            fetchVehicle(id, currentPage);
+            fetchVehicle(id, 1);
+            setCurrentPage(1); 
         } catch (error) {
             console.error('Lỗi khi thêm phương tiện:', error);
+        } finally {
+            setSaving(false);
         }
     };
 
-
+    // Handle modal close
     const handleCancel = () => {
         setIsModalVisible(false);
         form.resetFields();
+        setFileList([]);
+    };
+
+    const normFile = (e) => Array.isArray(e) ? e : e?.fileList;
+
+    const onUploadChange = ({ fileList }) => {
+        setFileList(fileList.slice(-5));
     };
 
     if (loading) {
-        return (
-            <div className='d-flex justify-content-center align-items-center' style={{ height: '100vh' }}>
-                <Spin size="large" />
-            </div>
-        );
+        return <Loading />;
     }
 
     return (
@@ -90,42 +109,22 @@ const TransportProviderInformation = () => {
                                 <Title level={5}>Thông tin đơn vị</Title>
                             </Col>
                             <Col>
-                                <Button type="link" icon={<EditOutlined />} >
-                                    Chỉnh sửa thông tin
-                                </Button>
+                                <Button type="link" icon={<EditOutlined />}>Chỉnh sửa thông tin</Button>
                             </Col>
                         </Row>
                         <Descriptions bordered column={6}>
-                            <Descriptions.Item label="Tên đơn vị" span={4}>
-                                <span>{provider?.providerName}</span>
-                            </Descriptions.Item>
+                            <Descriptions.Item label="Tên đơn vị" span={4}>{provider?.providerName}</Descriptions.Item>
                             <Descriptions.Item label="Trạng thái" span={2}>
                                 <Switch checked={provider?.isActive} />
                             </Descriptions.Item>
-                            <Descriptions.Item label="Người đại diện" span={2}>
-                                <span>{provider?.representativeName}</span>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Chức vụ" span={2}>
-                                <span>{provider?.representativePosition}</span>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Mã số thuế" span={2}>
-                                <span>{provider?.providerTaxCode}</span>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Số điện thoại" span={2}>
-                                <span>{provider?.providerPhone}</span>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Email" span={4}>
-                                <span>{provider?.providerEmail}</span>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Ngân hàng" span={2}>
-                                <span>{provider?.bankName}</span>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Số tài khoản" span={4}>
-                                <span>{provider?.bankAccountNumber}</span>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Địa chỉ" span={6}>
-                                <span>{provider?.providerAddress}</span>
-                            </Descriptions.Item>
+                            <Descriptions.Item label="Người đại diện" span={2}>{provider?.representativeName}</Descriptions.Item>
+                            <Descriptions.Item label="Chức vụ" span={2}>{provider?.representativePosition}</Descriptions.Item>
+                            <Descriptions.Item label="Mã số thuế" span={2}>{provider?.providerTaxCode}</Descriptions.Item>
+                            <Descriptions.Item label="Số điện thoại" span={2}>{provider?.providerPhone}</Descriptions.Item>
+                            <Descriptions.Item label="Email" span={4}>{provider?.providerEmail}</Descriptions.Item>
+                            <Descriptions.Item label="Ngân hàng" span={2}>{provider?.bankName}</Descriptions.Item>
+                            <Descriptions.Item label="Số tài khoản" span={4}>{provider?.bankAccountNumber}</Descriptions.Item>
+                            <Descriptions.Item label="Địa chỉ" span={6}>{provider?.providerAddress}</Descriptions.Item>
                         </Descriptions>
                     </Col>
                 </Row>
@@ -133,7 +132,7 @@ const TransportProviderInformation = () => {
                 <Col xs={24} sm={16} className="container">
                     <Row justify="space-between" className='mb-3'>
                         <Col>
-                            <Title level={5}>Danh sách đơn vị</Title>
+                            <Title level={5}>Danh sách phương tiện</Title>
                         </Col>
                         <Col>
                             <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>
@@ -141,7 +140,7 @@ const TransportProviderInformation = () => {
                             </Button>
                         </Col>
                     </Row>
-                    <VehicleTable data={vehicle} total={total} />
+                    <VehicleTable dataDefault={vehicle} providerId={id} />
                 </Col>
             </Card>
 
@@ -150,53 +149,43 @@ const TransportProviderInformation = () => {
                 open={isModalVisible}
                 onCancel={handleCancel}
                 onOk={handleAddVehicle}
+                okButtonProps={{ loading: saving }}
                 okText="Lưu"
                 cancelText="Hủy"
                 width={1000}
             >
-                <Form form={form} layout="vertical">
+                <Form form={form} layout="vertical" disabled={saving}>
                     <Row gutter={16}>
                         <Col span={24}>
-                            <Form.Item
-                                name="vehicleName"
-                                label="Tên phương tiện"
+                            <Form.Item name="vehicleName" label="Tên phương tiện"
                                 rules={[{ required: true, message: 'Vui lòng nhập tên phương tiện' }]}
                             >
                                 <Input placeholder="Tên phương tiện" />
                             </Form.Item>
                         </Col>
                         <Col span={6}>
-                            <Form.Item
-                                name="manufacturer"
-                                label="Hãng sản xuất"
+                            <Form.Item name="manufacturer" label="Hãng sản xuất"
                                 rules={[{ required: true, message: 'Vui lòng nhập hãng sản xuất' }]}
                             >
                                 <Input placeholder="Hãng sản xuất" />
                             </Form.Item>
                         </Col>
                         <Col span={6}>
-                            <Form.Item
-                                name="numberOfSeats"
-                                label="Số ghế"
+                            <Form.Item name="numberOfSeats" label="Số ghế"
                                 rules={[{ required: true, message: 'Vui lòng nhập số ghế' }]}
                             >
                                 <Input type="number" min={1} placeholder="Số ghế" />
                             </Form.Item>
                         </Col>
                         <Col span={6}>
-                            <Form.Item
-                                name="color"
-                                label="Màu sắc"
+                            <Form.Item name="color" label="Màu sắc"
                                 rules={[{ required: true, message: 'Vui lòng nhập màu sắc' }]}
                             >
                                 <Input placeholder="Màu sắc" />
                             </Form.Item>
                         </Col>
-
                         <Col span={6}>
-                            <Form.Item
-                                name="licensePlate"
-                                label="Biển số"
+                            <Form.Item name="licensePlate" label="Biển số"
                                 rules={[{ required: true, message: 'Vui lòng nhập biển số' }]}
                             >
                                 <Input placeholder="Biển số" />
@@ -211,7 +200,6 @@ const TransportProviderInformation = () => {
                                 <Input placeholder="Tên tài xế" />
                             </Form.Item>
                         </Col>
-
                         <Col span={12}>
                             <Form.Item
                                 name="driverPhone"
@@ -230,7 +218,31 @@ const TransportProviderInformation = () => {
                                 <Input placeholder="Điểm đón" />
                             </Form.Item>
                         </Col>
-
+                        <Col span={24}>
+                            <Form.Item
+                                name="images"
+                                label="Tải lên hình ảnh"
+                                valuePropName="fileList"
+                                getValueFromEvent={normFile}
+                                rules={[{ required: true, message: 'Vui lòng tải lên ít nhất 1 hình ảnh' }]}
+                            >
+                                <Upload
+                                    name="images"
+                                    listType="picture-card"
+                                    fileList={fileList}
+                                    onChange={onUploadChange}
+                                    beforeUpload={() => false}
+                                    multiple
+                                    maxCount={5}
+                                >
+                                    {fileList.length < 5 && (
+                                        <div>
+                                            <UploadOutlined /> Tải lên
+                                        </div>
+                                    )}
+                                </Upload>
+                            </Form.Item>
+                        </Col>
                     </Row>
                 </Form>
             </Modal>
