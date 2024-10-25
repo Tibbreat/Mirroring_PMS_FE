@@ -4,52 +4,6 @@ import { Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../component/context/auth.context';
 
-
-const items = [
-    {
-        key: '1',
-        icon: <DashboardOutlined />,
-        label: 'Trang chủ',
-    },
-    {
-        key: '2',
-        icon: <UserOutlined />,
-        label: 'Giáo viên',
-    },
-    {
-        key: '3',
-        icon: <UsergroupAddOutlined />,
-        label: 'Nhân viên',
-    },
-    {
-        key: '4',
-        icon: <HomeOutlined />,
-        label: 'Lớp',
-    },
-    {
-        key: '5',
-        icon: <ReconciliationOutlined />,
-        label: 'Đối tác',
-        children: [
-            {
-                key: '51',
-                label: 'Thực phẩm',
-            },
-            {
-                key: '52',
-                label: 'Vận chuyển',
-            }
-        ],
-    },
-    {
-        key: '6',
-        icon: <UserAddOutlined />,
-        label: 'Trẻ',
-    },
-];
-
-
-
 const Sidebar = () => {
     const { user } = useContext(AuthContext);
     const [openKeys, setOpenKeys] = useState([]);
@@ -57,7 +11,7 @@ const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const items = [
+    const allItems = [
         {
             key: '1',
             icon: <DashboardOutlined />,
@@ -100,16 +54,22 @@ const Sidebar = () => {
         },
     ];
 
+    // Nếu user là ADMIN, thêm mục Cài đặt thông tin
     if (user.role === "ADMIN") {
-        items.push({
+        allItems.push({
             key: '7',
             icon: <SettingOutlined />,
             label: 'Cài đặt thông tin',
         });
     }
 
+    // Kiểm tra vai trò TEACHER và điều chỉnh items hiển thị
+    const items = user.role === "TEACHER"
+        ? allItems.filter(item => ['1', '2', '4', '6'].includes(item.key))
+        : allItems;
+
     useEffect(() => {
-        // Update selected key based on current location path
+        // Cập nhật selectedKey dựa trên đường dẫn hiện tại
         if (location.pathname.includes('/dashboard')) {
             setSelectedKey('1');
         } else if (location.pathname.includes('/teacher')) {
@@ -124,7 +84,6 @@ const Sidebar = () => {
             setSelectedKey('52');
         } else if (location.pathname.includes('/children')) {
             setSelectedKey('6');
-
         } else if (location.pathname.includes('/settings')) {
             setSelectedKey('7');
         } else {
@@ -160,7 +119,6 @@ const Sidebar = () => {
                 navigate('/pms/manage/children');
                 break;
             case '7':
-
                 navigate('/pms/manage/settings');
                 break;
             default:
@@ -169,7 +127,7 @@ const Sidebar = () => {
     };
 
     return (
-        <div className='sidebar-custom-antd'>
+        <div className=''>
             <Menu
                 mode="inline"
                 openKeys={openKeys}
