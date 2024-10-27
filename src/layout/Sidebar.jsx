@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { HomeOutlined, UserOutlined, UsergroupAddOutlined, AimOutlined, DashboardOutlined, ReconciliationOutlined, UserAddOutlined, SettingOutlined } from '@ant-design/icons';
 import { Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../component/context/auth.context';
@@ -14,28 +13,24 @@ const Sidebar = () => {
     const allItems = [
         {
             key: '1',
-            icon: <DashboardOutlined />,
             label: 'Trang chủ',
         },
         {
             key: '2',
-            icon: <UserOutlined />,
-            label: 'Giáo viên',
+            label: 'Quản lý giáo viên',
         },
         {
             key: '3',
-            icon: <UsergroupAddOutlined />,
-            label: 'Nhân viên',
+            label: 'Quản lý nhân viên',
         },
         {
             key: '4',
-            icon: <HomeOutlined />,
-            label: 'Lớp',
+            label: 'Quản lý lớp',
         },
         {
             key: '5',
-            icon: <ReconciliationOutlined />,
-            label: 'Đối tác',
+         
+            label: 'Quản lý đối tác',
             children: [
                 {
                     key: '51',
@@ -49,8 +44,11 @@ const Sidebar = () => {
         },
         {
             key: '6',
-            icon: <UserAddOutlined />,
-            label: 'Trẻ',
+            label: 'Quản lý trẻ',
+        },
+        {
+            key: '8',
+            label: 'Thực đơn',
         },
     ];
 
@@ -58,7 +56,7 @@ const Sidebar = () => {
     if (user.role === "ADMIN") {
         allItems.push({
             key: '7',
-            icon: <SettingOutlined />,
+          
             label: 'Cài đặt thông tin',
         });
     }
@@ -86,6 +84,8 @@ const Sidebar = () => {
             setSelectedKey('6');
         } else if (location.pathname.includes('/settings')) {
             setSelectedKey('7');
+        }else if (location.pathname.includes('/kitchen')) {
+            setSelectedKey('8');
         } else {
             setSelectedKey(undefined);
         }
@@ -120,6 +120,9 @@ const Sidebar = () => {
                 break;
             case '7':
                 navigate('/pms/manage/settings');
+                break;
+            case '8':
+                navigate('/pms/manage/kitchen/menu/calendar');
                 break;
             default:
                 break;

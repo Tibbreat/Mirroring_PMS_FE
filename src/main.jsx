@@ -34,6 +34,8 @@ import AddChildren from './page/children/AddChildren';
 
 import AddTransportProvider from './page/supplier/transport-provider/AddTransportProvider';
 import { SchoolInformation } from './page/school/SchoolInformation';
+import AddDailyMenu from './page/kitchen/AddDailyMenu';
+import MenuCalendar from './page/kitchen/MenuCalendar';
 
 
 const App = () => (
@@ -49,7 +51,7 @@ const App = () => (
           </PrivateRoute>
         </AuthWrapper>
       }>
-        <Route index path="dashboard" element={<Dashboard />}/>
+        <Route index path="dashboard" element={<Dashboard />} />
         <Route path="teacher" element={<TeacherList />} />
         <Route path="teacher/:id" element={<TeacherInformation />} />
         <Route path="class" element={<ClassList />} />
@@ -67,6 +69,9 @@ const App = () => (
         <Route path="children" element={<ChildrenList />} />
         <Route path="children/add-children" element={<AddChildren />} />
 
+        {/* Kitchen */}
+        <Route path="kitchen/menu/new-daily-menu" element={<AddDailyMenu />} />
+        <Route path="kitchen/menu/calendar" element={<MenuCalendar />} />
         <Route path="settings" element={<SchoolInformation />} />
 
       </Route>

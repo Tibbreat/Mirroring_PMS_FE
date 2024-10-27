@@ -333,3 +333,13 @@
     text-align: left;
   }
   
+  .custom-calendar .ant-picker-cell-inner {
+    padding: 4px !important; /* Reduce padding */
+    font-size: 12px !important; /* Smaller font size */
+}
+
+/* Adjust the size of the calendar cell's badge */
+.custom-calendar .ant-badge-status-text {
+    font-size: 10px !important; /* Smaller font for status text */
+    line-height: 1 !important;
+}

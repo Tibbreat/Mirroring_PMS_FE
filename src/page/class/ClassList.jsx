@@ -161,10 +161,9 @@ const ClassList = () => {
                                 rules={[{ required: true, message: 'Vui lòng nhập tuổi' }]}
                             >
                                 <Select placeholder="Chọn lứa tuổi">
-                                    <Option value="1-2">1 - 2 tuổi</Option>
-                                    <Option value="2-3">2 - 3 tuổi</Option>
-                                    <Option value="3-4">3 - 4 tuổi</Option>
-                                    <Option value="4-5">4 - 5 tuổi</Option>
+                                    <Option value="2-3 tuổi">2 - 3 tuổi</Option>
+                                    <Option value="2-3 tuổi">3 - 4 tuổi</Option>
+                                    <Option value="2-3 tuổi">4 - 5 tuổi</Option>
                                 </Select>
                             </Form.Item>
                         </Col>
