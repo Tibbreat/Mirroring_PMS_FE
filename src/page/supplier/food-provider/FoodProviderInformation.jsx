@@ -129,11 +129,11 @@ const FoodProviderInformation = () => {
                         <Col>
                             <Title level={5}>Danh sách yêu cầu</Title>
                         </Col>
-                        <Col>
+                        {provider?.isActive && (
                             <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>
                                 Tạo yêu cầu
                             </Button>
-                        </Col>
+                        )}
                     </Row>
                     <FoodRequestTable dataDefault={foodRequest} total={total} providerId={id} currentPage={currentPage} />
                 </Col>

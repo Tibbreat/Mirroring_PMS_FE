@@ -27,3 +27,17 @@ export const changeStatusAPI = async (id) => {
     const url = `/pms/vehicle/update-status/${id}`;
     return await axios.put(url);
 };
+
+export const updateRouteForVehicle = async (routeId, data) => {
+    const url = `/pms/vehicle/route-registered/${routeId}`;
+    return await axios.put(url, data);
+}
+
+export const getVehicleOfRoute = async (routeId) => {
+    return await axios.get(`/pms/vehicle/route/${routeId}`);
+
+}
+
+export const unsubscribeRoute = async (vehicleId) => {
+    return await axios.put(`/pms/vehicle/unsubscribe-route/${vehicleId}`)
+}

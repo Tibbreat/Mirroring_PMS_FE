@@ -4,7 +4,7 @@ import { Button, Card, Col, Input, Modal, Pagination, Row, Select, Spin, DatePic
 import TeacherTable from "../../component/table/TeacherTable";
 import NoData from "../../component/no-data-page/NoData";
 import UploadImage from "../../component/input/UploadImage";
-import moment from "moment"; 
+import moment from "moment";
 import { AuthContext } from "../../component/context/auth.context";
 
 const { Option } = Select;
@@ -48,12 +48,10 @@ const TeacherList = () => {
     };
 
     const handleOk = async (values) => {
-        const { fullName, idCardNumber, address, phone, dob } = values;
+        const { fullName, idCardNumber, address, phone, dob , contractType} = values;
 
         // Create a FormData object to handle multipart form data
         const formData = new FormData();
-
-        // Append teacher data as JSON
         const teacherData = {
             fullName,
             idCardNumber,
@@ -61,12 +59,11 @@ const TeacherList = () => {
             phone,
             dob: dob ? moment(dob).format("YYYY-MM-DD") : null,
             role: "TEACHER",
-            schoolId: user?.schoolId
+            schoolId: user?.schoolId,
+            contractType: values.contractType
         };
 
         formData.append('user', new Blob([JSON.stringify(teacherData)], { type: 'application/json' }));
-
-        // Append the image file if it exists
         if (!imageFile) {
             message.error("Vui lòng cung cấp ảnh thẻ");
         } else {
@@ -162,10 +159,11 @@ const TeacherList = () => {
                                                 <Input placeholder="Nhập số điện thoại" />
                                             </Form.Item>
                                         </Col>
+
                                     </Row>
                                 </Card>
 
-                                {/* Additional Information Section */}
+
                                 <Card title="Thông tin bổ sung" bordered={false} style={{ marginTop: 20 }}>
                                     <Row gutter={[16, 16]}>
                                         <Col span={12}>
@@ -198,6 +196,20 @@ const TeacherList = () => {
                                                 rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
                                             >
                                                 <Input placeholder="Nhập địa chỉ" />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={24}>
+                                            <Form.Item
+                                                label="Loại hợp đồng"
+                                                name="contractType"
+                                                rules={[{ required: true, message: 'Vui chọn loại hợp đồng' }]}
+                                            >
+                                                <Select placeholder="Loại hợp đồng">
+                                                    <Option value="Hợp đồng lao động có thời hạn 6 tháng">Hợp đồng lao động có thời hạn 6 tháng</Option>
+                                                    <Option value="Hợp đồng lao động có thời hạn 1 năm">Hợp đồng lao động có thời hạn 1 năm</Option>
+                                                    <Option value="Hợp đồng lao động không xác định thời hạn">Hợp đồng lao động không xác định thời hạn</Option>
+                                                    <Option value="Hợp đồng thời vụ">Hợp đồng thời vụ</Option>
+                                                </Select>
                                             </Form.Item>
                                         </Col>
                                     </Row>

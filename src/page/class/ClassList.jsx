@@ -1,14 +1,14 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { addClassAPI, getClassesAPI } from "../../services/services.class";
 import { Pagination, Spin, Card, Row, Col, Input, Select, Button, Modal, Form, DatePicker, notification } from "antd";
-import { getUserOpnionAPI } from "../../services/services.user";
+import { getTeacherAvailableInYear, getUserOpnionAPI } from "../../services/services.user";
 import NoData from "../../component/no-data-page/NoData";
 import { AuthContext } from "../../component/context/auth.context";
 import moment from "moment";
 import { ClassTable } from "../../component/table/ClassTable";
+import Title from "antd/es/typography/Title";
 
 const { Option } = Select;
-const { RangePicker } = DatePicker;
 
 const ClassList = () => {
     const [classes, setClasses] = useState([]);
@@ -16,15 +16,16 @@ const ClassList = () => {
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedAgeRange, setSelectedAgeRange] = useState(null); // New state for age range filter
     const [form] = Form.useForm();
     const [teachers, setTeachers] = useState([]);
     const [classManager, setClassManager] = useState([]);
     const { user } = useContext(AuthContext);
 
-    const fetchClasses = useCallback(async (page) => {
+    const fetchClasses = useCallback(async (page, ageRange) => {
         setLoading(true);
         try {
-            const response = await getClassesAPI(page, null, null);
+            const response = await getClassesAPI(page, null, ageRange);
             setClasses(response.data.listData);
             setTotal(response.data.total);
         } catch (error) {
@@ -36,7 +37,11 @@ const ClassList = () => {
 
     const fetchTeachers = useCallback(async () => {
         try {
-            const response = await getUserOpnionAPI("TEACHER");
+            const today = moment();
+            const currentYear = today.year();
+            const nextYear = currentYear + 1;
+            const academicYear = `${currentYear}-${nextYear}`;
+            const response = await getTeacherAvailableInYear(academicYear);
             setTeachers(response.data);
         } catch (error) {
             console.error('Error fetching teachers:', error);
@@ -53,25 +58,35 @@ const ClassList = () => {
     }, []);
 
     useEffect(() => {
-        fetchClasses(currentPage);
+        fetchClasses(currentPage, null, selectedAgeRange);
         fetchTeachers();
         fetchClassManager();
-    }, [currentPage, fetchClasses, fetchTeachers, fetchClassManager]);
+    }, [currentPage, selectedAgeRange, fetchClasses, fetchTeachers, fetchClassManager]);
+
+    const handleAgeRangeChange = (value) => {
+        setSelectedAgeRange(value); // Update the selected age range and refetch classes
+        fetchClasses(currentPage, value);
+    };
 
     const handleOk = async () => {
         try {
+            const today = moment();
+            const augustFifth = moment(`${today.year()}-08-05`, "YYYY-MM-DD");
+
             const values = await form.validateFields();
-            const [openingDay, closingDay] = values.dateRange || [];
             const payload = {
-                ...values,
-                openingDay: openingDay ? openingDay.format('YYYY-MM-DD') : null,
-                closingDay: closingDay ? closingDay.format('YYYY-MM-DD') : null,
+                className: values.className,
+                ageRange: values.ageRange,
+                openingDay: `${today.year()}-09-05`,
+                teacherId: values.teacherId,
+                managerId: values.managerId,
                 createdBy: user.id,
-                schoolYear: `${moment(openingDay).year()} - ${moment(closingDay).year()}`,
                 schoolId: user.schoolId,
             };
+
             await addClassAPI(payload);
             fetchClasses(currentPage);
+            fetchTeachers();
             setIsModalOpen(false);
             notification.success({ message: "Thêm lớp thành công" });
             form.resetFields();
@@ -86,15 +101,24 @@ const ClassList = () => {
         form.resetFields();
     };
 
+    const currentYear = moment().year();
+    const nextYear = currentYear + 1;
+    const academicYear = `${currentYear} - ${nextYear}`;
+    const openingDate = `5-9-${currentYear}`;
+
     return (
         <Card style={{ margin: 20 }}>
             <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
                 <Col xs={24} sm={8}>
-                    <Select placeholder="Độ tuổi" style={{ width: '100%' }}>
-                        <Option value="1 - 2">1 - 2 tuổi</Option>
-                        <Option value="2 - 3">2 - 3 tuổi</Option>
-                        <Option value="3 - 4">3 - 4 tuổi</Option>
-                        <Option value="4 - 5">4 - 5 tuổi</Option>
+                    <Select
+                        placeholder="Độ tuổi"
+                        style={{ width: '100%' }}
+                        onChange={handleAgeRangeChange}
+                        allowClear
+                    >
+                        <Option value="3-4">3 - 4 tuổi</Option>
+                        <Option value="4-5">4 - 5 tuổi</Option>
+                        <Option value="5-6">5 - 6 tuổi</Option>
                     </Select>
                 </Col>
                 <Col xs={24} sm={16}>
@@ -135,21 +159,18 @@ const ClassList = () => {
                 <Form form={form} layout="vertical">
                     <Row gutter={16}>
                         <Col span={12}>
+                            <Title level={5}>Năm học: {academicYear}</Title>
+                        </Col>
+                        <Col span={12}>
+                            <Title level={5}>Ngày khai giảng: {openingDate}</Title>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={12}>
                             <Form.Item
                                 name="className"
                                 label="Tên lớp"
-                                rules={[
-                                    { required: true, message: 'Vui lòng nhập tên lớp' },
-                                    { pattern: /^[a-zA-Z0-9À-ỹ\s]{3,50}$/, message: 'Tên lớp phải từ 3 đến 50 ký tự, chỉ gồm chữ cái, số và khoảng trắng' },
-                                    ({ getFieldValue }) => ({
-                                        validator(_, value) {
-                                            if (!value || value.trim().length !== 0) {
-                                                return Promise.resolve();
-                                            }
-                                            return Promise.reject(new Error('Tên lớp không được để trống'));
-                                        },
-                                    }),
-                                ]}
+                                rules={[{ required: true, message: 'Vui lòng nhập tên lớp' }]}
                             >
                                 <Input placeholder="Nhập tên lớp" />
                             </Form.Item>
@@ -161,25 +182,10 @@ const ClassList = () => {
                                 rules={[{ required: true, message: 'Vui lòng nhập tuổi' }]}
                             >
                                 <Select placeholder="Chọn lứa tuổi">
-                                    <Option value="2-3 tuổi">2 - 3 tuổi</Option>
-                                    <Option value="2-3 tuổi">3 - 4 tuổi</Option>
-                                    <Option value="2-3 tuổi">4 - 5 tuổi</Option>
+                                    <Option value="3-4">3 - 4 tuổi</Option>
+                                    <Option value="4-5">4 - 5 tuổi</Option>
+                                    <Option value="5-6">5 - 6 tuổi</Option>
                                 </Select>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    <Row gutter={16}>
-                        <Col span={24}>
-                            <Form.Item
-                                name="dateRange"
-                                label="Ngày khai giảng và ngày bế giảng"
-                                rules={[{ required: true, message: 'Vui lòng chọn khoảng thời gian' }]}
-                            >
-                                <RangePicker
-                                    style={{ width: '100%' }}
-                                    disabledDate={(current) => current && current.isBefore(moment().add(7, 'days').endOf('day'))}
-                                    format="DD/MM/YYYY"
-                                />
                             </Form.Item>
                         </Col>
                     </Row>
@@ -205,7 +211,7 @@ const ClassList = () => {
                                 label="Quản lý lớp"
                                 rules={[{ required: true, message: 'Vui lòng chọn quản lý lớp' }]}
                             >
-                                <Select placeholder="Nhập danh sách quản lý lớp" style={{ width: '100%' }}>
+                                <Select placeholder="Chọn quản lý lớp" style={{ width: '100%' }}>
                                     {classManager.map((manager) => (
                                         <Option key={manager.id} value={manager.id}>
                                             {manager.username}

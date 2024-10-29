@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Modal, Form, Input, Row, Col, Button, message, Badge, Descriptions, Card } from 'antd';
+import { Calendar, Modal, Form, Input, Row, Col, Button, message, Badge, Descriptions, Card, Typography, Tabs } from 'antd'; // Import Typography
 import moment from 'moment';
 import 'moment/locale/vi';
 import { addNewMenu, getDailyMenuByDate, getMonthlyMenu } from '../../services/services.menu';
 import viVN from 'antd/es/calendar/locale/vi_VN';
+import TabPane from 'antd/es/tabs/TabPane';
+
 moment.locale('vi');
+
+const { Title } = Typography;
 
 const MenuCalendar = () => {
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
@@ -14,7 +18,7 @@ const MenuCalendar = () => {
     const [viewData, setViewData] = useState({});
     const [form] = Form.useForm();
 
-    const ageGroups = ['2-3 tuổi', '3-4 tuổi', '5-6 tuổi'];
+    const ageGroups = ['3-4 tuổi', '4-5 tuổi', '5-6 tuổi'];
 
     const fetchMonthlyMenu = async (year, month) => {
         try {
@@ -22,7 +26,7 @@ const MenuCalendar = () => {
             setMonthlyData(response.data);
         } catch (error) {
             message.error('Lỗi khi tải thực đơn của tháng');
-            console.log(error);
+            console.error(error);
         }
     };
 
@@ -36,7 +40,6 @@ const MenuCalendar = () => {
             const data = response.data;
 
             if (data && data.length > 0) {
-                // Directly set the response data to viewData
                 setViewData(data);
                 setIsViewModalVisible(true);
             } else {
@@ -50,10 +53,9 @@ const MenuCalendar = () => {
             }
         } catch (error) {
             message.error('Lỗi khi tải thực đơn');
-            console.log(error);
+            console.error(error);
         }
     };
-
 
     const onSelect = (date) => {
         const formattedDate = date.format('YYYY-MM-DD');
@@ -80,23 +82,22 @@ const MenuCalendar = () => {
                 }));
 
                 try {
-                    await addNewMenu(requestData);  // Pass the structured data to backend
+                    await addNewMenu(requestData);
                     message.success('Thêm thực đơn thành công');
                     setIsAddModalVisible(false);
                     form.resetFields();
                     const [year, month] = selectedDate.split('-').map(Number);
-                    fetchMonthlyMenu(year, month);  // Refresh calendar data
+                    fetchMonthlyMenu(year, month);
                     setSelectedDate(null);
                 } catch (error) {
                     message.error('Thêm thực đơn thất bại');
-                    console.log(error);
+                    console.error(error);
                 }
             })
             .catch(info => {
-                console.log('Validate Failed:', info);
+                console.error('Validate Failed:', info);
             });
     };
-
 
     const handleViewCancel = () => {
         setIsViewModalVisible(false);
@@ -127,6 +128,7 @@ const MenuCalendar = () => {
             <div key={index}>{item.trim()}</div>
         ));
     };
+
     return (
         <div style={{ padding: 20 }}>
             <Calendar
@@ -136,7 +138,6 @@ const MenuCalendar = () => {
                 dateCellRender={dateCellRender}
                 disabledDate={disabledDate}
                 mode="month"
-
             />
 
             <Modal
@@ -151,28 +152,30 @@ const MenuCalendar = () => {
                 ]}
             >
                 {viewData && viewData.length > 0 ? (
-                    viewData.map((menu) => (
-                        <Card title={`Lứa tuổi ${menu.ageRange}`} key={menu.id} style={{ marginBottom: 16 }}>
-                            <Descriptions bordered column={1}>
-                                <Descriptions.Item label="Bữa sáng">
-                                    {renderFoodItems(menu.breakfast) || 'Không có thực đơn'}
-                                </Descriptions.Item>
-                                <Descriptions.Item label="Bữa trưa">
-                                    {renderFoodItems(menu.lunch) || 'Không có thực đơn'}
-                                </Descriptions.Item>
-                                <Descriptions.Item label="Bữa chiều">
-                                    {renderFoodItems(menu.afternoon) || 'Không có thực đơn'}
-                                </Descriptions.Item>
-                            </Descriptions>
-                        </Card>
-                    ))
+                    <Tabs defaultActiveKey="1">
+                        {viewData.map((menu) => (
+                            <TabPane tab={`Lứa tuổi ${menu.ageRange}`} key={menu.ageRange}>
+                                <Card key={menu.id} style={{ marginBottom: 16 }}>
+                                    <Descriptions bordered column={1}>
+                                        <Descriptions.Item label="Bữa sáng">
+                                            {renderFoodItems(menu.breakfast) || 'Không có thực đơn'}
+                                        </Descriptions.Item>
+                                        <Descriptions.Item label="Bữa trưa">
+                                            {renderFoodItems(menu.lunch) || 'Không có thực đơn'}
+                                        </Descriptions.Item>
+                                        <Descriptions.Item label="Bữa chiều">
+                                            {renderFoodItems(menu.afternoon) || 'Không có thực đơn'}
+                                        </Descriptions.Item>
+                                    </Descriptions>
+                                </Card>
+                            </TabPane>
+                        ))}
+                    </Tabs>
                 ) : (
                     <p>Không có thực đơn cho ngày này</p>
                 )}
             </Modal>
 
-
-            {/* Modal Thêm Thực Đơn */}
             <Modal
                 title="Nhập thực đơn"
                 open={isAddModalVisible}
@@ -191,25 +194,34 @@ const MenuCalendar = () => {
                 <Form form={form} layout="vertical">
                     <Row gutter={[16, 16]}>
                         {ageGroups.map(age => (
-                            <Col span={8} key={age}>
-                                <Form.Item
-                                    label="Bữa sáng 7h30 - 8h15"
-                                    name={`${age}_breakfast`}
-                                >
-                                    <Input placeholder="Nhập thực đơn buổi sáng" />
-                                </Form.Item>
-                                <Form.Item
-                                    label="Bữa trưa 10h30 - 11h30"
-                                    name={`${age}_lunch`}
-                                >
-                                    <Input placeholder="Nhập thực đơn buổi trưa" />
-                                </Form.Item>
-                                <Form.Item
-                                    label="Bữa chiều 14h30 - 15h30"
-                                    name={`${age}_afternoon`}
-                                >
-                                    <Input placeholder="Nhập thực đơn buổi chiều" />
-                                </Form.Item>
+                            <Col span={24} key={age}>
+                                <Title level={5}>Lớp {age}</Title>
+                                <Row gutter={[16, 16]}>
+                                    <Col span={8}>
+                                        <Form.Item
+                                            label="Bữa sáng 7h30 - 8h15"
+                                            name={`${age}_breakfast`}
+                                        >
+                                            <Input placeholder="Nhập thực đơn buổi sáng" />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={8}>
+                                        <Form.Item
+                                            label="Bữa trưa 10h30 - 11h30"
+                                            name={`${age}_lunch`}
+                                        >
+                                            <Input placeholder="Nhập thực đơn buổi trưa" />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={8}>
+                                        <Form.Item
+                                            label="Bữa chiều 14h30 - 15h30"
+                                            name={`${age}_afternoon`}
+                                        >
+                                            <Input placeholder="Nhập thực đơn buổi chiều" />
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
                             </Col>
                         ))}
                     </Row>

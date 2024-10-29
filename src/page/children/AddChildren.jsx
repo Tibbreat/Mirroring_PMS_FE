@@ -1,8 +1,10 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Form, Input, Button, DatePicker, Select, Card, Row, Col, message, Spin } from 'antd';
 import { addChildren } from '../../services/service.children';
 import UploadImage from '../../component/input/UploadImage';
 import { AuthContext } from '../../component/context/auth.context';
+import { getClassList } from '../../services/services.class';
+import moment from 'moment';
 
 const { Option } = Select;
 
@@ -11,16 +13,35 @@ const AddChildren = () => {
     const [imageFile, setImageFile] = useState(null);
     const { user } = useContext(AuthContext);
     const [loading, setLoading] = useState(false);
+    const [classList, setClassList] = useState([]);
+    const [selectedClass, setSelectedClass] = useState(null);
 
     const handleImageChange = (file) => {
         setImageFile(file);
     };
+
+    useEffect(() => {
+        const today = moment();
+        const currentYear = today.year();
+        const nextYear = currentYear + 1;
+        const academicYear = `${currentYear}-${nextYear}`;
+        const fetchClasses = async () => {
+            try {
+                const response = await getClassList(academicYear);
+                setClassList(response.data);
+            } catch (error) {
+                message.error('Không thể tải danh sách lớp');
+            }
+        };
+        fetchClasses();
+    }, []);
 
     const onFinish = async (values) => {
         const formattedValues = {
             ...values,
             childBirthDate: values.childBirthDate ? values.childBirthDate.format('YYYY-MM-DD') : null,
             createdBy: user.id,
+            classId: selectedClass,
         };
 
         const formData = new FormData();
@@ -32,11 +53,13 @@ const AddChildren = () => {
             formData.append('image', imageFile);
             setLoading(true);
             try {
+                console.log(formData);
                 const response = await addChildren(formData);
                 console.log(response);
                 message.success('Thêm trẻ thành công!');
                 form.resetFields();
                 setImageFile(null);
+                setSelectedClass(null);
             } catch (error) {
                 console.error('Error:', error);
                 message.error('Có lỗi xảy ra!');
@@ -44,6 +67,10 @@ const AddChildren = () => {
                 setLoading(false);
             }
         }
+    };
+
+    const handleClassChange = (value) => {
+        setSelectedClass(value);
     };
 
     const renderFormItem = (name, label, placeholder, rules, component = <Input />, span = 8) => (
@@ -263,6 +290,30 @@ const AddChildren = () => {
                                     }),
                                 ]
                             )}
+                        </Row>
+                    </Card>
+                    <Card title="Chọn Lớp" bordered={false} style={{ marginTop: 20 }}>
+                        <Row gutter={16}>
+                            <Col xs={24} md={24}>
+                                <Form.Item
+                                    name="classId"
+                                    label="Chọn Lớp"
+                                    rules={[{ required: true, message: 'Vui lòng chọn lớp' }]}
+                                >
+                                    <Select
+                                        placeholder="Chọn lớp cho trẻ"
+                                        loading={!classList.length && loading}
+                                        disabled={loading}
+                                        onChange={handleClassChange}
+                                    >
+                                        {classList.map((classItem, index) => (
+                                            <Option key={index} value={classItem.id}>
+                                                {classItem.className} - Giáo viên: {classItem.teacherName} - Độ tuổi: {classItem.ageRange}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
+                            </Col>
                         </Row>
                     </Card>
                     <Form.Item>

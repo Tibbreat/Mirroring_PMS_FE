@@ -121,10 +121,17 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
             };
 
             const response = await updateAcceptFoodRequestAPI(selectedRequest.id, "APPROVED", requestData);
-            console.log(response.data.pdfBase64);
             if (response.data.pdfBase64) {
                 setPdfBase64(response.data.pdfBase64);
                 setPdfPreviewVisible(true);
+
+                // Tạo và kích hoạt liên kết tải xuống
+                const link = document.createElement('a');
+                link.href = `data:application/pdf;base64,${response.data.pdfBase64}`;
+                link.download = 'yeu-cau-cung-cap-thuc-pham.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             }
 
             message.success("Yêu cầu đã được xác nhận và gửi đến đối tác");
@@ -133,7 +140,7 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
         } catch (error) {
             message.error("Có lỗi xảy ra khi xác nhận yêu cầu");
         }
-    }
+    };
 
 
     // Handle rejection action

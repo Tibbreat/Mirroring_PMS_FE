@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Spin, Row, Col, Button, Modal, message, Card, Descriptions, Divider, Switch, Avatar, List, Radio, Table } from 'antd';
+import { Spin, Row, Col, Button, Modal, message, Card, Descriptions, Divider, Switch, Avatar, Table, Radio } from 'antd';
 import { useParams } from 'react-router-dom';
 import { getChildDetailAPI, updateServiceStatus } from '../../services/service.children';
 import moment from 'moment/moment';
 import Title from 'antd/es/typography/Title';
 import { EditOutlined } from '@ant-design/icons';
 import { getAvailableVehicles } from '../../services/service.vehicle';
+import { fetchAvailableRoutesAPI } from '../../services/services.route';
 
 const ChildrenInformation = () => {
     const [childrenData, setChildrenData] = useState(null);
@@ -14,10 +15,11 @@ const ChildrenInformation = () => {
     const [isBoardingModalVisible, setIsBoardingModalVisible] = useState(false);
     const [isTransportModalVisible, setIsTransportModalVisible] = useState(false);
     const [isVehicleModalVisible, setIsVehicleModalVisible] = useState(false);
-    const [availableVehicles, setAvailableVehicles] = useState([]);
-    const [selectedVehicle, setSelectedVehicle] = useState(null);
+    const [availableRoutes, setAvailableRoutes] = useState([]);
+    const [selectedRoute, setSelectedRoute] = useState(null);
 
     const { id } = useParams();
+
     const fetchChildrenData = async (id) => {
         setLoading(true);
         try {
@@ -30,48 +32,28 @@ const ChildrenInformation = () => {
         }
     };
 
-    const fetchAvailableVehicles = async () => {
+    const fetchAvailableRoutes = async () => {
         try {
-            const response = await getAvailableVehicles();
-            setAvailableVehicles(response.data);
+            const response = await fetchAvailableRoutesAPI();
+            setAvailableRoutes(response.data);
         } catch (error) {
-            console.error('Error fetching available vehicles:', error);
+            console.error('Error fetching available routes:', error);
         }
     };
 
     const columns = [
-        {
-            title: 'Tên phương tiện',
-            dataIndex: 'vehicleName',
-            key: 'vehicleName',
-        },
-        {
-            title: 'Số chỗ',
-            dataIndex: 'numberOfSeats',
-            key: 'numberOfSeats',
-        },
-        {
-            title: 'Chỗ trống',
-            dataIndex: 'availableSeats',
-            key: 'availableSeats',
-        },
-        {
-            title: 'Điểm đón',
-            dataIndex: 'pickUpLocation',
-            key: 'pickUpLocation',
-        },
-        {
-            title: 'Thời gian khởi hành',
-            dataIndex: 'timeStart',
-            key: 'timeStart',
-        },
+        { title: 'Tên tuyến', dataIndex: 'routeName', key: 'routeName' },
+        { title: 'Điểm đầu', dataIndex: 'startLocation', key: 'startLocation' },
+        { title: 'Điểm cuối', dataIndex: 'endLocation', key: 'endLocation' },
+        { title: 'Thời gian đón', dataIndex: 'pickupTime', key: 'pickupTime' },
+        { title: 'Thời gian trả', dataIndex: 'dropOffTime', key: 'dropOffTime' },
         {
             title: 'Chọn',
             key: 'select',
             render: (text, record) => (
                 <Radio.Group
                     onChange={handleVehicleSelect}
-                    value={selectedVehicle}
+                    value={selectedRoute}
                 >
                     <Radio value={record.id}>Chọn</Radio>
                 </Radio.Group>
@@ -86,11 +68,13 @@ const ChildrenInformation = () => {
     const handleChangeServiceStatus = async (serviceName) => {
         setUpdating(true);
         try {
-            if (selectedVehicle === null) {
-                message.error("Vui lòng chọn phương tiện");
-                return;
+            if (!childrenData.isRegisteredForTransport) {
+                if (selectedRoute === null) {
+                    message.error("Vui lòng chọn tuyến");
+                    return;
+                }
             }
-            await updateServiceStatus(id, serviceName, selectedVehicle);
+            await updateServiceStatus(id, serviceName, selectedRoute);
             setIsVehicleModalVisible(false);
             message.success("Đăng ký thành công");
 
@@ -109,7 +93,7 @@ const ChildrenInformation = () => {
 
     const handleTransportSwitchChange = () => {
         if (!childrenData?.isRegisteredForTransport) {
-            fetchAvailableVehicles();
+            fetchAvailableRoutes();
             setIsVehicleModalVisible(true);
         } else {
             setIsTransportModalVisible(true);
@@ -143,7 +127,7 @@ const ChildrenInformation = () => {
     };
 
     const handleVehicleSelect = (e) => {
-        setSelectedVehicle(e.target.value);
+        setSelectedRoute(e.target.value);
     };
 
     if (loading) {
@@ -177,7 +161,7 @@ const ChildrenInformation = () => {
                                 <span>{childrenData?.childName}</span>
                             </Descriptions.Item>
                             <Descriptions.Item label="Ngày sinh" span={3}>
-                                <span>{childrenData?.childBirthDate}</span>
+                                <span>{moment(childrenData?.childBirthDate).format('DD/MM/YYYY')}</span>
                             </Descriptions.Item>
                             <Descriptions.Item label="Giới tính" span={3}>
                                 <span>{childrenData?.gender === 'female' ? "Nữ" : "Nam"}</span>
@@ -234,7 +218,7 @@ const ChildrenInformation = () => {
 
             <Modal
                 title="Xác nhận thay đổi"
-                visible={isBoardingModalVisible}
+                open={isBoardingModalVisible}
                 onOk={handleConfirmBoarding}
                 onCancel={handleCancelBoarding}
                 okText="Xác nhận"
@@ -245,7 +229,7 @@ const ChildrenInformation = () => {
 
             <Modal
                 title="Xác nhận thay đổi"
-                visible={isTransportModalVisible}
+                open={isTransportModalVisible}
                 onOk={handleConfirmTransport}
                 onCancel={handleCancelTransport}
                 okText="Xác nhận"
@@ -255,7 +239,7 @@ const ChildrenInformation = () => {
             </Modal>
 
             <Modal
-                title="Chọn phương tiện"
+                title="Chọn tuyến"
                 open={isVehicleModalVisible}
                 onOk={handleConfirmVehicle}
                 onCancel={handleCancelVehicle}
@@ -264,7 +248,7 @@ const ChildrenInformation = () => {
                 width={800}
             >
                 <Table
-                    dataSource={availableVehicles}
+                    dataSource={availableRoutes}
                     columns={columns}
                     rowKey="id"
                     pagination={false}

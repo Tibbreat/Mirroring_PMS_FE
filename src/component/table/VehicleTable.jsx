@@ -9,20 +9,19 @@ export const VehicleTable = ({ dataDefault, providerId }) => {
     const [data, setVehicle] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
-    const [pageSize] = useState(10); // Số lượng phương tiện trên mỗi trang
+    const [pageSize] = useState(10);
 
-    // Hàm fetch danh sách phương tiện
     const fetchVehicle = async (providerId, page) => {
         try {
             const response = await getVehicles(providerId, page);
             setVehicle(response.data.listData);
-            setTotal(response.data.total); // Tổng số lượng phương tiện
+            setTotal(response.data.total);
         } catch (error) {
             console.error("Failed to fetch vehicles:", error);
         }
     };
 
-    // Tải lại dữ liệu khi dataDefault hoặc providerId thay đổi
+
     useEffect(() => {
         fetchVehicle(providerId, currentPage);
     }, [currentPage, providerId, dataDefault]);
@@ -92,7 +91,7 @@ export const VehicleTable = ({ dataDefault, providerId }) => {
             <Table
                 columns={columns}
                 dataSource={data}
-                pagination={false} // Tắt phân trang mặc định của Table
+                pagination={false}
                 rowKey="id"
             />
             <Pagination
@@ -123,8 +122,6 @@ export const VehicleTable = ({ dataDefault, providerId }) => {
                         <Descriptions.Item span={2} label="Số chỗ ngồi">{selectedVehicle.numberOfSeats}</Descriptions.Item>
                         <Descriptions.Item span={6} label="Tài xế phụ trách">{selectedVehicle.driverName}</Descriptions.Item>
                         <Descriptions.Item span={6} label="Số điện thoại tài xế">{selectedVehicle.driverPhone}</Descriptions.Item>
-                        <Descriptions.Item span={6} label="Địa điểm đón/trả trẻ">{selectedVehicle.pickUpLocation}</Descriptions.Item>
-                        <Descriptions.Item span={6} label="Thời gian đón trẻ">{selectedVehicle.timeStart}</Descriptions.Item>
                         <Descriptions.Item span={6} label="Hình ảnh phương tiện">
                             {selectedVehicle.images && selectedVehicle.images.length > 0 ? (
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>

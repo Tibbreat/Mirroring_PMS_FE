@@ -42,3 +42,8 @@ export const getParentWithUserNameAPI = async (teacherId) => {
     const URL = `/pms/users/parents-by-teacher/${teacherId}`;
     return axios.get(URL);
 }
+
+export const getTeacherAvailableInYear = async(academicYear) => {
+    const url = `/pms/users/options/available-teacher/${academicYear}`;
+    return axios.get(url);
+}

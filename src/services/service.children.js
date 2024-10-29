@@ -29,8 +29,8 @@ export const getChildDetailAPI = async (childId) => {
 
 
 
-export const updateServiceStatus = async (childrenId, serviceName, vehicleId = null) => {
+export const updateServiceStatus = async (childrenId, serviceName, routeId = null) => {
     const URL = `/pms/children/service/${childrenId}/${serviceName}`;
-    const params = vehicleId ? { vehicleId } : {};
+    const params = routeId ? { routeId } : {};
     return await axios.put(URL, null, { params });
 };

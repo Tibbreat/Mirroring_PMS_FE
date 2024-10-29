@@ -29,7 +29,7 @@ export const ChildrenTable = ({ data, currentPage, total, setCurrentPage }) => {
             title: 'Ngày sinh',
             dataIndex: 'childBirthDate',
             key: 'childBirthDate',
-            render: (date) => new Date(date).toLocaleDateString(),  
+            render: (date) => new Date(date).toLocaleDateString(),
         },
         {
             title: 'Cha',
@@ -45,12 +45,12 @@ export const ChildrenTable = ({ data, currentPage, total, setCurrentPage }) => {
             title: 'Lớp',
             dataIndex: 'className',
             key: 'className',
-            render: (text) => text === null ? 
-                <Tag color="red" >Chưa được thêm vào lớp</Tag> 
-                : 
-                <Tag color="lime"> {text} </Tag> ,
+            render: (text) => text === null ?
+                <Tag color="red" >Chưa được thêm vào lớp</Tag>
+                :
+                <Tag color="lime"> {text} </Tag>,
         }
-        
+
     ];
 
     const handlePageChange = (page) => {

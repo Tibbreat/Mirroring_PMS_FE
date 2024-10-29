@@ -31,6 +31,12 @@ const TeacherTable = ({ data }) => {
             render: (text) => text || "N/A",
         },
         {
+            title: 'Hợp đồng',
+            dataIndex: 'contractType',
+            key: 'contractType',
+            render: (text) => text || "N/A",
+        },
+        {
             title: 'Trạng thái',
             dataIndex: 'isActive',
             key: 'isActive',

@@ -1,5 +1,3 @@
-
-
 .btn-blue-1 {
     background-color: #2D88D4;
     color: #fff;
@@ -268,7 +266,7 @@
     top: 0;
     left: 0;
     overflow-x: hidden;
-   
+
 }
 
 .sidebar-title {
@@ -293,53 +291,43 @@
     background: #509CDB;
     color: white !important;
 }
+
 /* Container của từng tin nhắn */
 .message-container {
     display: flex;
     margin: 10px 0;
     padding: 5px;
-  }
-  
-  /* Tin nhắn của người dùng sẽ căn phải */
-  .message-right {
+}
+
+/* Tin nhắn của người dùng sẽ căn phải */
+.message-right {
     justify-content: flex-end;
-  }
-  
-  /* Tin nhắn của người khác sẽ căn trái */
-  .message-left {
+}
+
+/* Tin nhắn của người khác sẽ căn trái */
+.message-left {
     justify-content: flex-start;
-  }
-  
-  /* Phong cách của từng tin nhắn */
-  .message-bubble {
+}
+
+/* Phong cách của từng tin nhắn */
+.message-bubble {
     max-width: 60%;
     padding: 10px;
     border-radius: 10px;
     word-wrap: break-word;
     box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Tin nhắn của người dùng */
-  .message-right .message-bubble {
-    background-color: #9a97fd; /* Màu nền cho tin nhắn của người dùng */
-    border-radius: 15px 15px 0px 15px;
-    text-align: right;
-  }
-  
-  /* Tin nhắn của người khác */
-  .message-left .message-bubble {
-    background-color: #FFFFFF; /* Màu nền cho tin nhắn của người khác */
-    border-radius: 15px 15px 15px 0px;
-    text-align: left;
-  }
-  
-  .custom-calendar .ant-picker-cell-inner {
-    padding: 4px !important; /* Reduce padding */
-    font-size: 12px !important; /* Smaller font size */
 }
 
-/* Adjust the size of the calendar cell's badge */
-.custom-calendar .ant-badge-status-text {
-    font-size: 10px !important; /* Smaller font for status text */
-    line-height: 1 !important;
+/* Tin nhắn của người dùng */
+.message-right .message-bubble {
+    background-color: #9a97fd;
+    border-radius: 15px 15px 0px 15px;
+    text-align: right;
+}
+
+/* Tin nhắn của người khác */
+.message-left .message-bubble {
+    background-color: #FFFFFF;
+    border-radius: 15px 15px 15px 0px;
+    text-align: left;
 }

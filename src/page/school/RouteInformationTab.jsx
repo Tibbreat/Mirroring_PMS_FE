@@ -1,0 +1,13 @@
+import React from 'react';
+import { Form, Input, Typography, Row, Col, Button, Space } from 'antd';
+import { EditOutlined } from '@ant-design/icons';
+import RouteTable from '../../component/table/RouteTable';
+
+const { Title } = Typography;
+
+const RouteInformationTab = () => {
+    return (
+        <RouteTable />
+    );
+}
+export default RouteInformationTab;

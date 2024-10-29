@@ -7,12 +7,28 @@ export const ProviderTable = ({ data, currentPage, total, setCurrentPage, provid
             title: "Tên công ty/đối tác",
             dataIndex: 'providerName',
             key: 'providerName',
-            render: (text, record) => (
-                <Link to={`/pms/manage/provider/${providerType}/${record.id}`}  style={{ textDecoration: "none" }}>
-                    {text}
-                </Link>
-            ),
+            render: (text, record) => {
+                // Get the current path
+                const currentPath = window.location.pathname;
+
+                // Determine the base path based on the current URL
+                let basePath;
+                if (currentPath.includes("/transport")) {
+                    basePath = `/pms/manage/transport/provider/${record.id}`;
+                } else if (currentPath.includes("/kitchen")) {
+                    basePath = `/pms/manage/kitchen/provider/${record.id}`;
+                } else {
+                    basePath = `/pms/manage/provider/${providerType}/${record.id}`;
+                }
+
+                return (
+                    <Link to={basePath} style={{ textDecoration: "none" }}>
+                        {text}
+                    </Link>
+                );
+            },
         },
+
         {
             title: 'Số điện thoại',
             dataIndex: 'providerPhone',

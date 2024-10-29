@@ -75,13 +75,11 @@ export const StaffList = () => {
             try {
                 await addUserAPI(formData);
                 message.success('Nhân viên đã được thêm thành công.');
-
-                // Reset the form fields
                 form.resetFields();
-                setImageFile(null);  // Reset the image file
+                setImageFile(null);
 
                 setIsModalOpen(false);
-                fetchStaff(currentPage); // Refresh the staff list
+                fetchStaff(currentPage);
             } catch (error) {
                 message.error('Có lỗi xảy ra khi thêm nhân viên.');
                 console.error('Error adding user:', error);
@@ -208,7 +206,7 @@ export const StaffList = () => {
                                                 <DatePicker
                                                     style={{ width: '100%' }}
                                                     format="DD-MM-YYYY"
-                                                    disabledDate={(current) => current && current.isAfter(moment().endOf('day'))}
+
                                                 />
                                             </Form.Item>
                                         </Col>

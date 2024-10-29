@@ -29,34 +29,44 @@ const Sidebar = () => {
         },
         {
             key: '5',
-         
-            label: 'Quản lý đối tác',
+
+            label: 'Quản lý bếp',
             children: [
                 {
                     key: '51',
-                    label: 'Thực phẩm',
+                    label: 'Danh sách đối tác',
                 },
                 {
                     key: '52',
-                    label: 'Vận chuyển',
+                    label: 'Thực đơn',
                 }
             ],
         },
         {
             key: '6',
-            label: 'Quản lý trẻ',
+
+            label: 'Quản lý đưa đón',
+            children: [
+                {
+                    key: '61',
+                    label: 'Danh sách đối tác',
+                },
+                {
+                    key: '62',
+                    label: 'Danh sách tuyến',
+                }
+            ],
         },
         {
-            key: '8',
-            label: 'Thực đơn',
+            key: '7',
+            label: 'Quản lý trẻ',
         },
     ];
 
     // Nếu user là ADMIN, thêm mục Cài đặt thông tin
     if (user.role === "ADMIN") {
         allItems.push({
-            key: '7',
-          
+            key: '8',
             label: 'Cài đặt thông tin',
         });
     }
@@ -76,15 +86,17 @@ const Sidebar = () => {
             setSelectedKey('3');
         } else if (location.pathname.includes('/class')) {
             setSelectedKey('4');
-        } else if (location.pathname.includes('/provider/food')) {
+        } else if (location.pathname.includes('/kitchen/provider')) {
             setSelectedKey('51');
-        } else if (location.pathname.includes('/provider/transport')) {
+        } else if (location.pathname.includes('/kitchen/menu/calendar')) {
             setSelectedKey('52');
+        } else if (location.pathname.includes('/transport/provider')) {
+            setSelectedKey('61');
+        } else if (location.pathname.includes('/transport/route')) {
+            setSelectedKey('62');
         } else if (location.pathname.includes('/children')) {
-            setSelectedKey('6');
-        } else if (location.pathname.includes('/settings')) {
             setSelectedKey('7');
-        }else if (location.pathname.includes('/kitchen')) {
+        } else if (location.pathname.includes('/settings')) {
             setSelectedKey('8');
         } else {
             setSelectedKey(undefined);
@@ -110,19 +122,22 @@ const Sidebar = () => {
                 navigate('/pms/manage/class');
                 break;
             case '51':
-                navigate('/pms/manage/provider/food');
+                navigate('/pms/manage/kitchen/provider');
                 break;
             case '52':
-                navigate('/pms/manage/provider/transport');
+                navigate('/pms/manage/kitchen/menu/calendar');
                 break;
-            case '6':
-                navigate('/pms/manage/children');
+            case '61':
+                navigate('/pms/manage/transport/provider');
+                break;
+            case '62':
+                navigate('/pms/manage/transport/route');
                 break;
             case '7':
-                navigate('/pms/manage/settings');
+                navigate('/pms/manage/children');
                 break;
             case '8':
-                navigate('/pms/manage/kitchen/menu/calendar');
+                navigate('/pms/manage/settings');
                 break;
             default:
                 break;

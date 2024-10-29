@@ -4,6 +4,7 @@ import { Spin, Tag, Row, Col, Avatar, Button, Input, Modal, message, Card, Descr
 import { useParams } from 'react-router-dom';
 import { ClassTable } from '../../component/table/ClassTable';
 import { getClassBaseOnTeacher } from '../../services/services.class';
+import { EditOutlined } from '@ant-design/icons';
 import Title from 'antd/es/typography/Title';
 
 const TeacherInformation = () => {
@@ -58,12 +59,12 @@ const TeacherInformation = () => {
         setIsModalVisible(false);
     };
 
-  
+
     const handleInputChange = (field, value) => {
         setFieldValues({ ...fieldValues, [field]: value });
     };
 
-   
+
 
     if (loading) {
         return (
@@ -85,7 +86,17 @@ const TeacherInformation = () => {
                     </Col>
 
                     <Col xs={24} sm={16}>
-                        <Descriptions title="Thông tin giáo viên" bordered column={2}>
+                        <Row justify="space-between" className='mb-3'>
+                            <Col>
+                                <Title level={5}>Thông tin giáo viên</Title>
+                            </Col>
+                            <Col>
+                                <Button type="link" icon={<EditOutlined />} >
+                                    Chỉnh sửa thông tin
+                                </Button>
+                            </Col>
+                        </Row>
+                        <Descriptions bordered column={2}>
                             <Descriptions.Item label="Họ và tên">{teacher?.fullName}</Descriptions.Item>
                             <Descriptions.Item label="Vai trò">Giáo viên</Descriptions.Item>
                             <Descriptions.Item label="Trạng thái">
@@ -97,8 +108,9 @@ const TeacherInformation = () => {
                             <Descriptions.Item label="Số điện thoại">{teacher?.phone}</Descriptions.Item>
                             <Descriptions.Item label="CCCD/CMT">{teacher?.idCardNumber}</Descriptions.Item>
                             <Descriptions.Item label="Địa chỉ" span={2}>{teacher?.address}</Descriptions.Item>
+                            <Descriptions.Item label="Hợp đồng" span={2}>{teacher?.contractType}</Descriptions.Item>
                         </Descriptions>
-                       
+
                     </Col>
                 </Row>
                 <Divider />

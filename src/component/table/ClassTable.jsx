@@ -33,13 +33,8 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
         },
         {
             title: 'Năm học',
-            dataIndex: 'openingDay',
-            key: 'openingDay',
-            render: (text, record) => {
-                const openingYear = text ? moment(text).year() : '';
-                const closingYear = record.closingDay ? moment(record.closingDay).year() : '';
-                return `${openingYear} - ${closingYear}`;
-            },
+            dataIndex: 'academicYear',
+            key: 'academicYear',
         },
         {
             title: 'Ngày khai giảng',

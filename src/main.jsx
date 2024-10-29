@@ -34,8 +34,9 @@ import AddChildren from './page/children/AddChildren';
 
 import AddTransportProvider from './page/supplier/transport-provider/AddTransportProvider';
 import { SchoolInformation } from './page/school/SchoolInformation';
-import AddDailyMenu from './page/kitchen/AddDailyMenu';
 import MenuCalendar from './page/kitchen/MenuCalendar';
+import RouteList from './page/route/RouteList';
+import RouteInformation from './page/route/RouteInformation';
 
 
 const App = () => (
@@ -58,19 +59,28 @@ const App = () => (
         <Route path="class/:id" element={<ClassInformation />} />
         <Route path="staff" element={<StaffList />} />
         <Route path="staff/:id" element={<StaffInformation />} />
-        <Route path="provider/transport" element={<ListTransportProvider />} />
-        <Route path="provider/transport/:id" element={<TransportProviderInformation />} />
-        <Route path="provider/transport/new-provider" element={<AddTransportProvider />} />
-        <Route path="provider/food/:id" element={<FoodProviderInformation />} />
-        <Route path="provider/food" element={<ListFoodProvider />} />
-        <Route path="class/attendance/:id" element={<Attendance />} />
-        <Route path="children/:id" element={<ChildrenInformation />} />
 
+        {/* Transport */}
+        <Route path="transport/provider" element={<ListTransportProvider />} />
+        <Route path="transport/provider/:id" element={<TransportProviderInformation />} />
+        <Route path="transport/provider/new-provider" element={<AddTransportProvider />} />
+        <Route path="transport/route" element={<RouteList />} />
+        <Route path="transport/route/:id" element={<RouteInformation />} />
+
+
+        {/* Kitchen */}
+        <Route path="kitchen/provider/:id" element={<FoodProviderInformation />} />
+        <Route path="kitchen/provider" element={<ListFoodProvider />} />
+
+        {/* Attendance */}
+        <Route path="class/attendance/:id" element={<Attendance />} />
+
+        {/* Children */}
         <Route path="children" element={<ChildrenList />} />
+        <Route path="children/:id" element={<ChildrenInformation />} />
         <Route path="children/add-children" element={<AddChildren />} />
 
         {/* Kitchen */}
-        <Route path="kitchen/menu/new-daily-menu" element={<AddDailyMenu />} />
         <Route path="kitchen/menu/calendar" element={<MenuCalendar />} />
         <Route path="settings" element={<SchoolInformation />} />
 

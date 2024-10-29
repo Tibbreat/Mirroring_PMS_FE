@@ -35,11 +35,16 @@ export const changeClassStatusAPI = async (classId) => {
     const URL = `/pms/classes/change-class-status/${classId}`;
     return await axios.put(URL);
 }
-export const changeClassInformationAPI = async (classId,data) => {
+export const changeClassInformationAPI = async (classId, data) => {
     const URL = `/pms/classes/change-class-description/${classId}`;
     return await axios.put(URL, data, {
         headers: {
             'Content-Type': 'application/json',
         },
     });
+}
+
+export const getClassList = async (academicYear) => {
+    const url = `/pms/classes/available/${academicYear}`;
+    return await axios.get(url);
 }
