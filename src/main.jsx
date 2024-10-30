@@ -24,8 +24,6 @@ import FoodProviderInformation from './page/supplier/food-provider/FoodProviderI
 import TransportProviderInformation from './page/supplier/transport-provider/TransportProviderInformation';
 import ChildrenInformation from './page/children/ChildrenInformation';
 
-import Attendance from './page/attendance/Attendance';
-
 import Error403 from './page/errors/Error403';
 import Error404 from './page/errors/Error404';
 import Error500 from './page/errors/Error500';
@@ -37,6 +35,7 @@ import { SchoolInformation } from './page/school/SchoolInformation';
 import MenuCalendar from './page/kitchen/MenuCalendar';
 import RouteList from './page/route/RouteList';
 import RouteInformation from './page/route/RouteInformation';
+import Attendance from './page/attendance/Attendance';
 
 
 const App = () => (
