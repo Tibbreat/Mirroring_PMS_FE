@@ -14,12 +14,17 @@ export const newRouteAPI = async (data) => {
     return await axios.post(url, data);
 }
 
-export const fetchRouteAPI = async(id) => {
+export const fetchRouteAPI = async (id) => {
     const url = `/pms/route/${id}`;
     return await axios.get(url);
 }
 
-export const fetchStopLocationAPI = async(id) => {
+export const fetchStopLocationAPI = async (id) => {
     const url = `/pms/route/stop-location/${id}`;
     return await axios.get(url);
+}
+
+export const changeStatusRouteAPI = async (id) => {
+    const url = `/pms/route/change-status/${id}`;
+    return await axios.put(url);
 }

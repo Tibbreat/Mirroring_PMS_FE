@@ -27,7 +27,7 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
             render: (text) => `${text} tuổi`,
         },
         {
-            title: 'Phụ Trách',
+            title: 'Quản lý',
             dataIndex: 'managerName',
             key: 'managerName',
         },

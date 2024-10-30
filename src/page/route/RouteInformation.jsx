@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
-import { fetchRouteAPI, fetchStopLocationAPI } from "../../services/services.route";
+import { changeStatusRouteAPI, fetchRouteAPI, fetchStopLocationAPI } from "../../services/services.route";
 import { useEffect, useState } from "react";
 import Loading from "../common/Loading";
-import { Button, Card, Col, Descriptions, Divider, Row, Switch, Tabs, Table, Steps, Checkbox, Modal, Avatar, Tag, message, Image } from "antd";
+import { Button, Card, Col, Descriptions, Divider, Row, Switch, Tabs, Table, Steps, Checkbox, Modal, Avatar, Tag, message, Image, Popconfirm } from "antd";
 import Title from "antd/es/typography/Title";
 import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
 import { getAvailableVehicles, getVehicleOfRoute, unsubscribeRoute, updateRouteForVehicle } from "../../services/service.vehicle";
@@ -65,7 +65,7 @@ const RouteInformation = () => {
 
     const fetchChildrenData = async () => {
         try {
-
+            // Fetch children data logic here
         } catch (error) {
             console.error("Error fetching children data:", error);
         }
@@ -135,6 +135,17 @@ const RouteInformation = () => {
     const closeConfirmDeleteModal = () => {
         setIsConfirmDeleteModalVisible(false);
         setVehicleToDelete(null);
+    };
+
+    const handleSwitchChange = async () => {
+        try {
+            await changeStatusRouteAPI(id);
+            fetchRoute();
+            message.success("Cập nhật trạng thái tuyến thành công.");
+        } catch (error) {
+            console.error("Error updating route status:", error);
+            message.error("Có lỗi xảy ra. Vui lòng thử lại sau");
+        }
     };
 
     if (loading) {
@@ -213,7 +224,16 @@ const RouteInformation = () => {
                         </Row>
                         <Descriptions bordered column={6}>
                             <Descriptions.Item label="Tên tuyến" span={4}>{route?.routeName}</Descriptions.Item>
-                            <Descriptions.Item label="Trạng thái" span={2}><Switch checked={route?.isActive} /></Descriptions.Item>
+                            <Descriptions.Item label="Trạng thái" span={2}>
+                                <Popconfirm
+                                    title="Bạn có chắc chắn muốn thay đổi trạng thái của tuyến này?"
+                                    onConfirm={handleSwitchChange}
+                                    okText="Đồng ý"
+                                    cancelText="Đóng"
+                                >
+                                    <Switch checked={route?.isActive} />
+                                </Popconfirm>
+                            </Descriptions.Item>
                             <Descriptions.Item label="Điểm bắt đầu" span={4}>{route?.startLocation}</Descriptions.Item>
                             <Descriptions.Item label="Thời gian đón" span={2}>{route?.pickupTime}</Descriptions.Item>
                             <Descriptions.Item label="Điểm kết thúc" span={4}>{route?.endLocation}</Descriptions.Item>

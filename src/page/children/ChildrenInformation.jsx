@@ -43,10 +43,24 @@ const ChildrenInformation = () => {
 
     const columns = [
         { title: 'Tên tuyến', dataIndex: 'routeName', key: 'routeName' },
-        { title: 'Điểm đầu', dataIndex: 'startLocation', key: 'startLocation' },
-        { title: 'Điểm cuối', dataIndex: 'endLocation', key: 'endLocation' },
+        { title: 'Điểm đón', dataIndex: 'startLocation', key: 'startLocation' },
         { title: 'Thời gian đón', dataIndex: 'pickupTime', key: 'pickupTime' },
         { title: 'Thời gian trả', dataIndex: 'dropOffTime', key: 'dropOffTime' },
+        {
+            title: 'Chặng',
+            dataIndex: 'stopLocations',
+            key: 'stopLocations',
+            render: (stopLocations) => {
+                if (stopLocations && stopLocations.length > 0) {
+                    return stopLocations.map((location) => (
+                        <div key={location.id} style={{ fontSize: '12px' }}>
+                            {location.locationName || location.id}
+                        </div>
+                    ));
+                }
+                return 'No stops available';
+            },
+        },
         {
             title: 'Chọn',
             key: 'select',
@@ -59,7 +73,9 @@ const ChildrenInformation = () => {
                 </Radio.Group>
             ),
         },
+
     ];
+
 
     useEffect(() => {
         fetchChildrenData(id);
@@ -129,6 +145,9 @@ const ChildrenInformation = () => {
     const handleVehicleSelect = (e) => {
         setSelectedRoute(e.target.value);
     };
+
+
+
 
     if (loading) {
         return (
@@ -245,7 +264,7 @@ const ChildrenInformation = () => {
                 onCancel={handleCancelVehicle}
                 okText="Xác nhận"
                 cancelText="Đóng"
-                width={800}
+                width={`${window.innerWidth * 0.8}px`}
             >
                 <Table
                     dataSource={availableRoutes}

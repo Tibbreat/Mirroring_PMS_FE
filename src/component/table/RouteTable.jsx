@@ -1,7 +1,7 @@
 import { EyeOutlined } from '@ant-design/icons';
 import { exp } from '@tensorflow/tfjs';
 import { Link, useNavigate } from "react-router-dom";
-import { Button, Pagination, Row, Switch, Table } from 'antd';
+import { Button, Pagination, Row, Switch, Table, Tag } from 'antd';
 import { useEffect, useState } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
 
@@ -9,6 +9,7 @@ const RouteTable = ({ data }) => {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
+
 
     const columns = [
         {
@@ -27,19 +28,14 @@ const RouteTable = ({ data }) => {
         { title: 'Thời gian trả', dataIndex: 'dropOffTime', key: 'dropOffTime' },
         { title: 'Số trẻ đăng ký', dataIndex: 'countRegistered', key: 'countRegistered' },
         {
-            title: 'Trạng thái', dataIndex: 'isActive', key: 'isActive', render: (isActive, record) => (
-                <Switch checked={isActive} />
+            title: 'Trạng thái', dataIndex: 'isActive', key: 'isActive',
+            render: (isActive) => (
+                <Tag color={isActive ? 'green' : 'red'}>
+                    {isActive ? 'Đang hoạt động' : 'Ngưng hoạt động'}
+                </Tag>
             )
         },
     ];
-
-    const fetchRoutes = async () => {
-        const reponse = fetchRoutes();
-    }
-
-    useEffect(() => {
-        fetchRoutes();
-    }, []);
     return (
         <div className="p-2">
             <Table columns={columns} dataSource={data} pagination={false} />
