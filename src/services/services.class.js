@@ -17,11 +17,6 @@ export const getClassBaseOnTeacher = async (teacherId, page) => {
     return await axios.get(URL);
 }
 
-export const getClassBaseOnManager = async (managerId, page) => {
-    const URL = `/pms/classes/class/manager/${managerId}?page=${page}`;
-    return await axios.get(URL);
-}
-
 export const getClassBaseOnClassId = async (classId) => {
     const URL = `/pms/classes/class/${classId}`;
     return await axios.get(URL);
@@ -46,5 +41,9 @@ export const changeClassInformationAPI = async (classId, data) => {
 
 export const getClassList = async (academicYear) => {
     const url = `/pms/classes/available/${academicYear}`;
+    return await axios.get(url);
+}
+export const getClassListBaseOnManagerId = async (managerId) => {
+    const url = `/pms/classes/${managerId}`;
     return await axios.get(url);
 }

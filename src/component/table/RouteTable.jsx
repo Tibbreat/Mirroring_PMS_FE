@@ -26,7 +26,7 @@ const RouteTable = ({ data }) => {
         { title: 'Điểm cuối', dataIndex: 'endLocation', key: 'endLocation' },
         { title: 'Thời gian đón', dataIndex: 'pickupTime', key: 'pickupTime' },
         { title: 'Thời gian trả', dataIndex: 'dropOffTime', key: 'dropOffTime' },
-        { title: 'Số trẻ đăng ký', dataIndex: 'countRegistered', key: 'countRegistered' },
+        { title: 'Số trẻ đăng ký', dataIndex: 'childrenCount', key: 'childrenCount' },
         {
             title: 'Trạng thái', dataIndex: 'isActive', key: 'isActive',
             render: (isActive) => (

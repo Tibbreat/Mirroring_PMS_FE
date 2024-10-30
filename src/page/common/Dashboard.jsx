@@ -11,7 +11,7 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchSchoolInfo = async () => {
             try {
-                const response = await getSchoolInformationAPI(user.id);
+                const response = await getSchoolInformationAPI(user.schoolId);
                 setSchoolInfo(response.data);
             } catch (error) {
                 console.error('Error fetching school information:', error);
