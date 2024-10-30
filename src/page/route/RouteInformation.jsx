@@ -6,6 +6,7 @@ import { Button, Card, Col, Descriptions, Divider, Row, Switch, Tabs, Table, Ste
 import Title from "antd/es/typography/Title";
 import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
 import { getAvailableVehicles, getVehicleOfRoute, unsubscribeRoute, updateRouteForVehicle } from "../../services/service.vehicle";
+import { getChildrenByRoute } from "../../services/service.children";
 const { TabPane } = Tabs;
 const { Step } = Steps;
 
@@ -23,7 +24,7 @@ const RouteInformation = () => {
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [vehicleToDelete, setVehicleToDelete] = useState(null);
     const [loading, setLoading] = useState(true);
-
+    const [currentPage, setCurrentPage] = useState(1);
     // Fetch data
     const fetchRoute = async () => {
         try {
@@ -35,7 +36,7 @@ const RouteInformation = () => {
             setLoading(false);
         }
     };
-
+    
     const fetchStopLocation = async () => {
         try {
             const response = await fetchStopLocationAPI(id);
@@ -64,10 +65,13 @@ const RouteInformation = () => {
     };
 
     const fetchChildrenData = async () => {
-        try {
-            // Fetch children data logic here
-        } catch (error) {
-            console.error("Error fetching children data:", error);
+        try{
+            const response = await getChildrenByRoute(id, currentPage);
+            setChildrenData(response.data.listData);
+        }catch (error) {
+            console.error('Error fetching route:', error);
+        } finally {
+            setLoading(false);
         }
     };
 

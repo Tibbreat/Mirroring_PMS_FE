@@ -27,3 +27,7 @@ export const getChildrenByClassAPI = async (classId, page) => {
     const url = `/pms/children/class/${classId}?page=${page}`;
     return await axios.get(url);
 };
+export const getChildrenByRoute = async (routeId, page) => {
+    const url = `/pms/children/route/${routeId}?page=${page}`;
+    return await axios.get(url);
+};
