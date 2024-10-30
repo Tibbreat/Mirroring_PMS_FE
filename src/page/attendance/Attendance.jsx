@@ -268,7 +268,10 @@ const Attendance = () => {
                 </Col>
             </Row>
 
-            <Table dataSource={children} columns={columns} rowKey="id" />
+            <Table dataSource={children}
+                columns={columns}
+                rowKey="id"
+                pagination={false} />
 
             <Modal
                 title="Webcam"

@@ -143,22 +143,27 @@ const StaffInformation = () => {
                         </Descriptions>
                     </Col>
                 </Row>
-                <Divider />
-                <Col xs={24} sm={16} className='container'>
-                    <Title level={4}>Danh sách lớp phụ trách</Title>
-                </Col>
-                <Table
-                    dataSource={classes}
-                    columns={columns}
-                    pagination={false}
-                    rowKey={(record) => record.id}
-                />
-                <Pagination
-                    current={currentPage}
-                    total={total}
-                    onChange={(page) => setCurrentPage(page)}
-                    style={{ textAlign: 'center', marginTop: 20 }}
-                />
+
+                {staff.role === "CLASS_MANAGER" && (
+                    <>
+                        <Divider />
+                        <Col xs={24} sm={16} className='container'>
+                            <Title level={4}>Danh sách lớp phụ trách</Title>
+                        </Col>
+                        <Table
+                            dataSource={classes}
+                            columns={columns}
+                            pagination={false}
+                            rowKey={(record) => record.id}
+                        />
+                        <Pagination
+                            current={currentPage}
+                            total={total}
+                            onChange={(page) => setCurrentPage(page)}
+                            style={{ textAlign: 'center', marginTop: 20 }}
+                        />
+                    </>
+                )}
             </Card>
             <Modal title="Thay đổi trạng thái" open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
                 <p>
