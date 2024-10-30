@@ -5,6 +5,7 @@ import { ProviderTable } from "../../../component/table/ProviderTable";
 import { addFoodProviderAPI, getFoodProvidersAPI } from "../../../services/service.foodprovider";
 import { AuthContext } from "../../../component/context/auth.context";
 import { getBankListAPI } from "../../../services/services.public";
+import { useNavigate } from "react-router-dom";
 
 const ListFoodProvider = () => {
     const [form] = Form.useForm();
@@ -16,6 +17,7 @@ const ListFoodProvider = () => {
     const [providers, setProviders] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [banks, setBanks] = useState([]);
+    const navigate = useNavigate();
 
     const fetchProviders = useCallback(async (page = 1, term = "") => {
         setLoading(true);
@@ -64,6 +66,7 @@ const ListFoodProvider = () => {
                 description: `Đã thêm đối tác ${response.data.providerName}`
             });
             form.resetFields();
+            navigate(`/pms/manage/kitchen/provider/${response.data.id}`);
         } catch (error) {
             notification.error({
                 message: "Thêm đối tác thất bại"

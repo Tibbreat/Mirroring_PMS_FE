@@ -8,6 +8,7 @@ import { ChildrenTable } from '../../component/table/ChildrenTable';
 import Modal from 'antd/es/modal/Modal';
 import { getUserOpnionAPI } from '../../services/services.user';
 import { AuthContext } from '../../component/context/auth.context';
+import { getChildrenByClassAPI } from '../../services/service.children';
 
 const ClassInformation = () => {
     const [classInfo, setClassInfo] = useState(null);

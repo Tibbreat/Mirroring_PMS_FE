@@ -5,6 +5,7 @@ import UploadImage from '../../component/input/UploadImage';
 import { AuthContext } from '../../component/context/auth.context';
 import { getClassList } from '../../services/services.class';
 import moment from 'moment';
+import { useNavigate } from 'react-router-dom';
 
 const { Option } = Select;
 
@@ -15,7 +16,7 @@ const AddChildren = () => {
     const [loading, setLoading] = useState(false);
     const [classList, setClassList] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
-
+    const navigate = useNavigate();
     const handleImageChange = (file) => {
         setImageFile(file);
     };
@@ -60,6 +61,7 @@ const AddChildren = () => {
                 form.resetFields();
                 setImageFile(null);
                 setSelectedClass(null);
+                navigate(`/pms/manage/children/${response.data.id}`);
             } catch (error) {
                 console.error('Error:', error);
                 message.error('Có lỗi xảy ra!');

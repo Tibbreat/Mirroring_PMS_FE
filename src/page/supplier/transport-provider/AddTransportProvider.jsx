@@ -2,13 +2,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Card, Row, Col, Button, message, Form, Input, Select, Modal, Descriptions } from 'antd';
 import { getBankListAPI } from '../../../services/services.public';
 import { addtransportProviderAPI } from '../../../services/service.transportprovider';
+import { useNavigate } from 'react-router-dom';
 
 const AddTransportProvider = () => {
     const [form] = Form.useForm();
     const [banks, setBanks] = useState([]);
     const [isReviewModalVisible, setIsReviewModalVisible] = useState(false);
     const [formValues, setFormValues] = useState({});
-
+    const navigate = useNavigate();
     const fetchBankList = useCallback(async () => {
         try {
             const response = await getBankListAPI();
@@ -34,12 +35,13 @@ const AddTransportProvider = () => {
     const handleConfirm = async () => {
         console.log('Form Values:', formValues);
         try {
-            await addtransportProviderAPI(formValues);
-            message.success('Đã xác nhận thông tin nhà cung cấp vận chuyển!');
+            const reponse = await addtransportProviderAPI(formValues);
+            message.success('Thêm đối tác thành công!');
             setIsReviewModalVisible(false);
+            navigate(`/pms/manage/transport/provider/${reponse.data.id}`);
         } catch (error) {
             console.error("Error adding transport provider:", error);
-            message.error('Có lỗi xảy ra khi thêm nhà cung cấp vận chuyển!');
+            message.error('Có lỗi xảy ra khi thêm đối tác!');
         }
     };
 

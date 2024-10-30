@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { getUserAPI, changeUserStatusAPI } from '../../services/services.user';
-import { Spin, Tag, Row, Col, Avatar, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, Pagination } from 'antd';
-import { useParams } from 'react-router-dom';
+import { Spin, Tag, Row, Col, Avatar, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, Pagination, Table } from 'antd';
+import { Link, useParams } from 'react-router-dom';
 import { ClassTable } from '../../component/table/ClassTable';
 import { getClassBaseOnTeacher } from '../../services/services.class';
 import { EditOutlined } from '@ant-design/icons';
 import Title from 'antd/es/typography/Title';
+import moment from 'moment';
 
 const TeacherInformation = () => {
     const [teacher, setTeacher] = useState(null);
@@ -18,7 +19,46 @@ const TeacherInformation = () => {
     const [classes, setClasses] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
+    const columns = [
+        {
+            title: 'Tên lớp',
+            dataIndex: 'className',
+            key: 'className',
+            render: (text, record) => (
+                <Link to={`/pms/manage/class/${record.id}`} style={{ textDecoration: "none" }}>
+                    {text}
+                </Link>
+            ),
+        },
+        {
+            title: 'Độ tuổi',
+            dataIndex: 'ageRange',
+            key: 'ageRange',
+            render: (text) => `${text} tuổi`,
+        },
+        {
+            title: 'Quản lý',
+            dataIndex: 'managerName',
+            key: 'managerName',
+            render: (text, record) => (
+                record.manager && record.manager.username ? record.manager.username : 'Chưa có quản lý'
+            )
+        },
 
+        {
+            title: 'Năm học',
+            dataIndex: 'academicYear',
+            key: 'academicYear',
+        },
+        {
+            title: 'Ngày khai giảng',
+            dataIndex: 'openingDay',
+            key: 'openingDay',
+            render: (text) => {
+                return text ? moment(text).format('DD-MM-YYYY') : '';
+            },
+        }
+    ];
     const fetchTeacher = async (id) => {
         setLoading(true);
         try {
@@ -117,7 +157,12 @@ const TeacherInformation = () => {
                 <Col xs={24} sm={16} className='container'>
                     <Title level={4}>Danh sách lớp phụ trách</Title>
                 </Col>
-                <ClassTable data={classes} />
+                <Table
+                    dataSource={classes}
+                    columns={columns}
+                    pagination={false}
+                    rowKey={(record) => record.id}
+                />
                 <Pagination
                     current={currentPage}
                     total={total}

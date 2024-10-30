@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../component/context/auth.context";
 import { useContext } from "react";
 
-export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
+export const ClassTable = ({ data }) => {
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
 
@@ -25,6 +25,11 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
             dataIndex: 'ageRange',
             key: 'ageRange',
             render: (text) => `${text} tuổi`,
+        },
+        {
+            title: 'Sĩ số tối đa',
+            dataIndex: 'totalStudent',
+            key: 'totalStudent',
         },
         {
             title: 'Quản lý',
@@ -89,12 +94,7 @@ export const ClassTable = ({ data, currentPage, total, setCurrentPage }) => {
             <Table
                 columns={columns}
                 dataSource={data}
-                pagination={{
-                    current: currentPage,
-                    pageSize: 10,
-                    total: total,
-                    onChange: onPageChange,
-                }}
+                pagination={false}
                 rowKey="id"
             />
         </div>

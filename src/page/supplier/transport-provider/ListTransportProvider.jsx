@@ -48,7 +48,7 @@ const ListTransportProvider = () => {
                 </Col>
             </Row>
             <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
-                <Button type="primary" onClick={() => navigate('/pms/manage/provider/transport/new-provider')} >Thêm đối tác</Button>
+                <Button type="primary" onClick={() => navigate('/pms/manage/transport/provider/new-provider')} >Thêm đối tác</Button>
             </Col>
             {loading ? (
                 <Loading />

@@ -4,33 +4,26 @@ export const addChildren = async (formData) => {
     return axios.post('/pms/children/new-children', formData);
 };
 
-export const getChildrenAPI = async (page, fullname, classId) => {
-    const params = new URLSearchParams();
-
-    if (page) {
-        params.append('page', page);
-    }
-    if (fullname) {
-        params.append('fullname', fullname);
-    }
-    if (classId) {
-        params.append('classId', classId);
-    }
-
-    const URL = `/pms/children?${params.toString()}`;
-    return await axios.get(URL);
+export const getChildrenAPI = async (page, academicYear) => {
+    const url = `/pms/children?academicYear=${academicYear}&page=${page}`;
+    return await axios.get(url);
 };
 
 
 export const getChildDetailAPI = async (childId) => {
-    const URL = `/pms/children/${childId}`;
-    return await axios.get(URL);
+    const url = `/pms/children/${childId}`;
+    return await axios.get(url);
 };
 
 
 
 export const updateServiceStatus = async (childrenId, serviceName, routeId = null) => {
-    const URL = `/pms/children/service/${childrenId}/${serviceName}`;
+    const url = `/pms/children/service/${childrenId}/${serviceName}`;
     const params = routeId ? { routeId } : {};
-    return await axios.put(URL, null, { params });
+    return await axios.put(url, null, { params });
+};
+
+export const getChildrenByClassAPI = async (classId, page) => {
+    const url = `/pms/children/class/${classId}?page=${page}`;
+    return await axios.get(url);
 };
