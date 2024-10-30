@@ -1,20 +1,32 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
-import { Button, Modal, Table, Avatar, notification } from 'antd';
+import { Button, Modal, Table, Avatar, notification, Image, Card, Row, Col, Select, DatePicker } from 'antd';
 import * as faceapi from 'face-api.js';
 import { useParams } from 'react-router-dom';
-import { createBaseLogAPI, getClassLogAPI } from '../../services/service.log';
+import { createBaseLogAPI } from '../../services/service.log';
 import { AuthContext } from '../../component/context/auth.context';
-import { EyeOutlined } from '@ant-design/icons'; // Import the eye icon
+import { EyeOutlined } from '@ant-design/icons';
+import moment from 'moment';
+
 const Attendance = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [videoStream, setVideoStream] = useState(null);
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [labeledDescriptors, setLabeledDescriptors] = useState([]);
     const [children, setChildren] = useState([]);
+    const [selectedDate, setSelectedDate] = useState(moment());
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
     const { id } = useParams();
     const { user } = useContext(AuthContext);
+
+    const loadChildren = async () => {
+        try {
+            const response = await createBaseLogAPI(id, selectedDate.format('YYYY-MM-DD'));
+            setChildren(response.data);
+        } catch (error) {
+            console.error('Failed to fetch children:', error);
+        }
+    };
 
     useEffect(() => {
         const loadModels = async () => {
@@ -39,36 +51,18 @@ const Attendance = () => {
             }
         };
 
-        const loadChildren = async () => {
-            try {
-                const response = await getClassLogAPI(id);
-                const childrenWithAttendance = response.map(child => ({
-                    ...child,
-                    attendanceStatus: false,
-                }));
-                setChildren(childrenWithAttendance);
-            } catch (error) {
-                console.error('Failed to fetch children:', error);
-            }
-        };
-
-        const createBaseLog = async () => {
-            await createBaseLogAPI(id, user.id);
-        };
-
-        createBaseLog();
-        loadChildren();
         loadModels();
-    }, [id, user.id]);
+    }, [id]);
 
-
-
+    useEffect(() => {
+        loadChildren();
+    }, [selectedDate]);
     const columns = [
         {
             title: 'Hình ảnh',
-            dataIndex: 'imageLink',
-            key: 'imageLink',
-            render: (text) => <Avatar width={100} src={text} />,
+            dataIndex: 'imageUrl',
+            key: 'imageUrl',
+            render: (text) => <Image width={100} src={text} />,
         },
         {
             title: 'Họ và tên',
@@ -93,21 +87,11 @@ const Attendance = () => {
             render: (_, record) => {
                 if (!record.checkinTime) {
                     return (
-                        <Button
-                            type="primary"
-                            onClick={() => handleCheckIn(record.id)}
-                        >
-                            Check-in
-                        </Button>
+                        <Button type="primary" onClick={() => handleCheckIn(record.id)}> Check-in </Button>
                     );
                 } else if (record.checkinTime && !record.checkoutTime) {
                     return (
-                        <Button
-                            type="danger"
-                            onClick={() => handleCheckOut(record.id)}
-                        >
-                            Check-out
-                        </Button>
+                        <Button type="danger" onClick={() => handleCheckOut(record.id)}> Check-out </Button>
                     );
                 } else {
                     return null;
@@ -131,43 +115,19 @@ const Attendance = () => {
         },
     ];
 
-
     const handleCheckIn = (id) => {
         const currentTime = new Date().toLocaleString();
-        setChildren((prevChildren) =>
-            prevChildren.map((child) =>
-                child.id === id ? { ...child, checkinTime: currentTime } : child
-            )
-        );
-        notification.success({
-            message: 'Check-in thành công',
-            description: `Đã check-in thành công cho học sinh có ID: ${id} vào lúc ${currentTime}`,
-        });
     };
 
     const handleCheckOut = (id) => {
         const currentTime = new Date().toLocaleString();
-        setChildren((prevChildren) =>
-            prevChildren.map((child) =>
-                child.id === id ? { ...child, checkoutTime: currentTime } : child
-            )
-        );
-        notification.success({
-            message: 'Check-out thành công',
-            description: `Đã check-out thành công cho học sinh có ID: ${id} vào lúc ${currentTime}`,
-        });
     };
 
-
-    // Try capture image from webcam and send to server for face recognition
-    // Try another webcam devide
-
-    
     const loadLabeledImages = async () => {
         const labels = children.map(child => child.childName);
         return Promise.all(
             labels.map(async (label) => {
-                const imgUrl = children.find(child => child.childName === label).imageLink;
+                const imgUrl = children.find(child => child.childName === label).imageUrl;
                 const img = await faceapi.fetchImage(imgUrl);
                 const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
                 if (!detections) {
@@ -283,13 +243,32 @@ const Attendance = () => {
         }
     };
 
-    return (
-        <div style={{ padding: 20 }}>
-            <Table dataSource={children} columns={columns} rowKey="id" />
+    const handleDateChange = (date) => {
+        setSelectedDate(date);
 
-            <Button type="primary" onClick={handleButtonClick}>
-                Điểm danh bằng webcam
-            </Button>
+    };
+
+
+    return (
+        <Card style={{ margin: 20 }}>
+            <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+                <Col span={12}>
+                    <DatePicker
+                        placeholder="Ngày"
+                        style={{ width: '50%' }}
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        disabledDate={(current) => current && current > moment().endOf('day')}
+                    />
+                </Col>
+                <Col span={12} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button type="link" onClick={handleButtonClick}>
+                        Điểm danh bằng webcam
+                    </Button>
+                </Col>
+            </Row>
+
+            <Table dataSource={children} columns={columns} rowKey="id" />
 
             <Modal
                 title="Webcam"
@@ -311,7 +290,7 @@ const Attendance = () => {
                     />
                 </div>
             </Modal>
-        </div>
+        </Card>
     );
 };
 

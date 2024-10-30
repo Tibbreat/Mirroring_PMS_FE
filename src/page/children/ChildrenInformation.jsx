@@ -3,10 +3,10 @@ import { Spin, Row, Col, Button, Modal, message, Card, Descriptions, Divider, Sw
 import { useParams } from 'react-router-dom';
 import { getChildDetailAPI, updateServiceStatus } from '../../services/service.children';
 import moment from 'moment/moment';
-import Title from 'antd/es/typography/Title';
 import { EditOutlined } from '@ant-design/icons';
 import { getAvailableVehicles } from '../../services/service.vehicle';
 import { fetchAvailableRoutesAPI } from '../../services/services.route';
+import Title from 'antd/es/typography/Title';
 
 const ChildrenInformation = () => {
     const [childrenData, setChildrenData] = useState(null);
