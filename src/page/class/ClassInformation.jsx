@@ -8,7 +8,8 @@ import { ChildrenTable } from '../../component/table/ChildrenTable';
 import Modal from 'antd/es/modal/Modal';
 import { getUserOpnionAPI } from '../../services/services.user';
 import { AuthContext } from '../../component/context/auth.context';
-import { getChildrenByClassAPI } from '../../services/service.children';
+import { exportChildrenToExcelByClassId, getChildrenByClassAPI } from '../../services/service.children';
+import { EditOutlined } from '@ant-design/icons';
 
 const ClassInformation = () => {
     const [classInfo, setClassInfo] = useState(null);
@@ -41,7 +42,7 @@ const ClassInformation = () => {
         const contentMessage = classInfo?.isActive
             ? "Bạn có chắc chắn muốn ngừng hoạt động của nhân viên này? Nếu đồng ý, nhân viên sẽ bị hạn chế truy cập vào hệ thống."
             : "Bạn có chắc chắn muốn kích hoạt tài khoản của nhân viên này?";
-    
+
         Modal.confirm({
             title: 'Xác nhận thay đổi trạng thái',
             content: contentMessage,
@@ -49,7 +50,7 @@ const ClassInformation = () => {
                 try {
                     await changeClassStatusAPI(classInfo.id);
                     message.success('Cập nhật trạng thái thành công');
-    
+
                     // Cập nhật lại thông tin nhân viên
                     await fetchClassInfo(id);
                 } catch (error) {
@@ -74,7 +75,19 @@ const ClassInformation = () => {
             setLoading(false);
         }
     };
-
+    const handleDownloadByClassId = async (classId) => {
+        try {
+            const response = await exportChildrenToExcelByClassId(classId);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `ChildrenData_Class_${classId}.xls`);
+            document.body.appendChild(link);
+            link.click();
+        } catch (error) {
+            console.error("Error downloading file:", error);
+        }
+    };
     const fetchTeachersAndManagers = useCallback(async () => {
         try {
             const teacherResponse = await getUserOpnionAPI('TEACHER');
@@ -104,22 +117,27 @@ const ClassInformation = () => {
         <div className="container">
             <Card style={{ marginTop: 20 }}>
                 <Col xs={24}>
-                    <Descriptions title="Thông tin lớp" bordered column={2}>
+                    <Row justify="space-between" className='mb-3'>
+                        <Col>
+                            <Title level={5}>Thông tin lớp</Title>
+                        </Col>
+                        <Col>
+                            <Button type="link" icon={<EditOutlined />} >
+                                Chỉnh sửa thông tin
+                            </Button>
+                        </Col>
+                    </Row>
+                    <Descriptions bordered column={2}>
                         <Descriptions.Item label="Lớp">{classInfo?.className}</Descriptions.Item>
                         <Descriptions.Item label="Độ tuổi">{classInfo?.ageRange}</Descriptions.Item>
-                        <Descriptions.Item label="Năm học">
-                            {classInfo?.academicYear}
-                        </Descriptions.Item>
+                        <Descriptions.Item label="Năm học">{classInfo?.academicYear}</Descriptions.Item>
                         <Descriptions.Item label="Ngày khai giảng">
                             {classInfo?.openingDay ? moment(classInfo.openingDay).format('DD-MM-YYYY') : ''}
                         </Descriptions.Item>
-
                         <Descriptions.Item label="Giáo viên phụ trách">
                             {teachers.map((t) => t.username).join(', ')}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Quản lý lớp">
-                            {classInfo?.manager.username}
-                        </Descriptions.Item>
+                        <Descriptions.Item label="Quản lý lớp">{classInfo?.manager.username}</Descriptions.Item>
                         <Descriptions.Item label="Trạng thái" span={3}>
                             <Switch checked={classInfo?.status} onClick={showModalChangeStatus} />
                         </Descriptions.Item>
@@ -127,7 +145,16 @@ const ClassInformation = () => {
                 </Col>
                 <Divider />
                 <Col xs={24} sm={16} className='container'>
-                    <Title level={4}>Danh sách trẻ</Title>
+                    <Row justify="space-between" align="middle">
+                        <Col>
+                            <Title level={4}>Danh sách trẻ</Title>
+                        </Col>
+                        <Col>
+                            <Button type="primary" icon={<DownloadOutlined />} onClick={() => handleDownloadByClassId(id)}>
+                                Download
+                            </Button>
+                        </Col>
+                    </Row>
                 </Col>
                 <ChildrenTable data={children} />
                 <Pagination

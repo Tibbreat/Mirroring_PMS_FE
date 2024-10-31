@@ -31,3 +31,17 @@ export const getChildrenByRoute = async (routeId, page) => {
     const url = `/pms/children/route/${routeId}?page=${page}`;
     return await axios.get(url);
 };
+export const exportChildrenToExcelByClassId = async (classId) => {
+    const url = `/pms/children/excel/${classId}`;
+    return await axios.get(url, {
+        responseType: 'blob', // Specify blob type to handle file download
+    });
+};
+
+// Download children data by academic year
+export const exportChildrenToExcelByAcademicYear = async (academicYear) => {
+    const url = `/pms/children/excel/academic-year/${academicYear}`;
+    return await axios.get(url, {
+        responseType: 'blob', // Specify blob type to handle file download
+    });
+};

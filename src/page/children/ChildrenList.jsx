@@ -1,12 +1,13 @@
-import { Pagination, Spin, Card, Row, Col, Input, Select, Button, Form, notification } from "antd";
+import { Pagination, Spin, Card, Row, Col, Input, Select, Button, Form, notification, Modal } from "antd";
 import { useCallback, useState, useEffect, useContext } from "react";
 import { ChildrenTable } from "../../component/table/ChildrenTable";
-import { getChildrenAPI } from "../../services/service.children";
+import { getChildrenAPI, exportChildrenToExcelByAcademicYear } from "../../services/service.children";
 import { AuthContext } from "../../component/context/auth.context";
 import NoData from "../../component/no-data-page/NoData";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { getAcademicYearsAPI } from "../../services/services.public";
+import { DownloadOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 
@@ -21,6 +22,8 @@ const ChildrenList = () => {
     const [selectedAcademicYear, setSelectedAcademicYear] = useState(getDefaultAcademicYear());
     const [academicYears, setAcademicYears] = useState([]);
     const navigate = useNavigate();
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [downloadAcademicYear, setDownloadAcademicYear] = useState(getDefaultAcademicYear());
 
     const fetchAcademicYear = useCallback(async () => {
         try {
@@ -63,6 +66,36 @@ const ChildrenList = () => {
         setCurrentPage(1);  // Reset to the first page on search
     };
 
+    const showModal = () => {
+        setIsModalVisible(true);
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+    };
+    const downloadButtonStyle = {
+        backgroundColor: '#4CAF50', // Set your preferred color here
+        borderColor: '#4CAF50',
+        color: '#fff',
+        transition: 'none', // Disable transition to prevent hover effect
+    };
+    const handleDownloadOk = async () => {
+        try {
+            const response = await exportChildrenToExcelByAcademicYear(downloadAcademicYear);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `ChildrenData_AcademicYear_${downloadAcademicYear}.xls`);
+            document.body.appendChild(link);
+            link.click();
+        } catch (error) {
+            console.error("Error downloading file:", error);
+            notification.error({ message: "Failed to download file" });
+        } finally {
+            setIsModalVisible(false);  // Close the modal after download
+        }
+    };
+
     return (
         <Card style={{ margin: 20 }}>
             <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
@@ -90,11 +123,26 @@ const ChildrenList = () => {
                     />
                 </Col>
             </Row>
+
             <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
-                <Button type="primary" onClick={() => navigate('/pms/manage/children/add-children')} >
+                <Button
+                    type="primary"
+                    icon={<DownloadOutlined />}
+                    onClick={showModal}
+                    style={downloadButtonStyle}
+                >
+                    Download
+                </Button>
+                <Button
+                    type="primary"
+                    onClick={() => navigate('/pms/manage/children/add-children')}
+                    style={{ marginLeft: 8 }} // Spacing between buttons
+                >
                     Thêm học sinh
                 </Button>
             </Col>
+
+
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
                     <Spin size="large" />
@@ -117,6 +165,29 @@ const ChildrenList = () => {
                     />
                 </div>
             )}
+
+            {/* Download Modal */}
+            <Modal
+                title="Chọn năm học để tải về"
+                visible={isModalVisible}
+                onOk={handleDownloadOk}
+                onCancel={handleCancel}
+                okText="Download"
+                cancelText="Cancel"
+            >
+                <Select
+                    placeholder="Chọn năm học"
+                    style={{ width: '100%' }}
+                    onChange={(value) => setDownloadAcademicYear(value)}
+                    value={downloadAcademicYear}
+                >
+                    {academicYears.map((year) => (
+                        <Option key={year} value={year}>
+                            {year}
+                        </Option>
+                    ))}
+                </Select>
+            </Modal>
         </Card>
     );
 };

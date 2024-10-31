@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { changeStatusRouteAPI, fetchRouteAPI, fetchStopLocationAPI } from "../../services/services.route";
 import { useEffect, useState } from "react";
 import Loading from "../common/Loading";
@@ -212,7 +212,13 @@ const RouteInformation = () => {
             title: 'Ảnh', dataIndex: 'imageUrl', key: 'imageUrl',
             render: (url) => url ? <Avatar width={50} src={url} /> : 'Không có ảnh',
         },
-        { title: 'Họ và tên', dataIndex: 'childName', key: 'childName' },
+        { title: 'Họ và tên', dataIndex: 'childName', key: 'childName' ,
+            render: (text, record) => (
+                <Link to={`/pms/manage/children/${record.id}`} style={{ textDecoration: "none" }}>
+                    {text}
+                </Link>
+            ),
+        },
         {
             title: 'Giới tính', dataIndex: 'gender', key: 'gender',
             render: (text) => text === 'male' ? 'Nam' : text === 'female' ? 'Nữ' : text,
@@ -222,12 +228,9 @@ const RouteInformation = () => {
             render: (date) => new Date(date).toLocaleDateString(),
         },
         {
-            title: 'Lớp',
-            dataIndex: 'className',
-            key: 'className',
-            render: (text) => text === null
-                ? <Tag color="red">Chưa được thêm vào lớp</Tag>
-                : <Tag color="lime">{text}</Tag>,
+            title: 'Địa chỉ',
+            dataIndex: 'childAddress',
+            key: 'childAddress',
         },
     ];
 

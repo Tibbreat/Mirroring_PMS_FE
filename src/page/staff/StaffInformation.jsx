@@ -80,17 +80,7 @@ const StaffInformation = () => {
         }
     };
 
-    const handleOk = async () => {
-        try {
-            await changeUserStatusAPI(staff.id);
-            message.success('Cập nhật trạng thái thành công');
-            await fetchStaff(id);
-        } catch (error) {
-            console.error('Error changing user status:', error);
-        } finally {
-            setIsModalVisible(false);
-        }
-    };
+
     
     const showModalChangeStatus = () => {
         const contentMessage = staff?.isActive
@@ -117,9 +107,7 @@ const StaffInformation = () => {
             },
         });
     };
-    const handleCancel = () => {
-        setIsModalVisible(false);
-    };
+ 
 
     const handleEditCancel = () => {
         setIsEditModalVisible(false);
