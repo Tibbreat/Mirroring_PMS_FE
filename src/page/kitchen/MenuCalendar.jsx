@@ -130,7 +130,7 @@ const MenuCalendar = () => {
     };
 
     return (
-        <div style={{ padding: 20 }}>
+        <Card className="m-2">
             <Calendar
                 locale={viVN}
                 onSelect={onSelect}
@@ -227,7 +227,7 @@ const MenuCalendar = () => {
                     </Row>
                 </Form>
             </Modal>
-        </div>
+        </Card>
     );
 };
 

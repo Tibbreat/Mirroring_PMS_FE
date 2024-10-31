@@ -90,7 +90,7 @@ export const StaffList = () => {
     };
 
     return (
-        <Card style={{ margin: 20 }}>
+        <Card className="m-2">
             <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
                 <Col xs={24} sm={8}>
                     <Select placeholder="Chọn vai trò" style={{ width: '100%' }}>

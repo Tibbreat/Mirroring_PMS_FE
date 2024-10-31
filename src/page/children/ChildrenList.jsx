@@ -7,7 +7,8 @@ import NoData from "../../component/no-data-page/NoData";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { getAcademicYearsAPI } from "../../services/services.public";
-import { DownloadOutlined } from "@ant-design/icons";
+import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
+import Loading from "../common/Loading";
 
 const { Option } = Select;
 
@@ -74,10 +75,10 @@ const ChildrenList = () => {
         setIsModalVisible(false);
     };
     const downloadButtonStyle = {
-        backgroundColor: '#4CAF50', // Set your preferred color here
+        backgroundColor: '#4CAF50',
         borderColor: '#4CAF50',
         color: '#fff',
-        transition: 'none', // Disable transition to prevent hover effect
+        transition: 'none',
     };
     const handleDownloadOk = async () => {
         try {
@@ -85,19 +86,19 @@ const ChildrenList = () => {
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `ChildrenData_AcademicYear_${downloadAcademicYear}.xls`);
+            link.setAttribute('download', `danh_sach_tre_nam_hoc_${downloadAcademicYear}.xls`);
             document.body.appendChild(link);
             link.click();
         } catch (error) {
             console.error("Error downloading file:", error);
             notification.error({ message: "Failed to download file" });
         } finally {
-            setIsModalVisible(false);  // Close the modal after download
+            setIsModalVisible(false);
         }
     };
 
     return (
-        <Card style={{ margin: 20 }}>
+        <Card className="m-2">
             <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
                 <Col xs={24} sm={8}>
                     <Select
@@ -131,12 +132,13 @@ const ChildrenList = () => {
                     onClick={showModal}
                     style={downloadButtonStyle}
                 >
-                    Download
+                    Xuất Excel
                 </Button>
                 <Button
                     type="primary"
                     onClick={() => navigate('/pms/manage/children/add-children')}
-                    style={{ marginLeft: 8 }} // Spacing between buttons
+                    icon={<PlusOutlined />}
+                    className="ms-2"
                 >
                     Thêm học sinh
                 </Button>
@@ -144,9 +146,7 @@ const ChildrenList = () => {
 
 
             {loading ? (
-                <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
-                    <Spin size="large" />
-                </div>
+                <Loading />
             ) : childrenList.length > 0 ? (
                 <>
                     <ChildrenTable data={childrenList} providerType="transport" />
@@ -168,12 +168,12 @@ const ChildrenList = () => {
 
             {/* Download Modal */}
             <Modal
-                title="Chọn năm học để tải về"
-                visible={isModalVisible}
+                title="Chọn năm học "
+                open={isModalVisible}
                 onOk={handleDownloadOk}
                 onCancel={handleCancel}
-                okText="Download"
-                cancelText="Cancel"
+                okText="Tải về"
+                cancelText="Đóng"
             >
                 <Select
                     placeholder="Chọn năm học"

@@ -63,7 +63,7 @@ const RouteList = () => {
         fetchRoutes();
     }, currentPage);
     return (
-        <Card style={{ margin: 20 }}>
+        <Card className="m-2">
             <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
                 <Button type="primary" onClick={showModal}>Thêm tuyến mới</Button>
             </Col>

@@ -9,7 +9,7 @@ import Modal from 'antd/es/modal/Modal';
 import { getUserOpnionAPI } from '../../services/services.user';
 import { AuthContext } from '../../component/context/auth.context';
 import { exportChildrenToExcelByClassId, getChildrenByClassAPI } from '../../services/service.children';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, DownloadOutlined } from '@ant-design/icons';
 
 const ClassInformation = () => {
     const [classInfo, setClassInfo] = useState(null);

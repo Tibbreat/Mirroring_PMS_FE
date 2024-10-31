@@ -9,7 +9,7 @@ const { TabPane } = Tabs;
 export const SchoolInformation = () => {
     return (
         <div className="container">
-            <Card style={{ marginTop: 20 }}>
+               <Card className="m-2">
                 <Tabs defaultActiveKey="1">
                     <TabPane tab="Thông tin trường" key="1">
                         <SchoolInformationTab />
