@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Row, Col, Button, Descriptions, Divider, Card, Modal, Form, Input, notification, Upload, Switch } from 'antd';
+import { Row, Col, Button, Descriptions, Divider, Card, Modal, Form, Input, notification, Upload, Switch, message } from 'antd';
 import { useParams } from 'react-router-dom';
-import { gettransportProviderDetailAPI } from '../../../services/service.transportprovider';
+import { gettransportProviderDetailAPI, updateStatusTransportProviderAPI } from '../../../services/service.transportprovider';
 import Title from 'antd/es/typography/Title';
 import { VehicleTable } from '../../../component/table/VehicleTable';
 import { EditOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
@@ -74,7 +74,7 @@ const TransportProviderInformation = () => {
                 placement: 'bottomRight',
             });
             fetchVehicle(id, 1);
-            setCurrentPage(1); 
+            setCurrentPage(1);
         } catch (error) {
             console.error('Lỗi khi thêm phương tiện:', error);
         } finally {
@@ -94,6 +94,33 @@ const TransportProviderInformation = () => {
     const onUploadChange = ({ fileList }) => {
         setFileList(fileList.slice(-5));
     };
+    const showModalChangeStatus = () => {
+        const contentMessage = provider?.isActive
+            ? "Bạn có chắc chắn muốn dừng hợp tác với đơn vị này? Nếu đồng ý thì mọi phương tiện đang hoạt động cũng bị dừng hoạt động và xóa khỏi tuyến xe nếu đang hoạt động"
+            : "Bạn có chắc chắn muốn hợp tác với đơn vị này?";
+
+        Modal.confirm({
+            title: 'Xác nhận thay đổi trạng thái',
+            content: contentMessage,
+            onOk: async () => {
+                try {
+                    await updateStatusTransportProviderAPI(id);
+                    message.success('Cập nhật trạng thái thành công');
+
+                    // Cập nhật lại trạng thái của nhà cung cấp
+                    await fetchTransportProvider(id);
+                    await fetchVehicle(id, currentPage);
+                } catch (error) {
+                    console.error('Error changing provider status:', error);
+                    message.error('Có lỗi xảy ra khi cập nhật trạng thái.');
+                }
+            },
+            onCancel() {
+                console.log('Hủy thay đổi trạng thái');
+            },
+        });
+    };
+
 
     if (loading) {
         return <Loading />;
@@ -115,7 +142,7 @@ const TransportProviderInformation = () => {
                         <Descriptions bordered column={6}>
                             <Descriptions.Item label="Tên đơn vị" span={4}>{provider?.providerName}</Descriptions.Item>
                             <Descriptions.Item label="Trạng thái" span={2}>
-                                <Switch checked={provider?.isActive} />
+                                <Switch checked={provider?.isActive} onClick={showModalChangeStatus} />
                             </Descriptions.Item>
                             <Descriptions.Item label="Người đại diện" span={2}>{provider?.representativeName}</Descriptions.Item>
                             <Descriptions.Item label="Chức vụ" span={2}>{provider?.representativePosition}</Descriptions.Item>
@@ -135,12 +162,14 @@ const TransportProviderInformation = () => {
                             <Title level={5}>Danh sách phương tiện</Title>
                         </Col>
                         <Col>
-                            <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>
-                                Thêm phương tiện
-                            </Button>
+                            {provider?.isActive && (
+                                <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>
+                                    Thêm phương tiện
+                                </Button>
+                            )}
                         </Col>
                     </Row>
-                    <VehicleTable dataDefault={vehicle} providerId={id} />
+                    <VehicleTable dataDefault={vehicle} providerId={id} providerStatus={provider?.isActive} />
                 </Col>
             </Card>
 

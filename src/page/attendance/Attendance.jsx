@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
-import { Button, Modal, Table, Avatar, notification, Image, Card, Row, Col, Select, DatePicker } from 'antd';
+import { Button, Modal, Table, Avatar, notification, Image, Card, Row, Col, Select, DatePicker, message } from 'antd';
 import * as faceapi from 'face-api.js';
 import { useParams } from 'react-router-dom';
 import { createBaseLogAPI } from '../../services/service.log';
@@ -104,11 +104,7 @@ const Attendance = () => {
             key: 'note',
             render: (text) => (
                 <span>
-                    <Button
-                        type="link"
-                        icon={<EyeOutlined />}
-                        onClick={() => handleViewNote(text)}
-                    >
+                    <Button type="link" icon={<EyeOutlined />} onClick={() => handleViewNote(text)} >
                     </Button>
                 </span>
             ),
@@ -160,10 +156,16 @@ const Attendance = () => {
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
             }
+            message.success('Đã mở camera. Hãy đợi một chút để hệ thống nhận diện khuôn mặt.');
         } catch (error) {
-            console.error('Error accessing webcam:', error);
+            console.error('Không thể truy cập camera:', error);
+            notification.error({
+                message: 'Lỗi truy cập camera',
+                description: 'Không thể mở camera trên iPad. Vui lòng kiểm tra quyền truy cập hoặc thử trên Safari.',
+            });
         }
     };
+
 
     const detectFaces = async () => {
         if (videoRef.current && canvasRef.current) {
@@ -243,15 +245,12 @@ const Attendance = () => {
         }
     };
 
-    const handleDateChange = (date) => {
-        setSelectedDate(date);
-
-    };
+    const handleDateChange = (date) => { setSelectedDate(date); };
 
 
     return (
-        <Card style={{ margin: 20 }}>
-            <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+        <Card className='m-2'>
+            <Row gutter={[16, 16]} className='mb-2'>
                 <Col span={12}>
                     <DatePicker
                         placeholder="Ngày"
