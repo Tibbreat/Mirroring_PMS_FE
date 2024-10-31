@@ -16,7 +16,7 @@ export const StaffList = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [imageFile, setImageFile] = useState(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);  // Add new state for submission loading
+    const [isSubmitting, setIsSubmitting] = useState(false);  // New state for submission loading
     const [pageSize] = useState(10);  // Number of staff per page
     const [form] = Form.useForm(); // Initialize the form instance
 
@@ -91,7 +91,47 @@ export const StaffList = () => {
 
     return (
         <Card style={{ margin: 20 }}>
-            {/* ...existing components... */}
+            <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
+                <Col xs={24} sm={8}>
+                    <Select placeholder="Chọn vai trò" style={{ width: '100%' }}>
+                        <Option value="CLASS_MANAGER">Quản lý lớp</Option>
+                        <Option value="KITCHEN_MANAGER">Quản lý bếp</Option>
+                        <Option value="TRANSPORT_MANAGER">Quản lý dịch vụ đưa đón</Option>
+                    </Select>
+                </Col>
+                <Col xs={24} sm={16}>
+                    <Input.Search
+                        placeholder="Nhập tên nhân viên cần tìm"
+                        enterButton
+                        onSearch={(value) => console.log(value)}
+                    />
+                </Col>
+            </Row>
+            <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
+                <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm quản lý</Button>
+            </Col>
+            {loading ? (
+                <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
+                    <Spin size="large" />
+                </div>
+            ) : staff.length > 0 ? (
+                <>
+                    <StaffTable
+                        data={staff}
+                        currentPage={currentPage}
+                        pageSize={pageSize}
+                        total={total}
+                        onPageChange={(page) => setCurrentPage(page)}
+                    />
+                </>
+            ) : (
+                <div className="d-flex justify-content-center align-items-center">
+                    <NoData
+                        title={"Không có nhân viên nào"}
+                        subTitle={"Danh sách nhân viên sẽ xuất hiện khi bạn thêm dữ liệu vào hệ thống"}
+                    />
+                </div>
+            )}
             <Modal
                 title="Thêm nhân viên"
                 open={isModalOpen}
