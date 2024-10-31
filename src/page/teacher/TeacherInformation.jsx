@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { getUserAPI, changeUserStatusAPI } from '../../services/services.user';
-import { Spin, Tag, Row, Col, Avatar, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, Pagination, Table } from 'antd';
+import { getUserAPI, changeUserStatusAPI, changeUserDescription } from '../../services/services.user';
+import { Spin, Tag, Row, Col, Avatar, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, Pagination, Table, Form, Select } from 'antd';
 import { Link, useParams } from 'react-router-dom';
-import { ClassTable } from '../../component/table/ClassTable';
 import { getClassBaseOnTeacher } from '../../services/services.class';
 import { EditOutlined } from '@ant-design/icons';
 import Title from 'antd/es/typography/Title';
 import moment from 'moment';
+import UploadImage from '../../component/input/UploadImage';
+
+const { Option } = Select;
 
 const TeacherInformation = () => {
     const [teacher, setTeacher] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
-    const [fieldValues, setFieldValues] = useState({});
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const { id } = useParams();
-
+    const [imageFile, setImageFile] = useState(null);
     const [classes, setClasses] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
+    const [form] = Form.useForm();
+
     const columns = [
         {
             title: 'Tên lớp',
@@ -59,6 +62,7 @@ const TeacherInformation = () => {
             },
         }
     ];
+
     const fetchTeacher = async (id) => {
         setLoading(true);
         try {
@@ -67,7 +71,7 @@ const TeacherInformation = () => {
             setClasses(response_2.data.listData);
             setTotal(response_2.data.total);
             setTeacher(response.data);
-            setFieldValues(response.data);
+            form.setFieldsValue(response.data); // Set giá trị mặc định trong form từ dữ liệu giáo viên
         } catch (error) {
             console.error('Error fetching teacher:', error);
         } finally {
@@ -83,6 +87,10 @@ const TeacherInformation = () => {
         setIsModalVisible(true);
     };
 
+    const showEditModal = () => {
+        setIsEditModalVisible(true);
+    };
+
     const handleOk = async () => {
         try {
             await changeUserStatusAPI(teacher.id);
@@ -94,17 +102,43 @@ const TeacherInformation = () => {
             setIsModalVisible(false);
         }
     };
+    const handleImageChange = (file) => {
+        setImageFile(file);
+    };
+    const handleEditOk = async () => {
+        try {
+            const values = await form.validateFields();
+            const teacherData = {
+                ...values,
+                role: "TEACHER",
+                dob: values.dob ? moment(values.dob).format("YYYY-MM-DD") : null,
+            };
+
+            const formData = new FormData();
+            formData.append('user', new Blob([JSON.stringify(teacherData)], { type: 'application/json' }));
+
+
+            formData.append('image', imageFile);
+
+            await changeUserDescription(id, formData);
+            message.success('Cập nhật thông tin giáo viên thành công');
+            await fetchTeacher(id);
+        } catch (error) {
+            console.error('Error updating teacher information:', error);
+            message.error('Có lỗi xảy ra khi cập nhật giáo viên');
+        } finally {
+            setIsEditModalVisible(false);
+            setImageFile(null); // Xóa ảnh sau khi cập nhật
+        }
+    };
 
     const handleCancel = () => {
         setIsModalVisible(false);
     };
 
-
-    const handleInputChange = (field, value) => {
-        setFieldValues({ ...fieldValues, [field]: value });
+    const handleEditCancel = () => {
+        setIsEditModalVisible(false);
     };
-
-
 
     if (loading) {
         return (
@@ -131,7 +165,7 @@ const TeacherInformation = () => {
                                 <Title level={5}>Thông tin giáo viên</Title>
                             </Col>
                             <Col>
-                                <Button type="link" icon={<EditOutlined />} >
+                                <Button type="link" icon={<EditOutlined />} onClick={showEditModal}>
                                     Chỉnh sửa thông tin
                                 </Button>
                             </Col>
@@ -150,7 +184,6 @@ const TeacherInformation = () => {
                             <Descriptions.Item label="Địa chỉ" span={2}>{teacher?.address}</Descriptions.Item>
                             <Descriptions.Item label="Hợp đồng" span={2}>{teacher?.contractType}</Descriptions.Item>
                         </Descriptions>
-
                     </Col>
                 </Row>
                 <Divider />
@@ -170,12 +203,100 @@ const TeacherInformation = () => {
                     style={{ textAlign: 'center', marginTop: 20 }}
                 />
             </Card>
+
             <Modal title="Thay đổi trạng thái" open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
                 <p>
                     {teacher?.isActive
                         ? 'Bạn có muốn hạn chế tài khoản này?'
                         : 'Bạn có muốn kích hoạt tài khoản này?'}
                 </p>
+            </Modal>
+
+            <Modal
+                title="Chỉnh sửa thông tin giáo viên"
+                open={isEditModalVisible}
+                onOk={handleEditOk}
+                onCancel={handleEditCancel}
+                okText="Lưu"
+                cancelText="Hủy"
+                width={1000}  // Đặt chiều rộng rộng hơn để có không gian cho layout
+            >
+                <div className="container">
+                    <Row gutter={[16, 16]} align="middle">
+                        {/* Phần UploadImage ở bên trái */}
+                        <Col span={8} className="d-flex flex-column align-items-center justify-content-center">
+                            {/* Hiển thị ảnh đại diện */}
+                            <Avatar size={128} src={teacher?.imageLink || "/image/5856.jpg"} style={{ marginBottom: '16px' }} />
+                            {/* Component UploadImage để tải lên ảnh mới */}
+                            <UploadImage onImageChange={handleImageChange} />
+                        </Col>
+
+                        {/* Phần Form ở bên phải */}
+                        <Col span={16}>
+                            <Form form={form} layout="vertical">
+                                <Card title="Thông tin cá nhân" bordered={false}>
+                                    <Row gutter={[16, 16]}>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="Họ và tên"
+                                                name="fullName"
+                                                rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
+                                            >
+                                                <Input placeholder="Nhập họ và tên" />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="Số điện thoại"
+                                                name="phone"
+                                                rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
+                                            >
+                                                <Input placeholder="Nhập số điện thoại" />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="CMT/CCCD"
+                                                name="idCardNumber"
+                                                rules={[{ required: true, message: 'Vui lòng nhập số CCCD' }]}
+                                            >
+                                                <Input placeholder="Nhập số CCCD" />
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                </Card>
+
+                                <Card title="Thông tin bổ sung" bordered={false} style={{ marginTop: 20 }}>
+                                    <Row gutter={[16, 16]}>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="Địa chỉ"
+                                                name="address"
+                                                rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
+                                            >
+                                                <Input placeholder="Nhập địa chỉ" />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={12}>
+                                            <Form.Item
+                                                label="Loại hợp đồng"
+                                                name="contractType"
+                                                rules={[{ required: true, message: 'Vui chọn loại hợp đồng' }]}
+                                            >
+                                                <Select placeholder="Loại hợp đồng">
+                                                    <Option value="Hợp đồng lao động có thời hạn 6 tháng">Hợp đồng lao động có thời hạn 6 tháng</Option>
+                                                    <Option value="Hợp đồng lao động có thời hạn 1 năm">Hợp đồng lao động có thời hạn 1 năm</Option>
+                                                    <Option value="Hợp đồng lao động không xác định thời hạn">Hợp đồng lao động không xác định thời hạn</Option>
+                                                    <Option value="Hợp đồng thời vụ">Hợp đồng thời vụ</Option>
+                                                </Select>
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                </Card>
+                            </Form>
+                        </Col>
+                    </Row>
+                </div>
             </Modal>
         </div>
     );

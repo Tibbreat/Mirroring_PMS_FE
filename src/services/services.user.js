@@ -47,3 +47,12 @@ export const getTeacherAvailableInYear = async(academicYear) => {
     const url = `/pms/users/options/available-teacher/${academicYear}`;
     return axios.get(url);
 }
+export const changeUserDescription = async (userId, formData) => {
+    const URL = `/pms/users/update-user/${userId}`;
+    
+    return axios.put(URL, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+};
