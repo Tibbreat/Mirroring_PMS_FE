@@ -36,7 +36,7 @@ const RouteInformation = () => {
             setLoading(false);
         }
     };
-    
+
     const fetchStopLocation = async () => {
         try {
             const response = await fetchStopLocationAPI(id);
@@ -65,10 +65,10 @@ const RouteInformation = () => {
     };
 
     const fetchChildrenData = async () => {
-        try{
+        try {
             const response = await getChildrenByRoute(id, currentPage);
             setChildrenData(response.data.listData);
-        }catch (error) {
+        } catch (error) {
             console.error('Error fetching route:', error);
         } finally {
             setLoading(false);
@@ -142,14 +142,20 @@ const RouteInformation = () => {
     };
 
     const handleSwitchChange = async () => {
-        try {
-            await changeStatusRouteAPI(id);
-            fetchRoute();
-            message.success("Cập nhật trạng thái tuyến thành công.");
-        } catch (error) {
-            console.error("Error updating route status:", error);
-            message.error("Có lỗi xảy ra. Vui lòng thử lại sau");
-        }
+        Modal.confirm({
+            title: 'Xác nhận thay đổi trạng thái',
+            content: 'Bạn có chắc chắn muốn thay đổi trạng thái của tuyến?',
+            onOk: async () => {
+                try {
+                    await changeStatusRouteAPI(id);
+                    message.success('Thay đổi trạng thái thành công');
+                    fetchRoute();
+                } catch (error) {
+                    console.error('Error changing route status:', error);
+                    message.error('Có lỗi xảy ra. Vui lòng thử lại sau');
+                }
+            },
+        });
     };
 
     if (loading) {
@@ -163,10 +169,18 @@ const RouteInformation = () => {
         { title: 'Số chỗ ngồi', dataIndex: 'numberOfSeats', key: 'numberOfSeats' },
         { title: 'Nhãn hiệu', dataIndex: 'manufacturer', key: 'manufacturer' },
         {
+            align: 'center',
             render: (record) => (
                 <>
                     <EyeOutlined onClick={() => openDetailModal(record)} style={{ cursor: 'pointer' }} />
-                    <DeleteOutlined onClick={() => openConfirmDeleteModal(record.id)} style={{ cursor: 'pointer', color: 'red', marginLeft: 16 }} />
+                </>
+            ),
+        },
+        {
+            align: 'center',
+            render: (record) => (
+                <>
+                    <DeleteOutlined onClick={() => openConfirmDeleteModal(record.id)} style={{ cursor: 'pointer', color: 'red' }} />
                 </>
             ),
         },
@@ -228,16 +242,7 @@ const RouteInformation = () => {
                         </Row>
                         <Descriptions bordered column={6}>
                             <Descriptions.Item label="Tên tuyến" span={4}>{route?.routeName}</Descriptions.Item>
-                            <Descriptions.Item label="Trạng thái" span={2}>
-                                <Popconfirm
-                                    title="Bạn có chắc chắn muốn thay đổi trạng thái của tuyến này?"
-                                    onConfirm={handleSwitchChange}
-                                    okText="Đồng ý"
-                                    cancelText="Đóng"
-                                >
-                                    <Switch checked={route?.isActive} />
-                                </Popconfirm>
-                            </Descriptions.Item>
+                            <Descriptions.Item label="Trạng thái" span={2}> <Switch checked={route?.isActive} onClick={handleSwitchChange} /> </Descriptions.Item>
                             <Descriptions.Item label="Điểm bắt đầu" span={4}>{route?.startLocation}</Descriptions.Item>
                             <Descriptions.Item label="Thời gian đón" span={2}>{route?.pickupTime}</Descriptions.Item>
                             <Descriptions.Item label="Điểm kết thúc" span={4}>{route?.endLocation}</Descriptions.Item>
@@ -250,8 +255,13 @@ const RouteInformation = () => {
                     <Tabs defaultActiveKey="1">
                         <TabPane tab="Danh sách phương tiện" key="1">
                             <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
-                                <Button type="primary" onClick={() => setIsVehicleModalVisible(true)}>Thêm xe vào chặng</Button>
+                                {route?.isActive && (
+                                    <Button type="primary" onClick={() => setIsVehicleModalVisible(true)}>
+                                        Thêm xe vào chặng
+                                    </Button>
+                                )}
                             </Col>
+
                             <Table
                                 columns={vehicleColumns}
                                 dataSource={vehicleData}

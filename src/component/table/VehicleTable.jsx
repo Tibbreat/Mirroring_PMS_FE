@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { EyeOutlined } from '@ant-design/icons';
 import { changeStatusAPI, getVehicles } from "../../services/service.vehicle";
 
-export const VehicleTable = ({ dataDefault, providerId }) => {
+export const VehicleTable = ({ dataDefault, providerId, providerStatus }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [data, setVehicle] = useState([]);
@@ -30,11 +30,18 @@ export const VehicleTable = ({ dataDefault, providerId }) => {
         { title: 'Phương tiện', dataIndex: 'vehicleName', key: 'vehicleName' },
         { title: 'Biển số xe', dataIndex: 'licensePlate', key: 'licensePlate' },
         { title: 'Màu sắc', dataIndex: 'color', key: 'color', render: (text) => `${text}` },
-        { title: 'Số chỗ ngồi', dataIndex: 'numberOfSeats', key: 'numberOfSeats' },
+        { title: 'Số chỗ ngồi', dataIndex: 'numberOfSeats', key: 'numberOfSeats',  sorter: (a, b) => a.numberOfSeats - b.numberOfSeats, },
         { title: 'Nhãn hiệu', dataIndex: 'manufacturer', key: 'manufacturer' },
         {
-            title: 'Trạng thái', dataIndex: 'isActive', key: 'isActive', render: (isActive, record) => (
-                <Switch checked={isActive} onChange={() => confirmStatusChange(record)} />
+            title: 'Trạng thái',
+            dataIndex: 'isActive',
+            key: 'isActive',
+            render: (isActive, record) => (
+                <Switch
+                    checked={isActive}
+                    onChange={() => confirmStatusChange(record)}
+                    disabled={!providerStatus}
+                />
             )
         },
         {
@@ -43,6 +50,7 @@ export const VehicleTable = ({ dataDefault, providerId }) => {
             )
         }
     ];
+
 
     const confirmStatusChange = (vehicle) => {
         Modal.confirm({

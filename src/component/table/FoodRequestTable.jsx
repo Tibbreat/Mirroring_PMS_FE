@@ -5,7 +5,7 @@ import { useState, useEffect, useContext } from "react";
 import { getFoodRequestItems, getFoodRequestsAPI, updateAcceptFoodRequestAPI } from '../../services/service.foodprovider';
 import { AuthContext } from '../context/auth.context';
 
-export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPage, providerId }) => {
+export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPage, providerId, isActive }) => {
     const [data, setData] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState(null);
@@ -212,7 +212,7 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
                 open={isModalVisible}
                 onCancel={handleModalClose}
                 footer={
-                    selectedRequest?.status === 'PENDING' ? (
+                    selectedRequest?.status === 'PENDING' && isActive ? (
                         [
                             <Button key="reject" danger onClick={handleReject}>
                                 Từ chối

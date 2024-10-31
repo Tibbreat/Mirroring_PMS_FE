@@ -1,5 +1,6 @@
 import axios from '../../axios.customize';
 
+//Đơn vị cung cấp thực phẩm
 export const addFoodProviderAPI = async (data) => {
     return await axios.post("/pms/food-service-provider/add", data);
 };
@@ -11,6 +12,10 @@ export const getFoodProvidersAPI = async (page) => {
 export const getFoodProviderDetailAPI = async (providerId) => {
     return await axios.get(`/pms/food-service-provider/${providerId}`);
 };
+
+export const updateStatusFoodProviderAPI = async (providerId) => {
+    return await axios.put(`/pms/food-service-provider/status/${providerId}`);
+}
 
 
 //Yêu cầu thực phẩm
