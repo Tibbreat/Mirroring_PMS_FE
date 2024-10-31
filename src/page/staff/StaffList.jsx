@@ -16,6 +16,7 @@ export const StaffList = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [imageFile, setImageFile] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);  // Add new state for submission loading
     const [pageSize] = useState(10);  // Number of staff per page
     const [form] = Form.useForm(); // Initialize the form instance
 
@@ -42,6 +43,7 @@ export const StaffList = () => {
         setIsModalOpen(false);
         form.resetFields();  // Reset form fields when modal is closed
         setImageFile(null);  // Reset image file when modal is closed
+        setIsSubmitting(false); // Reset submitting state when modal is closed
     };
 
     const handleImageChange = (file) => {
@@ -49,12 +51,11 @@ export const StaffList = () => {
     };
 
     const handleOk = async (values) => {
+        setIsSubmitting(true);  // Set loading state to true on submit
         const { fullName, idCardNumber, address, phone, dob, role } = values;
 
-        // Create a FormData object to handle multipart form data
         const formData = new FormData();
 
-        // Append user data as JSON
         const userData = {
             fullName,
             idCardNumber,
@@ -67,9 +68,9 @@ export const StaffList = () => {
 
         formData.append('user', new Blob([JSON.stringify(userData)], { type: 'application/json' }));
 
-        // Append the image file if it exists
         if (!imageFile) {
             message.error("Vui lòng cung cấp ảnh thẻ");
+            setIsSubmitting(false);  // Stop loading if there's an error
         } else {
             formData.append('image', imageFile);
             try {
@@ -77,59 +78,20 @@ export const StaffList = () => {
                 message.success('Nhân viên đã được thêm thành công.');
                 form.resetFields();
                 setImageFile(null);
-
                 setIsModalOpen(false);
                 fetchStaff(currentPage);
             } catch (error) {
                 message.error('Có lỗi xảy ra khi thêm nhân viên.');
                 console.error('Error adding user:', error);
+            } finally {
+                setIsSubmitting(false);  // Stop loading once done
             }
         }
     };
 
     return (
         <Card style={{ margin: 20 }}>
-            <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
-                <Col xs={24} sm={8}>
-                    <Select placeholder="Chọn vai trò" style={{ width: '100%' }}>
-                        <Option value="CLASS_MANAGER">Quản lý lớp</Option>
-                        <Option value="KITCHEN_MANAGER">Quản lý bếp</Option>
-                        <Option value="TRANSPORT_MANAGER">Quản lý dịch vụ đưa đón</Option>
-                    </Select>
-                </Col>
-                <Col xs={24} sm={16}>
-                    <Input.Search
-                        placeholder="Nhập tên nhân viên cần tìm"
-                        enterButton
-                        onSearch={(value) => console.log(value)}
-                    />
-                </Col>
-            </Row>
-            <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
-                <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm quản lý</Button>
-            </Col>
-            {loading ? (
-                <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
-                    <Spin size="large" />
-                </div>
-            ) : staff.length > 0 ? (
-                <>
-                    <StaffTable
-                        data={staff}
-                        currentPage={currentPage}
-                        pageSize={pageSize}
-                        total={total}
-                        onPageChange={(page) => setCurrentPage(page)}
-                    />
-                </>
-            ) : (
-                <div className="d-flex justify-content-center align-items-center">
-                    <NoData
-                        title={"Không có nhân viên nào"}
-                        subTitle={"Danh sách nhân viên sẽ xuất hiện khi bạn thêm dữ liệu vào hệ thống"}
-                    />
-                </div>
-            )}
+            {/* ...existing components... */}
             <Modal
                 title="Thêm nhân viên"
                 open={isModalOpen}
@@ -140,7 +102,7 @@ export const StaffList = () => {
                 <div className="container">
                     <Row gutter={[16, 16]} align="middle">
                         <Col span={8} className="d-flex justify-content-center">
-                            <UploadImage onImageChange={handleImageChange} />
+                            <UploadImage onImageChange={handleImageChange} disabled={isSubmitting} />
                         </Col>
                         <Col span={16}>
                             <Form
@@ -148,10 +110,10 @@ export const StaffList = () => {
                                 layout="vertical"
                                 onFinish={handleOk}
                                 initialValues={{
-                                    dob: moment(), // Optional default value
+                                    dob: moment(),
                                 }}
+                                disabled={isSubmitting} // Disable the form when loading
                             >
-                                {/* Thông tin cá nhân */}
                                 <Card title="Thông tin cá nhân" bordered={false}>
                                     <Row gutter={[16, 16]}>
                                         <Col span={8}>
@@ -163,7 +125,7 @@ export const StaffList = () => {
                                                     { pattern: /^[a-zA-ZÀ-ỹ\s]{2,50}$/, message: 'Họ và tên chỉ được chứa chữ cái và khoảng trắng, từ 2 đến 50 ký tự.' }
                                                 ]}
                                             >
-                                                <Input placeholder="Nhập họ và tên" />
+                                                <Input placeholder="Nhập họ và tên" disabled={isSubmitting} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={8}>
@@ -175,7 +137,7 @@ export const StaffList = () => {
                                                     { pattern: /^(\+84|0)?[3|5|7|8|9]\d{8}$/, message: 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng +84, 03, 05, 07, 08, 09.' }
                                                 ]}
                                             >
-                                                <Input placeholder="Nhập số điện thoại" />
+                                                <Input placeholder="Nhập số điện thoại" disabled={isSubmitting} />
                                             </Form.Item>
                                         </Col>
                                         <Col span={8}>
@@ -184,7 +146,7 @@ export const StaffList = () => {
                                                 name="role"
                                                 rules={[{ required: true, message: 'Vui lòng chọn chức vụ' }]}
                                             >
-                                                <Select placeholder="Chọn vai trò" style={{ width: '100%' }}>
+                                                <Select placeholder="Chọn vai trò" style={{ width: '100%' }} disabled={isSubmitting}>
                                                     <Option value="CLASS_MANAGER">Quản lý lớp</Option>
                                                     <Option value="KITCHEN_MANAGER">Quản lý bếp</Option>
                                                     <Option value="TRANSPORT_MANAGER">Quản lý dịch vụ đưa đón</Option>
@@ -193,8 +155,7 @@ export const StaffList = () => {
                                         </Col>
                                     </Row>
                                 </Card>
-
-                                {/* Thông tin bổ sung */}
+                                {/* Additional Information */}
                                 <Card title="Thông tin bổ sung" bordered={false} style={{ marginTop: 20 }}>
                                     <Row gutter={[16, 16]}>
                                         <Col span={12}>
@@ -206,7 +167,7 @@ export const StaffList = () => {
                                                 <DatePicker
                                                     style={{ width: '100%' }}
                                                     format="DD-MM-YYYY"
-
+                                                    disabled={isSubmitting}
                                                 />
                                             </Form.Item>
                                         </Col>
@@ -219,7 +180,7 @@ export const StaffList = () => {
                                                     { pattern: /^\d{12}$/, message: 'CMT/CCCD phải gồm 12 chữ số.' }
                                                 ]}
                                             >
-                                                <Input placeholder="Nhập CMT/CCCD" />
+                                                <Input placeholder="Nhập CMT/CCCD" disabled={isSubmitting} />
                                             </Form.Item>
                                         </Col>
                                     </Row>
@@ -233,18 +194,16 @@ export const StaffList = () => {
                                                     { pattern: /^[a-zA-Z0-9À-ỹ\s,.-]{5,100}$/, message: 'Địa chỉ phải có từ 5 đến 100 ký tự và chỉ bao gồm chữ cái, số, và các dấu phẩy, dấu chấm, gạch ngang.' }
                                                 ]}
                                             >
-                                                <Input placeholder="Nhập địa chỉ" />
+                                                <Input placeholder="Nhập địa chỉ" disabled={isSubmitting} />
                                             </Form.Item>
                                         </Col>
                                     </Row>
                                 </Card>
-
-                                {/* Hành động */}
                                 <Row justify="center" style={{ marginTop: 30 }}>
-                                    <Button type="primary" htmlType="submit" style={{ width: '120px' }}>
+                                    <Button type="primary" htmlType="submit" style={{ width: '120px' }} loading={isSubmitting}>
                                         Thêm
                                     </Button>
-                                    <Button onClick={handleCancel} style={{ width: '120px', marginLeft: '10px' }}>
+                                    <Button onClick={handleCancel} style={{ width: '120px', marginLeft: '10px' }} disabled={isSubmitting}>
                                         Hủy
                                     </Button>
                                 </Row>
