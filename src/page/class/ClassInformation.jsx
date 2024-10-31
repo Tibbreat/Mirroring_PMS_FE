@@ -24,22 +24,6 @@ const ClassInformation = () => {
 
     const { user } = useContext(AuthContext);
 
-    const handleCancel = () => {
-        setIsModalVisible(false);
-    };
-
-    const handleOk = async () => {
-        try {
-            await changeClassStatusAPI(classInfo.id);
-            message.success('Cập nhật trạng thái thành công');
-            await fetchClassInfo(id);
-        } catch (error) {
-            console.error('Error changing user status:', error);
-        } finally {
-            setIsModalVisible(false);
-        }
-    };
-
     const fetchClassInfo = async (id) => {
         setLoading(true);
         try {
@@ -53,7 +37,31 @@ const ClassInformation = () => {
             setLoading(false);
         }
     };
-
+    const showModalChangeStatus = () => {
+        const contentMessage = classInfo?.isActive
+            ? "Bạn có chắc chắn muốn ngừng hoạt động của nhân viên này? Nếu đồng ý, nhân viên sẽ bị hạn chế truy cập vào hệ thống."
+            : "Bạn có chắc chắn muốn kích hoạt tài khoản của nhân viên này?";
+    
+        Modal.confirm({
+            title: 'Xác nhận thay đổi trạng thái',
+            content: contentMessage,
+            onOk: async () => {
+                try {
+                    await changeClassStatusAPI(classInfo.id);
+                    message.success('Cập nhật trạng thái thành công');
+    
+                    // Cập nhật lại thông tin nhân viên
+                    await fetchClassInfo(id);
+                } catch (error) {
+                    console.error('Error changing user status:', error);
+                    message.error('Có lỗi xảy ra khi cập nhật trạng thái.');
+                }
+            },
+            onCancel() {
+                console.log('Hủy thay đổi trạng thái');
+            },
+        });
+    };
     const fetchChildrenList = async (id) => {
         setLoading(true);
         try {
@@ -84,10 +92,6 @@ const ClassInformation = () => {
         fetchTeachersAndManagers();
     }, [id, fetchTeachersAndManagers]);
 
-    const showModal = () => {
-        setIsModalVisible(true);
-    };
-
     if (loading) {
         return (
             <div className='d-flex justify-content-center align-items-center' style={{ height: '100vh' }}>
@@ -117,7 +121,7 @@ const ClassInformation = () => {
                             {classInfo?.manager.username}
                         </Descriptions.Item>
                         <Descriptions.Item label="Trạng thái" span={3}>
-                            <Switch checked={classInfo?.status} onClick={showModal} />
+                            <Switch checked={classInfo?.status} onClick={showModalChangeStatus} />
                         </Descriptions.Item>
                     </Descriptions>
                 </Col>
@@ -133,13 +137,7 @@ const ClassInformation = () => {
                     style={{ textAlign: 'center', marginTop: 20 }}
                 />
             </Card>
-            <Modal title="Thay đổi trạng thái" open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
-                <p>
-                    {classInfo?.status
-                        ? 'Bạn có muốn hạn chế lớp này?'
-                        : 'Bạn có muốn kích hoạt lớp này?'}
-                </p>
-            </Modal>
+
         </div>
     );
 }

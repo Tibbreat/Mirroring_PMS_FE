@@ -83,25 +83,36 @@ const TeacherInformation = () => {
         fetchTeacher(id);
     }, [id]);
 
-    const showModal = () => {
-        setIsModalVisible(true);
+    const showModalChangeStatus = () => {
+        const contentMessage = teacher?.isActive
+            ? "Bạn có chắc chắn muốn ngừng hoạt động của nhân viên này? Nếu đồng ý, nhân viên sẽ bị hạn chế truy cập vào hệ thống."
+            : "Bạn có chắc chắn muốn kích hoạt tài khoản của nhân viên này?";
+    
+        Modal.confirm({
+            title: 'Xác nhận thay đổi trạng thái',
+            content: contentMessage,
+            onOk: async () => {
+                try {
+                    await changeUserStatusAPI(teacher.id);
+                    message.success('Cập nhật trạng thái thành công');
+    
+                    // Cập nhật lại thông tin nhân viên
+                    await fetchTeacher(id);
+                } catch (error) {
+                    console.error('Error changing user status:', error);
+                    message.error('Có lỗi xảy ra khi cập nhật trạng thái.');
+                }
+            },
+            onCancel() {
+                console.log('Hủy thay đổi trạng thái');
+            },
+        });
     };
 
     const showEditModal = () => {
         setIsEditModalVisible(true);
     };
 
-    const handleOk = async () => {
-        try {
-            await changeUserStatusAPI(teacher.id);
-            message.success('Cập nhật trạng thái thành công');
-            await fetchTeacher(id);
-        } catch (error) {
-            console.error('Error changing user status:', error);
-        } finally {
-            setIsModalVisible(false);
-        }
-    };
     const handleImageChange = (file) => {
         setImageFile(file);
     };
@@ -174,7 +185,7 @@ const TeacherInformation = () => {
                             <Descriptions.Item label="Họ và tên">{teacher?.fullName}</Descriptions.Item>
                             <Descriptions.Item label="Vai trò">Giáo viên</Descriptions.Item>
                             <Descriptions.Item label="Trạng thái">
-                                <Switch checked={teacher.isActive} onClick={showModal} />
+                                <Switch checked={teacher.isActive} onClick={showModalChangeStatus} />
                             </Descriptions.Item>
                             <Descriptions.Item label="Mã nhân viên">{teacher?.id}</Descriptions.Item>
                             <Descriptions.Item label="Account">{teacher?.username}</Descriptions.Item>
@@ -204,13 +215,6 @@ const TeacherInformation = () => {
                 />
             </Card>
 
-            <Modal title="Thay đổi trạng thái" open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
-                <p>
-                    {teacher?.isActive
-                        ? 'Bạn có muốn hạn chế tài khoản này?'
-                        : 'Bạn có muốn kích hoạt tài khoản này?'}
-                </p>
-            </Modal>
 
             <Modal
                 title="Chỉnh sửa thông tin giáo viên"

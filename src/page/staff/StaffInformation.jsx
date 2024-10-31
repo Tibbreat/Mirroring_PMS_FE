@@ -91,7 +91,32 @@ const StaffInformation = () => {
             setIsModalVisible(false);
         }
     };
-
+    
+    const showModalChangeStatus = () => {
+        const contentMessage = staff?.isActive
+            ? "Bạn có chắc chắn muốn ngừng hoạt động của nhân viên này? Nếu đồng ý, nhân viên sẽ bị hạn chế truy cập vào hệ thống."
+            : "Bạn có chắc chắn muốn kích hoạt tài khoản của nhân viên này?";
+    
+        Modal.confirm({
+            title: 'Xác nhận thay đổi trạng thái',
+            content: contentMessage,
+            onOk: async () => {
+                try {
+                    await changeUserStatusAPI(staff.id);
+                    message.success('Cập nhật trạng thái thành công');
+    
+                    // Cập nhật lại thông tin nhân viên
+                    await fetchStaff(id);
+                } catch (error) {
+                    console.error('Error changing user status:', error);
+                    message.error('Có lỗi xảy ra khi cập nhật trạng thái.');
+                }
+            },
+            onCancel() {
+                console.log('Hủy thay đổi trạng thái');
+            },
+        });
+    };
     const handleCancel = () => {
         setIsModalVisible(false);
     };
@@ -174,7 +199,7 @@ const StaffInformation = () => {
                                 {staff?.role === 'TRANSPORT_MANAGER' && 'Quản lý dịch vụ vận chuyển'}
                             </Descriptions.Item>
                             <Descriptions.Item label="Trạng thái">
-                                <Switch checked={staff.isActive} onClick={showModal} />
+                                <Switch checked={staff.isActive} onClick={showModalChangeStatus} />
                             </Descriptions.Item>
                             <Descriptions.Item label="Mã nhân viên">{staff?.id}</Descriptions.Item>
                             <Descriptions.Item label="Account">{staff?.username}</Descriptions.Item>
@@ -207,14 +232,6 @@ const StaffInformation = () => {
                     </>
                 )}
             </Card>
-
-            <Modal title="Thay đổi trạng thái" open={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
-                <p>
-                    {staff?.isActive
-                        ? 'Bạn có muốn hạn chế tài khoản này?'
-                        : 'Bạn có muốn kích hoạt tài khoản này?'}
-                </p>
-            </Modal>
 
             <Modal
                 title="Chỉnh sửa thông tin nhân viên"
@@ -294,16 +311,6 @@ const StaffInformation = () => {
                                         </Col>
                                     </Row>
                                 </Card>
-
-                                {/* Nút hành động */}
-                                <Row justify="center" style={{ marginTop: 30 }}>
-                                    <Button type="primary" htmlType="submit" style={{ width: '120px' }}>
-                                        Lưu
-                                    </Button>
-                                    <Button onClick={handleEditCancel} style={{ width: '120px', marginLeft: '10px' }}>
-                                        Hủy
-                                    </Button>
-                                </Row>
                             </Form>
                         </Col>
                     </Row>
