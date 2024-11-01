@@ -17,3 +17,7 @@ export const getClassLogAPI = async (classId) => {
         throw error;
     }
 }
+
+export const attendAPI = async (data) => {
+    return await axios.put('/pms/attendance', data);
+}
