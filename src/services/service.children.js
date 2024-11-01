@@ -4,10 +4,13 @@ export const addChildren = async (formData) => {
     return axios.post('/pms/children/new-children', formData);
 };
 
-export const getChildrenAPI = async (page, academicYear) => {
-    const url = `/pms/children?academicYear=${academicYear}&page=${page}`;
+export const getChildrenAPI = async (page, academicYear, childName) => {
+    let url = `/pms/children?page=${page}`;
+    if (academicYear) url += `&academicYear=${academicYear}`;
+    if (childName) url += `&childName=${encodeURIComponent(childName)}`; // Add childName if provided
     return await axios.get(url);
 };
+
 
 
 export const getChildDetailAPI = async (childId) => {

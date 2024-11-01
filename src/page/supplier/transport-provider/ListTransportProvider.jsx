@@ -38,15 +38,6 @@ const ListTransportProvider = () => {
 
     return (
         <Card className="m-2">
-            <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
-                <Col xs={24} sm={16}>
-                    <Input.Search
-                        placeholder="Nhập tên nhà cung cấp cần tìm"
-                        enterButton
-                        onSearch={(value) => console.log(value)}
-                    />
-                </Col>
-            </Row>
             <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
                 <Button type="primary" onClick={() => navigate('/pms/manage/transport/provider/new-provider')} >Thêm đối tác</Button>
             </Col>

@@ -16,16 +16,17 @@ const TeacherList = () => {
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [fullName, setFullName] = useState("");
     const [imageFile, setImageFile] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [form] = Form.useForm();
 
     const { user } = useContext(AuthContext);
 
-    const fetchTeachers = useCallback(async (page) => {
+    const fetchTeachers = useCallback(async (page, fullName) => {
         setLoading(true);
         try {
-            const response = await getUsersAPI(user.schoolId, page, ["TEACHER"], null);
+            const response = await getUsersAPI(user.schoolId, page, ["TEACHER"], true, fullName);
             setTeachers(response.data.listData);
             setTotal(response.data.total);
         } catch (error) {
@@ -48,6 +49,11 @@ const TeacherList = () => {
 
     const handleImageChange = (file) => {
         setImageFile(file);
+    };
+    const handleChangeName = (event) => {
+        const value = event.target.value;
+        setFullName(value);
+        fetchTeachers(currentPage, value); // Pass new value directly to fetchTeachers
     };
 
     const handleOk = async (values) => {
@@ -92,10 +98,10 @@ const TeacherList = () => {
         <Card className="m-2">
             <Row gutter={[16, 16]} justify="center" className="mt-2">
                 <Col xs={24} sm={8}>
-                    <Input.Search
+                    <Input
                         placeholder="Nhập tên giáo viên cần tìm"
-                        enterButton
-                        onSearch={(value) => console.log(value)}
+                        onChange = {handleChangeName}
+                        value={fullName}
                     />
                 </Col>
             </Row>

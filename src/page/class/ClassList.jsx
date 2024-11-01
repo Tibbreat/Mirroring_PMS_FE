@@ -20,12 +20,13 @@ const ClassList = () => {
     const [form] = Form.useForm();
     const [teachers, setTeachers] = useState([]);
     const [classManager, setClassManager] = useState([]);
+    const [pathClassName, setPathClassName] = useState();
     const { user } = useContext(AuthContext);
-
-    const fetchClasses = useCallback(async (page, ageRange) => {
+    const [className, setClassName] = useState(''); 
+    const fetchClasses = useCallback(async (page,className, ageRange) => {
         setLoading(true);
         try {
-            const response = await getClassesAPI(page, null, ageRange);
+            const response = await getClassesAPI(page, className, ageRange);
             setClasses(response.data.listData);
             setTotal(response.data.total);
         } catch (error) {
@@ -58,14 +59,19 @@ const ClassList = () => {
     }, []);
 
     useEffect(() => {
-        fetchClasses(currentPage, null, selectedAgeRange);
+        fetchClasses(currentPage, className, selectedAgeRange);
         fetchTeachers();
         fetchClassManager();
     }, [currentPage, selectedAgeRange, fetchClasses, fetchTeachers, fetchClassManager]);
 
     const handleAgeRangeChange = (value) => {
-        setSelectedAgeRange(value); // Update the selected age range and refetch classes
-        fetchClasses(currentPage, value);
+        setSelectedAgeRange(value); 
+        fetchClasses(currentPage,className, value);
+    };
+    const handleClassNameChange = (event) => {
+        const value = event.target.value;
+        setClassName(value);
+        fetchClasses(currentPage, value, selectedAgeRange); // Pass new className and current ageRange
     };
 
     const handleOk = async () => {
@@ -122,10 +128,10 @@ const ClassList = () => {
                     </Select>
                 </Col>
                 <Col xs={24} sm={16}>
-                    <Input.Search
+                    <Input
                         placeholder="Nhập tên lớp cần tìm"
-                        enterButton
-                        onSearch={(value) => console.log(value)}
+                        onChange={handleClassNameChange}
+                        value={className}
                     />
                 </Col>
             </Row>
