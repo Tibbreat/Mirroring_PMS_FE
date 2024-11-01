@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Spin, Row, Col, Button, Modal, message, Card, Descriptions, Divider, Switch, Avatar, Table, Radio } from 'antd';
+import { Row, Col, Button, Modal, message, Card, Descriptions, Divider, Switch, Avatar, Table, Radio, Steps } from 'antd';
 import { useParams } from 'react-router-dom';
 import { getChildDetailAPI, updateServiceStatus } from '../../services/service.children';
 import moment from 'moment/moment';
 import { EditOutlined } from '@ant-design/icons';
-import { getAvailableVehicles } from '../../services/service.vehicle';
 import { fetchAvailableRoutesAPI } from '../../services/services.route';
 import Title from 'antd/es/typography/Title';
+import Loading from '../common/Loading';
+import { getVehicleOfRoute } from '../../services/service.vehicle';
+
+const { Step } = Steps;
 
 const ChildrenInformation = () => {
     const [childrenData, setChildrenData] = useState(null);
@@ -17,6 +20,9 @@ const ChildrenInformation = () => {
     const [isVehicleModalVisible, setIsVehicleModalVisible] = useState(false);
     const [availableRoutes, setAvailableRoutes] = useState([]);
     const [selectedRoute, setSelectedRoute] = useState(null);
+    const [vehicles, setVehicles] = useState([]);
+    const [selectedvehicle, setSelectedvehicle] = useState(null);
+    const [currentStep, setCurrentStep] = useState(0);
 
     const { id } = useParams();
 
@@ -38,6 +44,15 @@ const ChildrenInformation = () => {
             setAvailableRoutes(response.data);
         } catch (error) {
             console.error('Error fetching available routes:', error);
+        }
+    };
+
+    const fetchVehiclesByRoute = async (routeId) => {
+        try {
+            const response = await getVehicleOfRoute(routeId);
+            setVehicles(response.data);
+        } catch (error) {
+            console.error('Error fetching vehicles:', error);
         }
     };
 
@@ -65,15 +80,30 @@ const ChildrenInformation = () => {
             title: 'Chọn',
             key: 'select',
             render: (text, record) => (
-                <Radio.Group
-                    onChange={handleVehicleSelect}
-                    value={selectedRoute}
-                >
+                <Radio.Group onChange={() => handleRouteSelect(record.id)} value={selectedRoute}>
                     <Radio value={record.id}>Chọn</Radio>
                 </Radio.Group>
             ),
         },
+    ];
 
+    const vehicleColumns = [
+        { title: 'Phương tiện', dataIndex: 'vehicleName', key: 'vehicleName' },
+        { title: 'Biển số xe', dataIndex: 'licensePlate', key: 'licensePlate' },
+        { title: 'Màu sắc', dataIndex: 'color', key: 'color' },
+        { title: 'Số chỗ ngồi', dataIndex: 'numberOfSeats', key: 'numberOfSeats' },
+        { title: 'Số trẻ đăng ký hiện tại', dataIndex: 'numberChildrenRegistered', key: 'numberChildrenRegistered' },
+        { title: 'Nhãn hiệu', dataIndex: 'manufacturer', key: 'manufacturer' },
+        {
+            title: 'Chọn', key: 'select',
+            render: (record) => (
+                record.numberOfSeats > record.numberChildrenRegistered ? (
+                    <Radio.Group onChange={() => handleVehicleSelect(record.id)} value={selectedvehicle}>
+                        <Radio value={record.id}>Chọn</Radio>
+                    </Radio.Group>
+                ) : null
+            ),
+        },
     ];
 
 
@@ -90,7 +120,7 @@ const ChildrenInformation = () => {
                     return;
                 }
             }
-            await updateServiceStatus(id, serviceName, selectedRoute);
+            await updateServiceStatus(id, serviceName, selectedRoute, selectedvehicle);
             setIsVehicleModalVisible(false);
             message.success("Đăng ký thành công");
 
@@ -127,6 +157,10 @@ const ChildrenInformation = () => {
     };
 
     const handleConfirmVehicle = () => {
+        if (selectedRoute === null) {
+            message.error("Vui lòng chọn xe");
+            return;
+        }
         handleChangeServiceStatus('transport');
     };
 
@@ -135,25 +169,37 @@ const ChildrenInformation = () => {
     };
 
     const handleCancelTransport = () => {
+        setSelectedRoute(null);
+        setSelectedvehicle(null);
         setIsTransportModalVisible(false);
     };
 
     const handleCancelVehicle = () => {
+        setSelectedRoute(null);
+        setSelectedvehicle(null);
         setIsVehicleModalVisible(false);
+        setCurrentStep(0);
     };
 
-    const handleVehicleSelect = (e) => {
-        setSelectedRoute(e.target.value);
+    const handleRouteSelect = (routeId) => {
+        setSelectedRoute(routeId);
+        fetchVehiclesByRoute(routeId);
+        setCurrentStep(1);
     };
 
+    const handleVehicleSelect = (vehicleId) => {
+        setSelectedvehicle(vehicleId);
+    };
 
-
+    const handleBack = () => {
+        setSelectedvehicle(null);
+        setSelectedRoute(null);
+        setCurrentStep(currentStep - 1);
+    };
 
     if (loading) {
         return (
-            <div className='d-flex justify-content-center align-items-center' style={{ height: '100vh' }}>
-                <Spin size="large" />
-            </div>
+            <Loading />
         );
     }
 
@@ -166,31 +212,15 @@ const ChildrenInformation = () => {
                     </Col>
                     <Col xs={24} sm={16}>
                         <Row justify="space-between" className='mb-3'>
-                            <Col>
-                                <Title level={5}>Thông tin cá nhân</Title>
-                            </Col>
-                            <Col>
-                                <Button type="link" icon={<EditOutlined />} >
-                                    Chỉnh sửa thông tin
-                                </Button>
-                            </Col>
+                            <Col><Title level={5}>Thông tin cá nhân</Title></Col>
+                            <Col><Button type="link" icon={<EditOutlined />} >Chỉnh sửa thông tin</Button></Col>
                         </Row>
                         <Descriptions bordered column={6}>
-                            <Descriptions.Item label="Họ và tên" span={6}>
-                                <span>{childrenData?.childName}</span>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Ngày sinh" span={3}>
-                                <span>{moment(childrenData?.childBirthDate).format('DD/MM/YYYY')}</span>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Giới tính" span={3}>
-                                <span>{childrenData?.gender === 'female' ? "Nữ" : "Nam"}</span>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Nơi khai sinh" span={6} >
-                                <span>{childrenData?.birthAddress}</span>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="Nơi ở hiện tại" span={6} >
-                                <span>{childrenData?.childAddress}</span>
-                            </Descriptions.Item>
+                            <Descriptions.Item label="Họ và tên" span={6}>{childrenData?.childName} </Descriptions.Item>
+                            <Descriptions.Item label="Ngày sinh" span={3}>{moment(childrenData?.childBirthDate).format('DD/MM/YYYY')}</Descriptions.Item>
+                            <Descriptions.Item label="Giới tính" span={3}>{childrenData?.gender === 'female' ? "Nữ" : "Nam"}</Descriptions.Item>
+                            <Descriptions.Item label="Nơi khai sinh" span={6}>{childrenData?.birthAddress}</Descriptions.Item>
+                            <Descriptions.Item label="Nơi ở hiện tại" span={6}>{childrenData?.childAddress}</Descriptions.Item>
                             <Descriptions.Item label="Đăng ký nội trú" span={3}>
                                 <Switch
                                     checked={childrenData?.isRegisteredForBoarding}
@@ -210,28 +240,14 @@ const ChildrenInformation = () => {
                 </Row>
                 <Divider />
                 <Row justify="space-between" className='mb-3'>
-                    <Col>
-                        <Title level={5}>Thông tin phụ huynh</Title>
-                    </Col>
-                    <Col>
-                        <Button type="link" icon={<EditOutlined />} >
-                            Chỉnh sửa thông tin
-                        </Button>
-                    </Col>
+                    <Col><Title level={5}>Thông tin phụ huynh</Title></Col>
+                    <Col><Button type="link" icon={<EditOutlined />} > Chỉnh sửa thông tin </Button></Col>
                 </Row>
                 <Descriptions bordered column={6}>
-                    <Descriptions.Item label="Họ và tên cha" span={3}>
-                        <span>{childrenData?.fatherName}</span>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Số điện thoại " span={3}>
-                        <span>{childrenData?.fatherPhone}</span>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Họ và tên mẹ" span={3}>
-                        <span>{childrenData?.motherName}</span>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Số điện thoại " span={3}>
-                        <span>{childrenData?.motherPhone}</span>
-                    </Descriptions.Item>
+                    <Descriptions.Item label="Họ và tên cha" span={3}>{childrenData?.fatherName}</Descriptions.Item>
+                    <Descriptions.Item label="Số điện thoại " span={3}>{childrenData?.fatherPhone}</Descriptions.Item>
+                    <Descriptions.Item label="Họ và tên mẹ" span={3}>{childrenData?.motherName}</Descriptions.Item>
+                    <Descriptions.Item label="Số điện thoại " span={3}>{childrenData?.motherPhone} </Descriptions.Item>
                 </Descriptions>
             </Card>
 
@@ -258,20 +274,66 @@ const ChildrenInformation = () => {
             </Modal>
 
             <Modal
+                title="Xác nhận thay đổi"
+                open={isTransportModalVisible}
+                footer={[
+                    <Button key="back" onClick={handleCancelTransport}>
+                        Đóng
+                    </Button>,
+                    <Button key="submit" type="primary" loading={updating} onClick={handleConfirmTransport}>
+                        Xác nhận
+                    </Button>,
+                ]}
+            >
+                <p>Bạn có chắc chắn muốn hủy đăng ký xe đưa đón?</p>
+            </Modal>
+
+            <Modal
                 title="Chọn tuyến"
                 open={isVehicleModalVisible}
-                onOk={handleConfirmVehicle}
                 onCancel={handleCancelVehicle}
-                okText="Xác nhận"
-                cancelText="Đóng"
-                width={`${window.innerWidth * 0.8}px`}
-            >
-                <Table
-                    dataSource={availableRoutes}
-                    columns={columns}
-                    rowKey="id"
-                    pagination={false}
-                />
+                footer={[
+                    <Button key="back" danger onClick={handleCancelVehicle}>
+                        Đóng
+                    </Button>,
+                    currentStep === 1 && (
+                        <Button key="previous" onClick={handleBack}>
+                            Quay lại
+                        </Button>
+                    ),
+                    <Button
+                        key="confirm"
+                        type="primary"
+                        onClick={handleConfirmVehicle}
+                        disabled={selectedRoute === null || selectedvehicle === null}
+                    >
+                        Xác nhận
+                    </Button>,
+                ]}
+                width={`${window.innerWidth * 0.8}px`}>
+                <Steps current={currentStep}>
+                    <Step title="Chọn tuyến" />
+                    <Step title="Chọn xe" />
+                </Steps>
+
+                {currentStep === 0 && (
+                    <Table
+                        className="mt-4"
+                        dataSource={availableRoutes}
+                        columns={columns}
+                        rowKey="id"
+                        pagination={false}
+                    />
+                )}
+
+                {currentStep === 1 && (
+                    <Table
+                        dataSource={vehicles}
+                        columns={vehicleColumns}
+                        rowKey="id"
+                        pagination={false}
+                    />
+                )}
             </Modal>
 
         </div>

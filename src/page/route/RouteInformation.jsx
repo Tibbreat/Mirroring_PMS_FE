@@ -150,6 +150,8 @@ const RouteInformation = () => {
                     await changeStatusRouteAPI(id);
                     message.success('Thay đổi trạng thái thành công');
                     fetchRoute();
+                    fetchVehicleOfRoute();
+                    fetchChildrenData();
                 } catch (error) {
                     console.error('Error changing route status:', error);
                     message.error('Có lỗi xảy ra. Vui lòng thử lại sau');
@@ -209,10 +211,15 @@ const RouteInformation = () => {
 
     const childrenColumns = [
         {
-            title: 'Ảnh', dataIndex: 'imageUrl', key: 'imageUrl',
+            title: 'Ảnh',
+            dataIndex: 'imageUrl',
+            key: 'imageUrl',
             render: (url) => url ? <Avatar width={50} src={url} /> : 'Không có ảnh',
         },
-        { title: 'Họ và tên', dataIndex: 'childName', key: 'childName' ,
+        {
+            title: 'Họ và tên',
+            dataIndex: 'childName',
+            key: 'childName',
             render: (text, record) => (
                 <Link to={`/pms/manage/children/${record.id}`} style={{ textDecoration: "none" }}>
                     {text}
@@ -220,11 +227,15 @@ const RouteInformation = () => {
             ),
         },
         {
-            title: 'Giới tính', dataIndex: 'gender', key: 'gender',
+            title: 'Giới tính',
+            dataIndex: 'gender',
+            key: 'gender',
             render: (text) => text === 'male' ? 'Nam' : text === 'female' ? 'Nữ' : text,
         },
         {
-            title: 'Ngày sinh', dataIndex: 'childBirthDate', key: 'childBirthDate',
+            title: 'Ngày sinh',
+            dataIndex: 'childBirthDate',
+            key: 'childBirthDate',
             render: (date) => new Date(date).toLocaleDateString(),
         },
         {
@@ -232,7 +243,14 @@ const RouteInformation = () => {
             dataIndex: 'childAddress',
             key: 'childAddress',
         },
+        {
+            title: 'Xe đăng ký',
+            dataIndex: 'vehicle',
+            key: 'vehicle',
+            render: (record) => record.vehicleName || 'Không có xe đăng ký',
+        },
     ];
+
 
     return (
         <div className='container'>

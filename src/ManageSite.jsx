@@ -7,7 +7,7 @@ import ChatDrawer from './component/drawer/ChatDrawer';
 import { AuthContext } from './component/context/auth.context';
 import "./assets/style.css";
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Content, Sider } = Layout;
 
 const ManageSite = () => {
   const { user } = useContext(AuthContext);
@@ -15,16 +15,15 @@ const ManageSite = () => {
   const [openKeys, setOpenKeys] = useState([]);
   const [selectedKey, setSelectedKey] = useState();
   const [collapsed, setCollapsed] = useState(false);
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Sidebar menu items in the specified order
   const allItems = [
     { key: '1', label: 'Trang chủ' },
     { key: '7', label: 'Trẻ' },
     {
-      key: '2',
-      label: 'Nhân viên',
+      key: '2', label: 'Nhân viên',
       children: [
         { key: '21', label: 'Giáo viên' },
         { key: '22', label: 'Quản lý' },
@@ -32,16 +31,14 @@ const ManageSite = () => {
     },
     { key: '4', label: 'Lớp' },
     {
-      key: '5',
-      label: 'Bếp',
+      key: '5', label: 'Bếp',
       children: [
         { key: '51', label: 'Danh sách đối tác' },
         { key: '52', label: 'Thực đơn' }
       ],
     },
     {
-      key: '6',
-      label: 'Đưa đón',
+      key: '6', label: 'Đưa đón',
       children: [
         { key: '61', label: 'Đối tác' },
         { key: '62', label: 'Danh sách tuyến' }
