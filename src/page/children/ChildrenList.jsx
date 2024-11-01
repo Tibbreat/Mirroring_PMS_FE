@@ -57,11 +57,11 @@ const ChildrenList = () => {
         fetchChildrenList(currentPage, selectedAcademicYear, searchTerm);
     }, [currentPage, selectedAcademicYear, searchTerm, fetchChildrenList]);
 
-    const handleAcademicYearChange = (value) => {
-        setSelectedAcademicYear(value || getDefaultAcademicYear());
-        setCurrentPage(1);  // Reset to the first page on filter change
+    const handleAcademicYearChange = async (year) => {
+        setSelectedAcademicYear(year);
+        const data = await getChildrenAPI(page, year);
+        setChildrenList(data); // Update state with the API response
     };
-
     const handleSearch = (value) => {
         setSearchTerm(value.trim());
         setCurrentPage(1);  // Reset to the first page on search
