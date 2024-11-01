@@ -36,6 +36,7 @@ import MenuCalendar from './page/kitchen/MenuCalendar';
 import RouteList from './page/route/RouteList';
 import RouteInformation from './page/route/RouteInformation';
 import Attendance from './page/attendance/Attendance';
+import ImportExcelChildren from './page/children/ImportExcelChildren';
 
 
 const App = () => (
@@ -78,6 +79,7 @@ const App = () => (
         <Route path="children" element={<ChildrenList />} />
         <Route path="children/:id" element={<ChildrenInformation />} />
         <Route path="children/add-children" element={<AddChildren />} />
+        <Route path="children/import-children" element={<ImportExcelChildren />} />
 
         {/* Kitchen */}
         <Route path="kitchen/menu/calendar" element={<MenuCalendar />} />

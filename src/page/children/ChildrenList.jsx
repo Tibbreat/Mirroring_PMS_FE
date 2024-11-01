@@ -24,6 +24,7 @@ const ChildrenList = () => {
     const [academicYears, setAcademicYears] = useState([]);
     const navigate = useNavigate();
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isAddChildModalVisible, setIsAddChildModalVisible] = useState(false);
     const [downloadAcademicYear, setDownloadAcademicYear] = useState(getDefaultAcademicYear());
 
     const fetchAcademicYear = useCallback(async () => {
@@ -66,7 +67,7 @@ const ChildrenList = () => {
     const handleSearch = (event) => {
         const value = event.target.value;
         setSearchTerm(value);
-        fetchChildrenList(currentPage, academicYears,searchTerm) // Pass new className and current ageRange
+        fetchChildrenList(currentPage, academicYears, searchTerm) // Pass new className and current ageRange
     };
 
     const showModal = () => {
@@ -76,12 +77,15 @@ const ChildrenList = () => {
     const handleCancel = () => {
         setIsModalVisible(false);
     };
-    const downloadButtonStyle = {
-        backgroundColor: '#4CAF50',
-        borderColor: '#4CAF50',
-        color: '#fff',
-        transition: 'none',
+
+    const showAddChildModal = () => {
+        setIsAddChildModalVisible(true);
     };
+
+    const handleAddChildModalCancel = () => {
+        setIsAddChildModalVisible(false);
+    };
+
     const handleDownloadOk = async () => {
         try {
             const response = await exportChildrenToExcelByAcademicYear(downloadAcademicYear);
@@ -132,20 +136,19 @@ const ChildrenList = () => {
                     type="primary"
                     icon={<DownloadOutlined />}
                     onClick={showModal}
-                    style={downloadButtonStyle}
+                    style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50', color: '#fff', transition: 'none' }}
                 >
                     Xuất Excel
                 </Button>
                 <Button
                     type="primary"
-                    onClick={() => navigate('/pms/manage/children/add-children')}
+                    onClick={showAddChildModal}
                     icon={<PlusOutlined />}
                     className="ms-2"
                 >
-                    Thêm học sinh
+                    Thêm trẻ
                 </Button>
             </Col>
-
 
             {loading ? (
                 <Loading />
@@ -189,6 +192,39 @@ const ChildrenList = () => {
                         </Option>
                     ))}
                 </Select>
+            </Modal>
+
+            {/* Add Child Modal */}
+            <Modal
+                title="Thêm trẻ"
+                open={isAddChildModalVisible}
+                onCancel={handleAddChildModalCancel}
+                footer={null}
+            >
+                <Row justify="center" gutter={16}>
+                    <Col>
+                        <Button
+                            type="primary"
+                            onClick={() => navigate('/pms/manage/children/import-children')}
+                            style={{ marginBottom: 16 }}
+                        >
+                            Nhập bằng file Excel
+                        </Button>
+                    </Col>
+                    <Col>
+                        <Button
+                            type="primary"
+                            onClick={() => {
+                                setIsAddChildModalVisible(false);
+                                navigate('/pms/manage/children/add-children');
+                            }}
+                            style={{ marginBottom: 16 }}
+                        >
+                            Nhập thủ công
+                        </Button>
+                    </Col>
+                </Row>
+
             </Modal>
         </Card>
     );

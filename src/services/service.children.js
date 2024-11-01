@@ -51,3 +51,19 @@ export const exportChildrenToExcelByAcademicYear = async (academicYear) => {
         responseType: 'blob', // Specify blob type to handle file download
     });
 };
+
+export const handleExcelData = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+        const response = await axios.post("/pms/children/excel/import", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error uploading Excel file:", error);
+        throw error;
+    }
+};
