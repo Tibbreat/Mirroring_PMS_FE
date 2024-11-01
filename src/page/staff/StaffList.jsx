@@ -19,22 +19,31 @@ export const StaffList = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);  // New state for submission loading
     const [pageSize] = useState(10);  // Number of staff per page
     const [form] = Form.useForm(); // Initialize the form instance
-
+    const [fullName, setFullName] = useState("");
     const { user } = useContext(AuthContext);
+    const [selectedRole, setSelectedRole] = useState([]);
+    const fetchStaff = useCallback(
+        async (page, fullName, selectedRole = []) => {  // Set default value to empty array
+            setLoading(true);
+            try {
+                const roles = selectedRole.length > 0 ? selectedRole : ["KITCHEN_MANAGER", "CLASS_MANAGER", "TRANSPORT_MANAGER"];
+                const response = await getUsersAPI(user.schoolId, page, roles, true, fullName);
+                setStaff(response.data.listData);
+                setTotal(response.data.total);
+            } catch (error) {
+                console.error('Error fetching staff:', error);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [user.schoolId]
+    );
 
-    const fetchStaff = useCallback(async (page) => {
-        setLoading(true);
-        try {
-            const response = await getUsersAPI(user.schoolId, page, ["KITCHEN_MANAGER", "CLASS_MANAGER", "TRANSPORT_MANAGER"], null);
-            setStaff(response.data.listData);
-            setTotal(response.data.total);
-        } catch (error) {
-            console.error('Error fetching staffs:', error);
-        } finally {
-            setLoading(false);
-        }
-    }, [user.schoolId]);
-
+    // Handle role change and fetch data
+    const handleRoleChange = (value) => {
+        setSelectedRole([value]); // Update selected role
+        fetchStaff(currentPage, fullName, [value]); // Pass selected role to fetchStaff
+    };
     useEffect(() => {
         fetchStaff(currentPage);
     }, [currentPage, fetchStaff]);
@@ -45,7 +54,11 @@ export const StaffList = () => {
         setImageFile(null);  // Reset image file when modal is closed
         setIsSubmitting(false); // Reset submitting state when modal is closed
     };
-
+    const handleChangeName = (event) => {
+        const value = event.target.value;
+        setFullName(value);
+        fetchStaff(currentPage, value, selectedRole || []); // Default to empty array if selectedRole is undefined
+    };
     const handleImageChange = (file) => {
         setImageFile(file);
     };
@@ -92,18 +105,24 @@ export const StaffList = () => {
     return (
         <Card className="m-2">
             <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
-                <Col xs={24} sm={8}>
-                    <Select placeholder="Chọn vai trò" style={{ width: '100%' }}>
-                        <Option value="CLASS_MANAGER">Quản lý lớp</Option>
-                        <Option value="KITCHEN_MANAGER">Quản lý bếp</Option>
-                        <Option value="TRANSPORT_MANAGER">Quản lý dịch vụ đưa đón</Option>
-                    </Select>
-                </Col>
+            <Col xs={24} sm={8}>
+                <Select
+                    placeholder="Chọn vai trò"
+                    style={{ width: '100%' }}
+                    onChange={handleRoleChange}
+                    allowClear 
+                    value={selectedRole[0] || null}
+                >
+                    <Option value="CLASS_MANAGER">Quản lý lớp</Option>
+                    <Option value="KITCHEN_MANAGER">Quản lý bếp</Option>
+                    <Option value="TRANSPORT_MANAGER">Quản lý dịch vụ đưa đón</Option>
+                </Select>
+            </Col>
                 <Col xs={24} sm={16}>
-                    <Input.Search
+                    <Input
                         placeholder="Nhập tên nhân viên cần tìm"
-                        enterButton
-                        onSearch={(value) => console.log(value)}
+                        onChange={handleChangeName}
+                        value={fullName}
                     />
                 </Col>
             </Row>

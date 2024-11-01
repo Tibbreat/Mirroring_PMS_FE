@@ -1,11 +1,11 @@
 import axios from '../../axios.customize';
 
-export const getClassesAPI = async (page, schoolYear, ageRange) => {
+export const getClassesAPI = async (page, className, ageRange) => {
     let URL = `/pms/classes?page=${page}`;
-    if (schoolYear) URL += `&schoolYear=${schoolYear}`;
+    if (className) URL += `&className=${className}`; // Replace schoolYear with className
     if (ageRange) URL += `&ageRange=${ageRange}`;
     return await axios.get(URL);
-}
+};
 
 export const addClassAPI = async (classData) => {
     const URL = `/pms/classes/add`;

@@ -81,15 +81,6 @@ const ListFoodProvider = () => {
 
     return (
         <Card className="m-2">
-            <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
-                <Col xs={24} sm={16}>
-                    <Input.Search
-                        placeholder="Nhập tên đối tác cần tìm"
-                        enterButton
-                        onSearch={handleSearch}
-                    />
-                </Col>
-            </Row>
             <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
                 <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm đối tác</Button>
             </Col>

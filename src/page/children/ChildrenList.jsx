@@ -57,14 +57,16 @@ const ChildrenList = () => {
         fetchChildrenList(currentPage, selectedAcademicYear, searchTerm);
     }, [currentPage, selectedAcademicYear, searchTerm, fetchChildrenList]);
 
-    const handleAcademicYearChange = (value) => {
-        setSelectedAcademicYear(value || getDefaultAcademicYear());
-        setCurrentPage(1);  // Reset to the first page on filter change
+    const handleAcademicYearChange = async (year) => {
+        setSelectedAcademicYear(year);
+        const data = await getChildrenAPI(page, year);
+        setChildrenList(data); // Update state with the API response
     };
 
-    const handleSearch = (value) => {
-        setSearchTerm(value.trim());
-        setCurrentPage(1);  // Reset to the first page on search
+    const handleSearch = (event) => {
+        const value = event.target.value;
+        setSearchTerm(value);
+        fetchChildrenList(currentPage, academicYears,searchTerm) // Pass new className and current ageRange
     };
 
     const showModal = () => {
@@ -117,10 +119,10 @@ const ChildrenList = () => {
                 </Col>
 
                 <Col xs={24} sm={16}>
-                    <Input.Search
+                    <Input
                         placeholder="Nhập tên trẻ cần tìm"
-                        enterButton
-                        onSearch={handleSearch}
+                        onChange={handleSearch}
+                        value={searchTerm}
                     />
                 </Col>
             </Row>
