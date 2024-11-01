@@ -255,43 +255,6 @@
     border: #C4C4C4;
 }
 
-
-/* Custom styles for the Ant Design Menu component */
-.sidebar-custom-antd {
-    background: #152259;
-    height: 100%;
-    width: 200px;
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    overflow-x: hidden;
-
-}
-
-.sidebar-title {
-    color: white;
-    font-size: 16px;
-    margin-top: 10px;
-}
-
-.sidebar-custom-antd .ant-menu-item,
-.sidebar-custom-antd .ant-menu-submenu-title {
-    color: white !important;
-    /* Make the label color white */
-}
-
-.sidebar-custom-antd .ant-menu-item:hover,
-.sidebar-custom-antd .ant-menu-submenu-title:hover {
-    color: #cccccc !important;
-}
-
-/* Ensure the active menu item is also styled in white */
-.sidebar-custom-antd .ant-menu-item-selected {
-    background: #509CDB;
-    color: white !important;
-}
-
 /* Container của từng tin nhắn */
 .message-container {
     display: flex;

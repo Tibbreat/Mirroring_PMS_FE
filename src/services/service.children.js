@@ -15,13 +15,16 @@ export const getChildDetailAPI = async (childId) => {
     return await axios.get(url);
 };
 
-
-
-export const updateServiceStatus = async (childrenId, serviceName, routeId = null) => {
+export const updateServiceStatus = async (childrenId, serviceName, routeId = null, vehicleId = null) => {
     const url = `/pms/children/service/${childrenId}/${serviceName}`;
-    const params = routeId ? { routeId } : {};
+    const params = {};
+
+    if (routeId) params.routeId = routeId;
+    if (vehicleId) params.vehicleId = vehicleId;
+
     return await axios.put(url, null, { params });
 };
+
 
 export const getChildrenByClassAPI = async (classId, page) => {
     const url = `/pms/children/class/${classId}?page=${page}`;
