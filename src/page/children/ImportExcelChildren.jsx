@@ -1,9 +1,11 @@
-import { Card, Upload, Table, Button, Divider, message, Modal, Form, Input, Row, Col, Select, DatePicker } from "antd";
-import { EditOutlined, InboxOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { Card, Upload, Table, Button, Divider, message, Modal, Form, Input, Row, Col, Select, DatePicker, notification } from "antd";
+import { DeleteOutlined, EditOutlined, InboxOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
 import Title from "antd/es/typography/Title";
 import dayjs from 'dayjs';
-import { handleExcelData } from "../../services/service.children";
+import { handleExcelData, saveChildrenFromExcel } from "../../services/service.children";
+import { getClassList } from "../../services/services.class";
+import moment from "moment";
 
 const { Dragger } = Upload;
 const { Option } = Select;
@@ -13,8 +15,12 @@ const ImportExcelChildren = () => {
     const [tableData, setTableData] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+    const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
     const [parentDetails, setParentDetails] = useState({ father: {}, mother: {} });
     const [editingChild, setEditingChild] = useState(null);
+    const [classAvailable, setClassAvailable] = useState([]);
+    const [selectedClass, setSelectedClass] = useState(null);
+    const [isSaveLoading, setIsSaveLoading] = useState(false);
     const [form] = Form.useForm();
 
     const columns = [
@@ -40,14 +46,24 @@ const ImportExcelChildren = () => {
             key: "action",
             align: "center",
             render: (_, record) => (
-                <EditOutlined style={{ cursor: "pointer" }} className="m-2" onClick={() => handleEdit(record)} />
+                <>
+                    <EditOutlined style={{ cursor: "pointer" }} className="m-2" onClick={() => handleEdit(record)} />
+                    <DeleteOutlined style={{ cursor: "pointer", color: 'red' }} onClick={() => handleDelete(record)} />
+                </>
+
             )
         }
     ];
 
+    const handleDelete = (record) => {
+        const updatedData = tableData.filter((item) => item.key !== record.key);
+        setTableData(updatedData);
+        message.success("Đã xóa thành công!");
+    };
+
     const handleUploadChange = async (info) => {
         const newFileList = info.fileList.slice(-1);
-        setFileList(newFileList);
+        // setFileList(newFileList);
 
         const file = newFileList[0]?.originFileObj;
         if (file) {
@@ -57,11 +73,30 @@ const ImportExcelChildren = () => {
                 setTableData(dataWithIndex);
                 message.success("Tải lên và xử lý file thành công!");
             } catch (error) {
-                message.error("Lỗi khi tải lên file!");
+                message.error("Lỗi khi tải lên file! Hãy kiểm tra lại file và thử lại.");
+                setTableData([]);
                 console.error(error);
             }
         }
     };
+
+    const fetchClassAvailable = async () => {
+        try {
+            const today = moment();
+            const currentYear = today.year();
+            const nextYear = currentYear + 1;
+            const academicYear = `${currentYear}-${nextYear}`;
+            const response = await getClassList(academicYear);
+            setClassAvailable(response.data);
+        } catch (error) {
+            console.error(error);
+            setClassAvailable([]);
+        }
+    };
+
+    useEffect(() => {
+        fetchClassAvailable();
+    }, []);
 
     const showParentDetails = (father, mother) => {
         setParentDetails({ father, mother });
@@ -101,6 +136,44 @@ const ImportExcelChildren = () => {
         });
     };
 
+    const handleClassChange = (value) => {
+        setSelectedClass(value);
+    };
+
+    const handleConfirm = async () => {
+        setIsSaveLoading(true); // Start loading effect
+        try {
+            const payload = tableData.map((item) => ({
+                ...item,
+                classId: selectedClass,
+            }));
+            console.log(payload);
+            await saveChildrenFromExcel(payload);
+            message.success(`Đã thêm ${tableData.length} trẻ vào lớp thành công!`);
+            setIsConfirmModalVisible(false);
+        } catch (error) {
+            console.log("Error:", error.status);
+            console.log("Error:", error.data);
+        
+            if (error.status === 404) {
+                message.error(error.data.data);
+            } else {
+                message.error("Có lỗi xảy ra khi thêm trẻ vào lớp");
+            }
+        } finally {
+            setIsSaveLoading(false);
+        }
+    };
+
+
+    const handleSaveButtonClick = () => {
+        if (!selectedClass) {
+            message.warning("Vui lòng chọn lớp trước khi lưu");
+        } else {
+            setIsConfirmModalVisible(true);
+        }
+    };
+
     return (
         <div className="container">
             <Card className="mt-2">
@@ -121,11 +194,32 @@ const ImportExcelChildren = () => {
                 </Dragger>
                 <Divider />
                 <Title level={5} className="mt-2">Dữ liệu trẻ từ file Excel</Title>
+                <Row justify="space-between" align="middle" className="mb-3">
+                    <Col span={12}>
+                        <span>Số lượng trẻ: {tableData.length}</span>
+                    </Col>
+                    <Col span={12}>
+                        <Select
+                            placeholder="Chọn lớp"
+                            style={{ width: '100%' }}
+                            onChange={handleClassChange}
+                            allowClear>
+                            {classAvailable.map((classItem) => (
+                                <Option key={classItem.id} value={classItem.id}>
+                                    {classItem.className}
+                                </Option>
+                            ))}
+                        </Select>
+                    </Col>
+                </Row>
                 <Table
                     columns={columns}
                     dataSource={tableData}
                     pagination={false}
                 />
+                <Row justify="center" className="mt-3">
+                    <Button type="primary" onClick={handleSaveButtonClick} disabled={tableData.length == 0}>Lưu</Button>
+                </Row>
             </Card>
 
             <Modal
@@ -188,8 +282,8 @@ const ImportExcelChildren = () => {
                                 rules={[{ required: true, message: 'Vui lòng chọn giới tính' }]}
                             >
                                 <Select placeholder="Chọn giới tính">
-                                    <Option value="Nam">Nam</Option>
-                                    <Option value="Nữ">Nữ</Option>
+                                    <Option value="male">Nam</Option>
+                                    <Option value="female">Nữ</Option>
                                 </Select>
                             </Form.Item>
                         </Col>
@@ -299,6 +393,18 @@ const ImportExcelChildren = () => {
                         </Row>
                     </Card>
                 </Form>
+            </Modal>
+
+            <Modal
+                title="Xác nhận"
+                open={isConfirmModalVisible}
+                onCancel={() => setIsConfirmModalVisible(false)}
+                onOk={handleConfirm}
+                okText="Xác nhận"
+                cancelText="Hủy"
+                confirmLoading={isSaveLoading}
+            >
+                <p>Bạn có chắc chắn muốn thêm toàn bộ trẻ vào lớp đã chọn không?</p>
             </Modal>
         </div>
     );

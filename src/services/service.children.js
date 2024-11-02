@@ -67,3 +67,7 @@ export const handleExcelData = async (file) => {
         throw error;
     }
 };
+
+export const saveChildrenFromExcel = async (childrenData) => {
+    return axios.post(`/pms/children/excel/import/save`, childrenData);
+}
