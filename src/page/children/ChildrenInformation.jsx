@@ -32,7 +32,8 @@ const ChildrenInformation = () => {
 
 
     const { id } = useParams();
-    const [form] = Form.useForm();
+    const [formUpdateChildren] = Form.useForm();
+    const [formUpdateParent] = Form.useForm();
 
     const fetchChildrenData = async (id) => {
         setLoading(true);
@@ -389,22 +390,114 @@ const ChildrenInformation = () => {
                 onOk={handleUpdateChildren}
                 okText="Cập nhật"
                 cancelText="Đóng"
+                width={800}
+
             >
-                <Form form={form} layout="vertical">
+                <Form form={formUpdateChildren} layout="vertical"
+                    initialValues={{
+                        childName: childrenData?.childName,            // Default name
+                        gender: childrenData?.gender,                        // Default gender
+                        birthAddress: childrenData?.birthAddress, // Default birth address
+                        childAddress: childrenData?.childAddress,  // Default current address
+                    }}
+                >
                     <Row gutter={16}>
-                        {renderFormItem('childName', 'Họ và tên', 'Nhập họ và tên', [{ required: true, message: 'Vui lòng nhập họ và tên' }], <Input />, 24)}
-                        {renderFormItem(
-                            'gender',
-                            'Giới tính',
-                            'Chọn giới tính',
-                            [{ required: true, message: 'Vui lòng chọn giới tính' }],
-                            <Select>
-                                <Option value="male">Nam</Option>
-                                <Option value="female">Nữ</Option>
-                            </Select>,
-                            11
-                        )},
-                        {renderFormItem('childBirthDate', 'Ngày sinh', 'Chọn ngày sinh', [{ required: true, message: 'Vui lòng chọn ngày sinh' }], <DatePicker />, 12)}
+                        <Col xs={24} md={24}>
+                            {renderFormItem(
+                                'childName',
+                                'Tên trẻ',
+                                'Nhập tên trẻ',
+                                [
+                                    { required: true, message: 'Vui lòng nhập tên trẻ' },
+                                    { pattern: /^[a-zA-ZÀ-ỹ\s]{3,50}$/, message: 'Tên phải từ 3 đến 50 ký tự, chỉ gồm chữ cái và khoảng trắng' },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            if (!value || value.trim().length !== 0) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error('Tên trẻ không được để trống'));
+                                        },
+                                    }),
+                                ]
+                            )}
+                        </Col>
+                        <Col xs={24} md={12}>
+                            {renderFormItem(
+                                'childBirthDate',
+                                'Ngày sinh',
+                                'Chọn ngày sinh',
+                                [{ required: true, message: 'Vui lòng chọn ngày sinh' }],
+                                <DatePicker style={{ width: '100%' }} />
+                            )}
+                        </Col>
+                        <Col xs={24} md={12}>
+                            {renderFormItem(
+                                'gender',
+                                'Giới tính',
+                                'Chọn giới tính',
+                                [{ required: true, message: 'Vui lòng chọn giới tính' }],
+                                <Select>
+                                    <Option value="male">Nam</Option>
+                                    <Option value="female">Nữ</Option>
+                                </Select>
+                            )}
+                        </Col>
+                        <Col xs={24} md={24}>
+                            {renderFormItem(
+                                'birthAddress',
+                                'Địa chỉ khai sinh',
+                                'Nhập địa chỉ khai sinh',
+                                [
+                                    { required: true, message: 'Vui lòng nhập địa chỉ khai sinh' },
+                                    { pattern: /^.{10,200}$/, message: 'Địa chỉ phải từ 10 đến 200 ký tự' },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            if (!value || value.trim().length !== 0) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error('Địa chỉ khai sinh không được để trống'));
+                                        },
+                                    }),
+                                ],
+                                <Input />,
+                                24
+                            )}
+                        </Col>
+                        <Col xs={24} md={24}>
+                            {renderFormItem(
+                                'childAddress',
+                                'Địa chỉ hiện tại',
+                                'Nhập địa chỉ hiện tại',
+                                [
+                                    { required: true, message: 'Vui lòng nhập địa chỉ hiện tại' },
+                                    { pattern: /^.{10,200}$/, message: 'Địa chỉ phải từ 10 đến 200 ký tự' },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            if (!value || value.trim().length !== 0) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error('Địa chỉ hiện tại không được để trống'));
+                                        },
+                                    }),
+                                ],
+                                <Input />,
+                                24
+                            )}
+                        </Col>
+
+                    </Row>
+                </Form>
+            </Modal>
+
+            <Modal
+                title="Cập nhật thông tin phụ huynh"
+                okText="Cập nhật"
+                cancelText="Đóng"
+                width={800}
+            >
+                <Form form={formUpdateParent} layout="vertical">
+                    <Row gutter={16}>
+                        <Title level={5}>Câp nhât thông tin phụ huynh</Title>
                     </Row>
                 </Form>
             </Modal>
