@@ -1,4 +1,4 @@
-import { Card, Upload, Table, Button, Divider, message, Modal, Form, Input, Row, Col, Select, DatePicker, notification } from "antd";
+import { Card, Upload, Table, Button, Divider, message, Modal, Form, Input, Row, Col, Select, DatePicker, notification, Tag } from "antd";
 import { DeleteOutlined, EditOutlined, InboxOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import Title from "antd/es/typography/Title";
@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import { handleExcelData, saveChildrenFromExcel } from "../../services/service.children";
 import { getClassList } from "../../services/services.class";
 import moment from "moment";
+import { render } from "react-dom";
 
 const { Dragger } = Upload;
 const { Option } = Select;
@@ -26,12 +27,34 @@ const ImportExcelChildren = () => {
     const columns = [
         { title: "STT", dataIndex: "index", key: "index", align: "center" },
         { title: "Họ và Tên", dataIndex: "childName", key: "childName" },
-        { title: "Ngày Sinh", dataIndex: "childBirthDate", key: "childBirthDate", align: "center" },
-        { title: "Địa Chỉ Hiện Tại", dataIndex: "childAddress", key: "childAddress" },
-        { title: "Nơi Sinh", dataIndex: "birthAddress", key: "birthAddress" },
+        { title: "Ngày Sinh", dataIndex: "childBirthDate", key: "childBirthDate", align: "center", },
+        {
+            title: "Địa Chỉ Hiện Tại", dataIndex: "childAddress", key: "childAddress",
+            render: (text) => {
+                if (text.length > 15) {
+                    return text.substring(0, 15) + '...';
+                } else {
+                    return text;
+                }
+            }
+        },
+        {
+            title: "Nơi Sinh", dataIndex: "birthAddress", key: "birthAddress",
+            render: (text) => {
+                if (text.length > 15) {
+                    return text.substring(0, 15) + '...';
+                } else {
+                    return text;
+                }
+            }
+        },
         { title: "Quốc Tịch", dataIndex: "nationality", key: "nationality", align: "center" },
-        { title: "Tôn Giáo", dataIndex: "religion", key: "religion", align: "center" },
         { title: "Giới Tính", dataIndex: "gender", key: "gender", align: "center", render: (text) => text === "male" ? "Nam" : "Nữ" },
+        {
+            title: "Khuyết tật", dataIndex: "isDisabled", key: "isDisabled", align: "center",
+            render: (text) => text ? 
+            <Tag color="red"> Có </Tag> : <Tag color="green"> Không </Tag>
+        },
         {
             title: "Thông Tin Phụ Huynh",
             key: "parentInfo",
@@ -154,7 +177,7 @@ const ImportExcelChildren = () => {
         } catch (error) {
             console.log("Error:", error.status);
             console.log("Error:", error.data);
-        
+
             if (error.status === 404) {
                 message.error(error.data.data);
             } else {

@@ -154,7 +154,7 @@ const ChildrenList = () => {
                 <Loading />
             ) : childrenList.length > 0 ? (
                 <>
-                    <ChildrenTable data={childrenList} providerType="transport" />
+                    <ChildrenTable data={childrenList}  />
                     <Pagination
                         current={currentPage}
                         total={total}

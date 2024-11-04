@@ -1,7 +1,7 @@
 import { Pagination, Tag, Table, Avatar } from "antd";
 import { Link } from "react-router-dom";
 
-export const ChildrenTable = ({ data, currentPage, total, setCurrentPage }) => {
+export const ChildrenTable = ({ data }) => {
     const columns = [
         {
             title: 'Ảnh',

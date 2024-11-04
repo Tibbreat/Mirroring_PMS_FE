@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Row, Col, Button, Modal, message, Card, Descriptions, Divider, Switch, Avatar, Table, Radio, Steps } from 'antd';
+import { Row, Col, Button, Modal, message, Card, Descriptions, Divider, Switch, Avatar, Table, Radio, Steps, Upload, Form, Input, DatePicker, Select } from 'antd';
 import { useParams } from 'react-router-dom';
-import { getChildDetailAPI, updateServiceStatus } from '../../services/service.children';
+import { getChildDetailAPI, updateServiceStatus, uploadImageAPI } from '../../services/service.children';
 import moment from 'moment/moment';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, UploadOutlined } from '@ant-design/icons';
 import { fetchAvailableRoutesAPI } from '../../services/services.route';
 import Title from 'antd/es/typography/Title';
 import Loading from '../common/Loading';
 import { getVehicleOfRoute } from '../../services/service.vehicle';
+import UploadImage from '../../component/input/UploadImage';
 
 const { Step } = Steps;
 
@@ -18,13 +19,20 @@ const ChildrenInformation = () => {
     const [isBoardingModalVisible, setIsBoardingModalVisible] = useState(false);
     const [isTransportModalVisible, setIsTransportModalVisible] = useState(false);
     const [isVehicleModalVisible, setIsVehicleModalVisible] = useState(false);
+    const [isUploadImageModalVisible, setIsUploadImageModalVisible] = useState(false);
     const [availableRoutes, setAvailableRoutes] = useState([]);
     const [selectedRoute, setSelectedRoute] = useState(null);
     const [vehicles, setVehicles] = useState([]);
     const [selectedvehicle, setSelectedvehicle] = useState(null);
     const [currentStep, setCurrentStep] = useState(0);
+    const [hasUploadedImage, setHasUploadedImage] = useState(false);
+    const [imageFile, setImageFile] = useState(null);
+
+    const [isModalUpdateChildren, setIsModalUpdateChildren] = useState(false);
+
 
     const { id } = useParams();
+    const [form] = Form.useForm();
 
     const fetchChildrenData = async (id) => {
         setLoading(true);
@@ -105,7 +113,6 @@ const ChildrenInformation = () => {
             ),
         },
     ];
-
 
     useEffect(() => {
         fetchChildrenData(id);
@@ -197,23 +204,66 @@ const ChildrenInformation = () => {
         setCurrentStep(currentStep - 1);
     };
 
+    const handleImageChange = async () => {
+        const file = imageFile;
+        if (!file) {
+            message.error("Vui lòng chọn ảnh");
+            return;
+        }
+
+        try {
+            await uploadImageAPI(id, file);
+            message.success("Ảnh đã được cập nhật thành công");
+            fetchChildrenData(id);
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            message.error("Có lỗi xảy ra khi cập nhật ảnh");
+        } finally {
+            setIsUploadImageModalVisible(false);
+            setFileList([]);
+        }
+    };
+
+    const handleUpdateChildren = () => {
+        setIsModalUpdateChildren(false);
+    };
+
+    const handleUploadChange = (file) => {
+        setImageFile(file);
+    };
+
+    const openUpdateChildrenModal = () => {
+        setIsModalUpdateChildren(true);
+    };
+
     if (loading) {
         return (
             <Loading />
         );
     }
-
+    const renderFormItem = (name, label, placeholder, rules, component = <Input />, span) => (
+        <Col xs={24} md={span}>
+            <Form.Item name={name} label={label} rules={rules}>
+                {React.cloneElement(component, { placeholder, disabled: loading })}
+            </Form.Item>
+        </Col>
+    );
     return (
         <div className="container">
             <Card style={{ marginTop: 20 }}>
                 <Row gutter={[16, 16]}>
                     <Col xs={24} sm={8} className='d-flex flex-column align-items-center justify-content-center'>
-                        <Avatar size={256} src={childrenData?.imageUrl || "/image/5856.jpg"} />
+                        <Avatar
+                            size={156}
+                            src={hasUploadedImage || childrenData?.imageUrl ? childrenData?.imageUrl : "/image/placeholder.jpg"}
+                            style={{ display: hasUploadedImage || childrenData?.imageUrl ? "block" : "none" }}
+                        />
+                        <Button className='mt-3' type="link" onClick={() => setIsUploadImageModalVisible(true)}>Cập nhật ảnh</Button>
                     </Col>
                     <Col xs={24} sm={16}>
                         <Row justify="space-between" className='mb-3'>
                             <Col><Title level={5}>Thông tin cá nhân</Title></Col>
-                            <Col><Button type="link" icon={<EditOutlined />} >Chỉnh sửa thông tin</Button></Col>
+                            <Col><Button type="link" icon={<EditOutlined />} onClick={openUpdateChildrenModal} >Chỉnh sửa thông tin</Button></Col>
                         </Row>
                         <Descriptions bordered column={6}>
                             <Descriptions.Item label="Họ và tên" span={6}>{childrenData?.childName} </Descriptions.Item>
@@ -274,21 +324,6 @@ const ChildrenInformation = () => {
             </Modal>
 
             <Modal
-                title="Xác nhận thay đổi"
-                open={isTransportModalVisible}
-                footer={[
-                    <Button key="back" onClick={handleCancelTransport}>
-                        Đóng
-                    </Button>,
-                    <Button key="submit" type="primary" loading={updating} onClick={handleConfirmTransport}>
-                        Xác nhận
-                    </Button>,
-                ]}
-            >
-                <p>Bạn có chắc chắn muốn hủy đăng ký xe đưa đón?</p>
-            </Modal>
-
-            <Modal
                 title="Chọn tuyến"
                 open={isVehicleModalVisible}
                 onCancel={handleCancelVehicle}
@@ -336,7 +371,46 @@ const ChildrenInformation = () => {
                 )}
             </Modal>
 
+            <Modal
+                title="Cập nhật ảnh"
+                open={isUploadImageModalVisible}
+                onCancel={() => setIsUploadImageModalVisible(false)}
+                onOk={handleImageChange}
+                okText="Xác nhận"
+                cancelText="Đóng"
+            >
+                <UploadImage onImageChange={handleUploadChange} />
+            </Modal>
+
+            <Modal
+                title="Cập nhật thông tin trẻ"
+                open={isModalUpdateChildren}
+                onCancel={() => setIsModalUpdateChildren(false)}
+                onOk={handleUpdateChildren}
+                okText="Cập nhật"
+                cancelText="Đóng"
+            >
+                <Form form={form} layout="vertical">
+                    <Row gutter={16}>
+                        {renderFormItem('childName', 'Họ và tên', 'Nhập họ và tên', [{ required: true, message: 'Vui lòng nhập họ và tên' }], <Input />, 24)}
+                        {renderFormItem(
+                            'gender',
+                            'Giới tính',
+                            'Chọn giới tính',
+                            [{ required: true, message: 'Vui lòng chọn giới tính' }],
+                            <Select>
+                                <Option value="male">Nam</Option>
+                                <Option value="female">Nữ</Option>
+                            </Select>,
+                            11
+                        )},
+                        {renderFormItem('childBirthDate', 'Ngày sinh', 'Chọn ngày sinh', [{ required: true, message: 'Vui lòng chọn ngày sinh' }], <DatePicker />, 12)}
+                    </Row>
+                </Form>
+            </Modal>
+
         </div>
+
     );
 };
 

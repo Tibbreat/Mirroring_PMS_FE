@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
-import { Button, Card, Col, DatePicker, Descriptions, Divider, message, Pagination, Row, Select, Spin, Switch, Tag } from 'antd';
+import { Button, Card, Col, Descriptions, Divider, message, Pagination, Row, Spin, Switch } from 'antd';
 import { useParams } from 'react-router-dom';
 import { changeClassStatusAPI, getClassBaseOnClassId, getTeacherOfClass } from '../../services/services.class';
 import moment from 'moment';
@@ -25,7 +25,7 @@ const ClassInformation = () => {
 
     const { user } = useContext(AuthContext);
 
-    const fetchClassInfo = async (id) => {
+    const fetchClassInfo = useCallback(async () => {
         setLoading(true);
         try {
             const response = await getClassBaseOnClassId(id);
@@ -37,33 +37,9 @@ const ClassInformation = () => {
         } finally {
             setLoading(false);
         }
-    };
-    const showModalChangeStatus = () => {
-        const contentMessage = classInfo?.isActive
-            ? "Bạn có chắc chắn muốn ngừng hoạt động của nhân viên này? Nếu đồng ý, nhân viên sẽ bị hạn chế truy cập vào hệ thống."
-            : "Bạn có chắc chắn muốn kích hoạt tài khoản của nhân viên này?";
+    }, [id]);
 
-        Modal.confirm({
-            title: 'Xác nhận thay đổi trạng thái',
-            content: contentMessage,
-            onOk: async () => {
-                try {
-                    await changeClassStatusAPI(classInfo.id);
-                    message.success('Cập nhật trạng thái thành công');
-
-                    // Cập nhật lại thông tin nhân viên
-                    await fetchClassInfo(id);
-                } catch (error) {
-                    console.error('Error changing user status:', error);
-                    message.error('Có lỗi xảy ra khi cập nhật trạng thái.');
-                }
-            },
-            onCancel() {
-                console.log('Hủy thay đổi trạng thái');
-            },
-        });
-    };
-    const fetchChildrenList = async (id) => {
+    const fetchChildrenList = useCallback(async () => {
         setLoading(true);
         try {
             const response = await getChildrenByClassAPI(id, currentPage);
@@ -74,7 +50,8 @@ const ClassInformation = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, currentPage]);
+
     const handleDownloadByClassId = async (classId) => {
         try {
             const response = await exportChildrenToExcelByClassId(classId);
@@ -88,6 +65,7 @@ const ClassInformation = () => {
             console.error("Error downloading file:", error);
         }
     };
+
     const fetchTeachersAndManagers = useCallback(async () => {
         try {
             const teacherResponse = await getUserOpnionAPI('TEACHER');
@@ -99,11 +77,38 @@ const ClassInformation = () => {
         }
     }, []);
 
+    const showModalChangeStatus = () => {
+        const contentMessage = classInfo?.isActive
+            ? "Bạn có chắc chắn muốn ngừng hoạt động của lớp này?."
+            : "Bạn có chắc chắn muốn cấp phép lớp này được phép hoạt động?";
+
+        Modal.confirm({
+            title: 'Xác nhận thay đổi trạng thái',
+            content: contentMessage,
+            onOk: async () => {
+                try {
+                    await changeClassStatusAPI(classInfo.id);
+                    message.success('Cập nhật trạng thái thành công');
+                    fetchClassInfo();
+                } catch (error) {
+                    console.error('Error changing user status:', error);
+                    message.error('Có lỗi xảy ra khi cập nhật trạng thái.');
+                }
+            },
+            onCancel() {
+                console.log('Hủy thay đổi trạng thái');
+            },
+        });
+    };
+
     useEffect(() => {
-        fetchClassInfo(id);
-        fetchChildrenList(id);
+        fetchClassInfo();
         fetchTeachersAndManagers();
-    }, [id, fetchTeachersAndManagers]);
+    }, [fetchClassInfo, fetchTeachersAndManagers]);
+
+    useEffect(() => {
+        fetchChildrenList();
+    }, [fetchChildrenList]);
 
     if (loading) {
         return (
@@ -122,7 +127,7 @@ const ClassInformation = () => {
                             <Title level={5}>Thông tin lớp</Title>
                         </Col>
                         <Col>
-                            <Button type="link" icon={<EditOutlined />} >
+                            <Button type="link" icon={<EditOutlined />}>
                                 Chỉnh sửa thông tin
                             </Button>
                         </Col>
@@ -134,6 +139,8 @@ const ClassInformation = () => {
                         <Descriptions.Item label="Ngày khai giảng">
                             {classInfo?.openingDay ? moment(classInfo.openingDay).format('DD-MM-YYYY') : ''}
                         </Descriptions.Item>
+                        <Descriptions.Item label="Số trẻ đăng ký bán trú">{classInfo?.countChildrenRegisteredOnBoarding}</Descriptions.Item>
+                        <Descriptions.Item label="Số trẻ đăng ký đưa đón">{classInfo?.countChildrenRegisteredTransport}</Descriptions.Item>
                         <Descriptions.Item label="Giáo viên phụ trách">
                             {teachers.map((t) => t.username).join(', ')}
                         </Descriptions.Item>
@@ -164,7 +171,6 @@ const ClassInformation = () => {
                     style={{ textAlign: 'center', marginTop: 20 }}
                 />
             </Card>
-
         </div>
     );
 }

@@ -71,3 +71,14 @@ export const handleExcelData = async (file) => {
 export const saveChildrenFromExcel = async (childrenData) => {
     return axios.post(`/pms/children/excel/import/save`, childrenData);
 }
+
+export const uploadImageAPI = async (childrenId, imageFile) => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
+    return await axios.put(`/pms/children/upload-image/${childrenId}`, formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+};
