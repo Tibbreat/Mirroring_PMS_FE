@@ -1,3 +1,4 @@
+import { UserOutlined } from "@ant-design/icons";
 import { Pagination, Tag, Table, Avatar } from "antd";
 import { Link } from "react-router-dom";
 
@@ -7,7 +8,7 @@ export const ChildrenTable = ({ data }) => {
             title: 'Ảnh',
             dataIndex: 'imageUrl',
             key: 'imageUrl',
-            render: (url) => url ? <Avatar width={50} src={url} /> : 'Không có ảnh',
+            render: (url) => url ? <Avatar width={50} src={url} /> : <Avatar size="small" icon={<UserOutlined />} />,
         },
         {
             title: 'Họ và tên',
@@ -45,17 +46,13 @@ export const ChildrenTable = ({ data }) => {
             title: 'Lớp',
             dataIndex: 'className',
             key: 'className',
-            render: (text) => text === null ?
-                <Tag color="red" >Chưa được thêm vào lớp</Tag>
-                :
-                <Tag color="lime"> {text} </Tag>,
-        }
-
+            render: (text) => text === null ? (
+                <Tag color="red">Chưa được thêm vào lớp</Tag>
+            ) : (
+                <Tag color="lime">{text}</Tag>
+            ),
+        },
     ];
-
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-    };
 
     return (
         <div className="p-2">

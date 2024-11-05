@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { addClassAPI, getClassesAPI } from "../../services/services.class";
-import { Pagination, Spin, Card, Row, Col, Input, Select, Button, Modal, Form, DatePicker, notification } from "antd";
+import { Pagination, Spin, Card, Row, Col, Input, Select, Button, Modal, Form, notification } from "antd";
 import { getTeacherAvailableInYear, getUserOpnionAPI } from "../../services/services.user";
 import NoData from "../../component/no-data-page/NoData";
 import { AuthContext } from "../../component/context/auth.context";
@@ -16,14 +16,14 @@ const ClassList = () => {
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedAgeRange, setSelectedAgeRange] = useState(null); // New state for age range filter
+    const [selectedAgeRange, setSelectedAgeRange] = useState(null);
     const [form] = Form.useForm();
     const [teachers, setTeachers] = useState([]);
     const [classManager, setClassManager] = useState([]);
-    const [pathClassName, setPathClassName] = useState();
     const { user } = useContext(AuthContext);
-    const [className, setClassName] = useState(''); 
-    const fetchClasses = useCallback(async (page,className, ageRange) => {
+    const [className, setClassName] = useState('');
+
+    const fetchClasses = useCallback(async (page, className, ageRange) => {
         setLoading(true);
         try {
             const response = await getClassesAPI(page, className, ageRange);
@@ -65,19 +65,25 @@ const ClassList = () => {
     }, [currentPage, selectedAgeRange, fetchClasses, fetchTeachers, fetchClassManager]);
 
     const handleAgeRangeChange = (value) => {
-        setSelectedAgeRange(value); 
-        fetchClasses(currentPage,className, value);
+        setSelectedAgeRange(value);
+        fetchClasses(currentPage, className, value);
     };
+
     const handleClassNameChange = (event) => {
         const value = event.target.value;
         setClassName(value);
-        fetchClasses(currentPage, value, selectedAgeRange); // Pass new className and current ageRange
+        fetchClasses(currentPage, value, selectedAgeRange);
     };
 
     const handleOk = async () => {
         try {
             const today = moment();
-            const augustFifth = moment(`${today.year()}-08-05`, "YYYY-MM-DD");
+            const septemberFifth = moment(`${today.year()}-09-05`, "YYYY-MM-DD");
+
+            if (today.isAfter(septemberFifth)) {
+                notification.error({ message: "Đã quá ngày khai giảng" });
+                return;
+            }
 
             const values = await form.validateFields();
             const payload = {
