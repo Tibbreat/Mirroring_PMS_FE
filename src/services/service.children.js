@@ -82,3 +82,11 @@ export const uploadImageAPI = async (childrenId, imageFile) => {
         },
     });
 };
+
+// Download children data by vehicle 
+export const exportChildrenToExcelByVehicle = async (vehicleId) => {
+    const url = `/pms/children/excel/vehicle/${vehicleId}`;
+    return await axios.get(url, {
+        responseType: 'blob',
+    });
+};

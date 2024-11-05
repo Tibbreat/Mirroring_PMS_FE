@@ -15,8 +15,6 @@ const { Option } = Select;
 const ChildrenList = () => {
     const [loading, setLoading] = useState(true);
     const [childrenList, setChildrenList] = useState([]);
-    const [form] = Form.useForm();
-    const { user } = useContext(AuthContext);
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [searchTerm, setSearchTerm] = useState("");
@@ -27,6 +25,7 @@ const ChildrenList = () => {
     const [isAddChildModalVisible, setIsAddChildModalVisible] = useState(false);
     const [downloadAcademicYear, setDownloadAcademicYear] = useState(getDefaultAcademicYear());
 
+    const { user } = useContext(AuthContext);
     const fetchAcademicYear = useCallback(async () => {
         try {
             const response = await getAcademicYearsAPI();
@@ -61,13 +60,13 @@ const ChildrenList = () => {
     const handleAcademicYearChange = async (year) => {
         setSelectedAcademicYear(year);
         const data = await getChildrenAPI(page, year);
-        setChildrenList(data); // Update state with the API response
+        setChildrenList(data);
     };
 
     const handleSearch = (event) => {
         const value = event.target.value;
         setSearchTerm(value);
-        fetchChildrenList(currentPage, academicYears, searchTerm) // Pass new className and current ageRange
+        fetchChildrenList(currentPage, academicYears, searchTerm)
     };
 
     const showModal = () => {
@@ -140,21 +139,23 @@ const ChildrenList = () => {
                 >
                     Xuất Excel
                 </Button>
-                <Button
-                    type="primary"
-                    onClick={showAddChildModal}
-                    icon={<PlusOutlined />}
-                    className="ms-2"
-                >
-                    Thêm trẻ
-                </Button>
+                {user?.role === 'ADMIN' && (
+                    <Button
+                        type="primary"
+                        onClick={showAddChildModal}
+                        icon={<PlusOutlined />}
+                        className="ms-2"
+                    >
+                        Thêm trẻ
+                    </Button>
+                )}
             </Col>
 
             {loading ? (
                 <Loading />
             ) : childrenList.length > 0 ? (
                 <>
-                    <ChildrenTable data={childrenList}  />
+                    <ChildrenTable data={childrenList} />
                     <Pagination
                         current={currentPage}
                         total={total}

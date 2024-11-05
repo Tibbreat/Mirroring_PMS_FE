@@ -2,11 +2,11 @@ import { Link, useParams } from "react-router-dom";
 import { changeStatusRouteAPI, fetchRouteAPI, fetchStopLocationAPI } from "../../services/services.route";
 import { useEffect, useState } from "react";
 import Loading from "../common/Loading";
-import { Button, Card, Col, Descriptions, Divider, Row, Switch, Tabs, Table, Steps, Checkbox, Modal, Avatar, Tag, message, Image, Popconfirm } from "antd";
+import { Button, Card, Col, Descriptions, Divider, Row, Switch, Tabs, Table, Steps, Checkbox, Modal, Avatar, Tag, message, Image, Popconfirm, Popover, notification } from "antd";
 import Title from "antd/es/typography/Title";
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownloadOutlined, DownOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
 import { getAvailableVehicles, getVehicleOfRoute, unsubscribeRoute, updateRouteForVehicle } from "../../services/service.vehicle";
-import { getChildrenByRoute } from "../../services/service.children";
+import { exportChildrenToExcelByVehicle, getChildrenByRoute } from "../../services/service.children";
 const { TabPane } = Tabs;
 const { Step } = Steps;
 
@@ -160,6 +160,20 @@ const RouteInformation = () => {
         });
     };
 
+    const handleDownload = async (vehicleId) => {
+        try {
+            const response = await exportChildrenToExcelByVehicle(vehicleId);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `danh_sach_tre_dang_ky xe.xls`);
+            document.body.appendChild(link);
+            link.click();
+        } catch (error) {
+            console.error("Error downloading file:", error);
+            notification.error({ message: "Lỗi khi tải xuống danh sách trẻ" });
+        }
+    }
     if (loading) {
         return <Loading />;
     }
@@ -181,9 +195,12 @@ const RouteInformation = () => {
         {
             align: 'center',
             render: (record) => (
-                <>
+                <Col>
                     <DeleteOutlined onClick={() => openConfirmDeleteModal(record.id)} style={{ cursor: 'pointer', color: 'red' }} />
-                </>
+                    <Popover title="Tải danh sách trẻ đăng ký xe này">
+                        <DownloadOutlined onClick={() => handleDownload(record.id)} style={{ cursor: 'pointer', marginLeft: 10 }} />
+                    </Popover>
+                </Col>
             ),
         },
     ];

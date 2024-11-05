@@ -51,7 +51,7 @@ const ManageSite = () => {
   }
 
   const items = user.role === "TEACHER"
-    ? allItems.filter(item => ['1', '2', '4', '6'].includes(item.key))
+    ? allItems.filter(item => ['1', '2', '4', '6', '7'].includes(item.key))
     : allItems;
 
   useEffect(() => {
