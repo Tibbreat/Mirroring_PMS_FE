@@ -5,9 +5,9 @@ import RouteTable from '../../component/table/RouteTable';
 
 const { Title } = Typography;
 
-const RouteInformationTab = () => {
+const AcademicYearInformation = () => {
     return (
-        <RouteTable />
+        <></>
     );
 }
-export default RouteInformationTab;
+export default AcademicYearInformation;

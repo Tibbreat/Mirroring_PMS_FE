@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Card, Spin, message, Tabs, Form } from 'antd';
 import SchoolInformationTab from './SchoolInformationTab';
-import RouteInformationTab from './RouteInformationTab';
+import AcademicYearInformation from './AcademicYearInformation';
 
 
 const { TabPane } = Tabs;
@@ -9,13 +9,13 @@ const { TabPane } = Tabs;
 export const SchoolInformation = () => {
     return (
         <div className="container">
-               <Card className="m-2">
+            <Card className="m-2">
                 <Tabs defaultActiveKey="1">
                     <TabPane tab="Thông tin trường" key="1">
                         <SchoolInformationTab />
                     </TabPane>
-                    <TabPane tab="Thông tin tuyến xe" key="2">
-                        <RouteInformationTab />
+                    <TabPane tab="Thông tin chi tiết năm học" key="2">
+                        <AcademicYearInformation />
                     </TabPane>
                 </Tabs>
             </Card>
