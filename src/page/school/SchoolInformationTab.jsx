@@ -59,7 +59,7 @@ const SchoolInformationTab = () => {
   };
 
   return (
-    <div>
+    <>
       <Row justify="end" className='mb-3'>
         <Col>
           <Button type="link" icon={<EditOutlined />} onClick={handleEditClick} hidden={!isEdit}>
@@ -114,7 +114,7 @@ const SchoolInformationTab = () => {
           </Button>
         </Row>
       </Form>
-    </div>
+    </>
   );
 };
 
