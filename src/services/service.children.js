@@ -90,3 +90,8 @@ export const exportChildrenToExcelByVehicle = async (vehicleId) => {
         responseType: 'blob',
     });
 };
+export const getChildrenByTeacherIdAPI = async (teacherId) => {
+    const url = `/pms/children/by-teacher/${teacherId}`;
+    return await axios.get(url);
+};
+
