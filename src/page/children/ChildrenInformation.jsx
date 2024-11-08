@@ -127,7 +127,7 @@ const ChildrenInformation = () => {
                     message.error("Vui lòng chọn tuyến");
                     return;
                 }
-            }
+            } 
             await updateServiceStatus(id, serviceName, selectedRoute, selectedvehicle);
             setIsVehicleModalVisible(false);
             message.success("Đăng ký thành công");
@@ -272,7 +272,7 @@ const ChildrenInformation = () => {
                             <Descriptions.Item label="Giới tính" span={3}>{childrenData?.gender === 'female' ? "Nữ" : "Nam"}</Descriptions.Item>
                             <Descriptions.Item label="Nơi khai sinh" span={6}>{childrenData?.birthAddress}</Descriptions.Item>
                             <Descriptions.Item label="Nơi ở hiện tại" span={6}>{childrenData?.childAddress}</Descriptions.Item>
-                            <Descriptions.Item label="Đăng ký nội trú" span={3}>
+                            <Descriptions.Item label="Đăng ký bán trú" span={3}>
                                 <Switch
                                     checked={childrenData?.isRegisteredForBoarding}
                                     loading={updating}
