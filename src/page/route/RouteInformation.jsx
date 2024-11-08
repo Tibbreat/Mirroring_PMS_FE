@@ -152,6 +152,8 @@ const RouteInformation = () => {
                     fetchRoute();
                     fetchVehicleOfRoute();
                     fetchChildrenData();
+                    fetchAvailableVehicles();
+                    setSelectedVehicles([]);
                 } catch (error) {
                     console.error('Error changing route status:', error);
                     message.error('Có lỗi xảy ra. Vui lòng thử lại sau');

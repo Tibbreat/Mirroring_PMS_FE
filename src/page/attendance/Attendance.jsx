@@ -1,21 +1,22 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Button, Modal, Table, Image, Card, Row, Col, DatePicker, Radio, message, Tag } from 'antd';
+import { Button, Modal, Table, Image, Card, Row, Col, DatePicker, Radio, message, Tag, Input } from 'antd';
 import { useParams } from 'react-router-dom';
 import { attendAPI, createBaseLogAPI } from '../../services/service.log';
 import { AuthContext } from '../../component/context/auth.context';
-import { EyeOutlined } from '@ant-design/icons';
+import { EditOutlined, EyeOutlined } from '@ant-design/icons';
 import moment from 'moment';
 
 const Attendance = () => {
     const [children, setChildren] = useState([]);
-    const [selectedDate, setSelectedDate] = useState(moment()); // Đặt mặc định là ngày hiện tại
+    const [selectedDate, setSelectedDate] = useState(moment());
     const [attendanceStatus, setAttendanceStatus] = useState({});
+    const [notes, setNotes] = useState({});
     const { id } = useParams();
     const { user } = useContext(AuthContext);
 
     const loadChildren = async () => {
         try {
-            const response = await createBaseLogAPI(id, selectedDate ? selectedDate.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD'));
+            const response = await createBaseLogAPI(id, selectedDate.format('YYYY-MM-DD'));
             setChildren(response.data);
         } catch (error) {
             console.error('Failed to fetch children:', error);
@@ -26,22 +27,46 @@ const Attendance = () => {
         loadChildren();
     }, [selectedDate]);
 
-    const handleViewNote = (note) => {
+    const handleViewNote = (childId) => {
+        const note = notes[childId] !== undefined ? notes[childId] : children.find((child) => child.id === childId)?.note || 'Không có ghi chú';
+
         Modal.info({
             title: 'Ghi chú',
-            content: <p>{note || 'Không có ghi chú'}</p>,
+            content: <p>{note}</p>,
+        });
+    };
+
+    const handleAddNote = (childId) => {
+        const defaultNote = notes[childId] || children.find((child) => child.id === childId)?.note || '';
+
+        let noteContent = defaultNote;
+
+        Modal.confirm({
+            title: 'Thêm ghi chú',
+            content: (
+                <Input.TextArea
+                    rows={4}
+                    defaultValue={defaultNote}
+                    onChange={(e) => {
+                        noteContent = e.target.value;
+                    }}
+                />
+            ),
+            onOk: () => {
+                setNotes((prevNotes) => ({
+                    ...prevNotes,
+                    [childId]: noteContent,
+                }));
+                message.success('Ghi chú đã được thêm');
+            },
         });
     };
 
     const handleDateChange = (date) => {
-        if (date) {
+        if (date && (!selectedDate || !date.isSame(selectedDate, 'day'))) {
             setSelectedDate(date);
-        } else {
-            setSelectedDate(null); 
         }
-        // console.log('Selected Date:', date ? date.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD'));
     };
-    
 
     const handleAttendanceChange = (childId, status) => {
         setAttendanceStatus((prevStatus) => ({
@@ -51,57 +76,96 @@ const Attendance = () => {
     };
 
     const handleSave = () => {
+        const attendanceDate = selectedDate.format('YYYY-MM-DD');
+        const totalChildren = children.length;
+
+        // Bắt đầu bằng dữ liệu trả về từ API
+        let initialPresentCount = children.filter(child => child.status === 'PRESENT').length;
+        let initialAbsentCount = children.filter(child => child.status === 'ABSENT').length;
+
+        // Cập nhật lại số lượng dựa trên các thay đổi trong `attendanceStatus`
+        Object.entries(attendanceStatus).forEach(([childId, status]) => {
+            const originalStatus = children.find(child => child.id === childId)?.status;
+
+            // Nếu trạng thái thay đổi, cập nhật số lượng
+            if (status === 'PRESENT' && originalStatus !== 'PRESENT') {
+                initialPresentCount += 1;
+                if (originalStatus === 'ABSENT') initialAbsentCount -= 1;
+            } else if (status === 'ABSENT' && originalStatus !== 'ABSENT') {
+                initialAbsentCount += 1;
+                if (originalStatus === 'PRESENT') initialPresentCount -= 1;
+            }
+        });
+
         Modal.confirm({
-            title: 'Xác nhận điểm danh',
+            title: `Xác nhận điểm danh ngày ${selectedDate.format('DD-MM-YYYY')}`,
+            width: 800,
             content: (
-                <Table
-                    dataSource={children.map((child) => ({
-                        key: child.id,
-                        name: child.childName,
-                        status: attendanceStatus[child.id] || child.status || 'Chưa điểm danh',
-                    }))}
-                    columns={[
-                        {
-                            title: 'Họ và tên',
-                            dataIndex: 'name',
-                            key: 'name',
-                        },
-                        {
-                            title: 'Trạng thái',
-                            dataIndex: 'status',
-                            key: 'status',
-                            render: (text) => {
-                                let color = 'gray';
-                                let label = 'Chưa điểm danh';
+                <>
+                    <p>Tổng số trẻ: {totalChildren}</p>
+                    <Tag color='green'>Tổng số có mặt: {initialPresentCount}</Tag>
+                    <Tag color='red'>Tổng số vắng: {initialAbsentCount}</Tag>
 
-                                if (text === 'PRESENT') {
-                                    color = 'green';
-                                    label = 'Có mặt';
-                                } else if (text === 'ABSENT') {
-                                    color = 'red';
-                                    label = 'Vắng';
-                                }
-
-                                return <Tag color={color}>{label}</Tag>;
+                    <Table
+                        className='mt-3'
+                        dataSource={children.map((child) => ({
+                            key: child.id,
+                            name: child.childName,
+                            status: attendanceStatus[child.id] || child.status || 'Chưa điểm danh',
+                            note: notes[child.id] !== undefined ? notes[child.id] : child.note,
+                        }))}
+                        columns={[
+                            {
+                                title: 'Họ và tên',
+                                dataIndex: 'name',
+                                key: 'name',
+                                width: 200,
                             },
-                        },
-                    ]}
-                    pagination={{
-                        defaultPageSize: 10,
-                        showSizeChanger: false,
-                    }}
-                    bordered
-                    size="small"
-                />
+                            {
+                                title: 'Trạng thái',
+                                dataIndex: 'status',
+                                key: 'status',
+                                align: 'center',
+                                width: 200,
+                                render: (text) => {
+                                    let color = 'gray';
+                                    let label = 'Chưa điểm danh';
+
+                                    if (text === 'PRESENT') {
+                                        color = 'green';
+                                        label = 'Có mặt';
+                                    } else if (text === 'ABSENT') {
+                                        color = 'red';
+                                        label = 'Vắng';
+                                    }
+
+                                    return <Tag color={color}>{label}</Tag>;
+                                },
+                            },
+                            {
+                                title: 'Ghi chú',
+                                dataIndex: 'note',
+                                width: 400,
+                                key: 'note',
+                            },
+                        ]}
+                        pagination={{
+                            defaultPageSize: 10,
+                            showSizeChanger: false,
+                        }}
+                        bordered
+                        size="small"
+                    />
+                </>
             ),
             onOk: async () => {
-                const requestDate = selectedDate ? selectedDate.format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
                 const requestData = {
                     classId: id,
-                    attendanceDate: requestDate,
+                    attendanceDate: attendanceDate,
                     children: children.map((child) => ({
                         childrenId: child.id,
                         status: attendanceStatus[child.id] || child.status || 'Chưa điểm danh',
+                        note: notes[child.id] !== undefined ? notes[child.id] : child.note,
                     })),
                 };
 
@@ -113,11 +177,13 @@ const Attendance = () => {
         });
     };
 
+
     const columns = [
         {
             title: 'Hình ảnh',
             dataIndex: 'imageUrl',
             key: 'imageUrl',
+            align: 'center',
             render: (text) => <Image width={80} src={text} />,
         },
         {
@@ -127,85 +193,60 @@ const Attendance = () => {
         },
         {
             title: 'Sáng',
+            align: 'center',
             children: [
                 {
                     title: 'Thời gian lên xe',
                     dataIndex: 'morningBoardingTime',
                     key: 'morningBoardingTime',
+                    align: 'center',
                     render: (text) => text || 'Chưa có',
-                },
-                {
-                    title: 'Thời gian xuống xe',
-                    dataIndex: 'morningAlightingTime',
-                    key: 'morningAlightingTime',
-                    render: (text) => text || 'Chưa có',
-                },
+                }
             ],
         },
         {
             title: 'Chiều',
+            align: 'center',
             children: [
                 {
                     title: 'Thời gian lên xe',
                     dataIndex: 'afternoonBoardingTime',
                     key: 'afternoonBoardingTime',
+                    align: 'center',
                     render: (text) => text || 'Chưa có',
-                },
-                {
-                    title: 'Thời gian xuống xe',
-                    dataIndex: 'afternoonAlightingTime',
-                    key: 'afternoonAlightingTime',
-                    render: (text) => text || 'Chưa có',
-                },
+                }
             ],
         },
         {
             title: 'Điểm danh',
             key: 'actions',
-            render: (text, record) => {
-                // Kiểm tra nếu ngày được chọn là ngày hiện tại
-                const isToday = selectedDate && selectedDate.format('YYYY-MM-DD') === moment().format('YYYY-MM-DD');
-                const status = attendanceStatus[record.id] || record.status || 'Chưa điểm danh';
-
-                // Chọn màu và nhãn cho Tag dựa trên trạng thái
-                const getStatusTag = () => {
-                    let color = 'gray';
-                    let label = 'Chưa điểm danh';
-
-                    if (status === 'PRESENT') {
-                        color = 'green';
-                        label = 'Có mặt';
-                    } else if (status === 'ABSENT') {
-                        color = 'red';
-                        label = 'Vắng';
-                    }
-
-                    return <Tag color={color}>{label}</Tag>;
-                };
-
-                return isToday || !selectedDate ? (
-                    <Radio.Group
-                        value={status}
-                        onChange={(e) => handleAttendanceChange(record.id, e.target.value)}
-                    >
-                        <Radio.Button value="ABSENT">Vắng</Radio.Button>
-                        <Radio.Button value="PRESENT">Có mặt</Radio.Button>
-                    </Radio.Group>
-                ) : (
-                    getStatusTag()
-                );
-            },
+            align: 'center',
+            render: (record) => (
+                <Radio.Group
+                    value={attendanceStatus[record.id] || record.status}
+                    onChange={(e) => handleAttendanceChange(record.id, e.target.value)}
+                >
+                    <Radio.Button value="ABSENT" className="absent-button">Vắng</Radio.Button>
+                    <Radio.Button value="PRESENT" className="present-button">Có mặt</Radio.Button>
+                </Radio.Group>
+            ),
         },
         {
             title: 'Ghi chú',
-            dataIndex: 'note',
             key: 'note',
-            render: (text) => (
-                <Button type="link" icon={<EyeOutlined />} onClick={() => handleViewNote(text)} />
+            align: 'center',
+            render: (text, record) => (
+                <Row>
+                    <Col span={24}>
+                        <Button type="link" icon={<EditOutlined />} onClick={() => handleAddNote(record.id)} />
+                    </Col>
+                    <Col span={24}>
+                        <Button type="link" icon={<EyeOutlined />} onClick={() => handleViewNote(record.id)} />
+                    </Col>
+                </Row>
             ),
         },
     ];
-
 
     return (
         <Card title='Điểm danh' className='m-2'>
@@ -217,7 +258,6 @@ const Attendance = () => {
                         value={selectedDate}
                         onChange={handleDateChange}
                         disabledDate={(current) => current && current > moment().endOf('day')}
-                        allowClear={true} // Cho phép xóa ngày
                     />
                 </Col>
             </Row>
@@ -228,9 +268,10 @@ const Attendance = () => {
                 columns={columns}
                 rowKey="id"
                 pagination={false}
+                bordered={true}
             />
 
-            {selectedDate && selectedDate.format('YYYY-MM-DD') === moment().format('YYYY-MM-DD') && (
+            {selectedDate.format('YYYY-MM-DD') === moment().format('YYYY-MM-DD') && (
                 <Row justify="end" className="mt-3">
                     <Col>
                         <Button type="primary" onClick={handleSave}>

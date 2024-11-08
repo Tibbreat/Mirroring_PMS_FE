@@ -122,7 +122,7 @@ const ChildrenInformation = () => {
     const handleChangeServiceStatus = async (serviceName) => {
         setUpdating(true);
         try {
-            if (!childrenData.isRegisteredForTransport) {
+            if (!childrenData.isRegisteredForTransport && serviceName === 'transport') {
                 if (selectedRoute === null) {
                     message.error("Vui lòng chọn tuyến");
                     return;

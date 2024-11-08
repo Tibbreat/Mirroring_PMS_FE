@@ -294,3 +294,39 @@
     border-radius: 15px 15px 15px 0px;
     text-align: left;
 }
+
+/* Đổi màu cho nút "Vắng" */
+.absent-button {
+    color: #ff4d4f !important;
+    border-color: #ff4d4f !important;
+}
+
+.absent-button:hover,
+.absent-button:active {
+    border-color: #ff7875 !important;
+    color: #ff4d4f !important;
+}
+
+.absent-button.ant-radio-button-wrapper-checked {
+    background-color: #ff7875;
+    border-color: #ff7875 !important;
+    color: white !important;
+}
+
+/* Đổi màu cho nút "Có mặt" */
+.present-button {
+    color: #4caf50 !important;
+    border-color: #4caf50 !important;
+}
+
+.present-button:hover,
+.present-button:active {
+    border-color: #66bb6a !important;
+    color: #4caf50 !important;
+}
+
+.present-button.ant-radio-button-wrapper-checked {
+    background-color: #66bb6a;
+    border-color: #66bb6a !important;
+    color: white !important;
+}
