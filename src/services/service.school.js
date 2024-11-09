@@ -5,9 +5,11 @@ export const getSchoolInformationAPI = async (schoolId) => {
     return await axios.get(url);
 }
 
-export const getAcademicYearInformationAPI = async (schoolId, academicYear) => {
-    const url = `/pms/school/academic-year?schoolId=${schoolId}&academicYear=${academicYear}`;
+export const getAcademicYearInformationAPI = async (academicYear) => {
+    const url = `/pms/public/school/academic-year?academicYear=${academicYear}`;
     return await axios.get(url);
 }
-export const updateSchoolInformationAPI = async (principalId, data) => {
+export const updateAcademicInformation = async (data) => {
+    const url = `/pms/school/update-academic-information`;
+    return await axios.put(url, data);
 }

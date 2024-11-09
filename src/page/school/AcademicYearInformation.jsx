@@ -1,11 +1,13 @@
-import { EditOutlined } from "@ant-design/icons";
-import { Button, Col, Form, InputNumber, Row, Select, DatePicker, Card, Modal, message } from "antd";
+import { EditOutlined, PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
+import { Button, Col, Form, InputNumber, Row, Select, DatePicker, Card, Modal, message, Input } from "antd";
 import Title from "antd/es/typography/Title";
 import moment from "moment";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { getAcademicYearsAPI } from "../../services/services.public";
-import { getAcademicYearInformationAPI } from "../../services/service.school";
+import { getAcademicYearInformationAPI, updateAcademicInformation } from "../../services/service.school";
 import { AuthContext } from "../../component/context/auth.context";
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -23,17 +25,29 @@ const AcademicYearInformation = () => {
 
     const fetchAcademicYearInformation = async () => {
         try {
-            const response = await getAcademicYearInformationAPI(user.schoolId, selectedAcademicYear);
+            const response = await getAcademicYearInformationAPI(selectedAcademicYear);
             const data = response.data;
 
-            if (data.enrollmentStartDate && data.enrollmentEndDate) {
-                data.enrollmentPeriod = [
-                    moment(data.enrollmentStartDate),
-                    moment(data.enrollmentEndDate)
+            if (data.onlineEnrollmentStartDate && data.onlineEnrollmentEndDate) {
+                data.enrollmentPeriodOnline = [
+                    moment(data.onlineEnrollmentStartDate),
+                    moment(data.onlineEnrollmentEndDate)
+                ];
+            }
+
+            if (data.offlineEnrollmentStartDate && data.offlineEnrollmentEndDate) {
+                data.enrollmentPeriodOffline = [
+                    moment(data.offlineEnrollmentStartDate),
+                    moment(data.offlineEnrollmentEndDate)
                 ];
             }
 
             data.openingDay = moment(data.openingDay);
+            data.admissionDocuments = data.admissionFiles.map(file => ({
+                document: file.fileName,
+                note: file.note
+            }));
+
             setInitialValues(data);
             form.setFieldsValue(data);
         } catch (error) {
@@ -56,28 +70,72 @@ const AcademicYearInformation = () => {
     }, []);
 
     const handleFinish = async (values) => {
-        const { totalClassLevel1, totalStudentLevel1, totalClassLevel2, totalStudentLevel2, totalClassLevel3, totalStudentLevel3, totalEnrolledStudents } = values;
-        const totalExpectedStudents = (totalClassLevel1 * totalStudentLevel1) + (totalClassLevel2 * totalStudentLevel2) + (totalClassLevel3 * totalStudentLevel3);
+        const {
+            totalClassLevel1,
+            totalStudentLevel1,
+            totalClassLevel2,
+            totalStudentLevel2,
+            totalClassLevel3,
+            totalStudentLevel3,
+            totalEnrolledStudents,
+            enrollmentPeriodOnline,
+            enrollmentPeriodOffline,
+            note,
+            admissionDocuments
+        } = values;
+
+        const totalExpectedStudents =
+            (totalClassLevel1 * totalStudentLevel1) +
+            (totalClassLevel2 * totalStudentLevel2) +
+            (totalClassLevel3 * totalStudentLevel3);
 
         if (totalExpectedStudents > totalEnrolledStudents) {
             message.error("Số lớp vượt quá chỉ tiêu tuyển sinh.");
             return;
         }
+
+        const transformedValues = {
+            academicYear: selectedAcademicYear,
+            openingDay: values.openingDay.format('YYYY-MM-DD'),
+            totalClassLevel1,
+            totalStudentLevel1,
+            totalClassLevel2,
+            totalStudentLevel2,
+            totalClassLevel3,
+            totalStudentLevel3,
+            totalEnrolledStudents,
+            onlineEnrollmentStartDate: enrollmentPeriodOnline[0].format('YYYY-MM-DD'),
+            onlineEnrollmentEndDate: enrollmentPeriodOnline[1].format('YYYY-MM-DD'),
+            offlineEnrollmentStartDate: enrollmentPeriodOffline[0].format('YYYY-MM-DD'),
+            offlineEnrollmentEndDate: enrollmentPeriodOffline[1].format('YYYY-MM-DD'),
+            note,
+            schoolId: user.schoolId,
+            admissionFiles: admissionDocuments.map(doc => ({
+                fileName: doc.document,
+                note: doc.note
+            }))
+        };
+
         try {
             setLoading(true);
-            const values = await form.validateFields();
-            if (JSON.stringify(values) === JSON.stringify(initialValues)) {
+            const validValues = await form.validateFields();
+            if (JSON.stringify(validValues) === JSON.stringify(initialValues)) {
                 message.info('Không có gì thay đổi');
                 setIsEdit(true);
-                setLoading(false);
                 return;
             }
-            setIsModalVisible(true);
+
+            console.log("Transformed values:", transformedValues);
+            await updateAcademicInformation(transformedValues);
         } catch (error) {
-            console.error('Validation failed:', error);
+            console.error('An error occurred:', error);
+            message.error("Cập nhật thông tin thất bại. Vui lòng thử lại.");
+        } finally {
+            setLoading(false);
+            setIsModalVisible(true);
         }
-        setIsModalVisible(true);
     };
+
 
     const handleEditClick = () => {
         setIsEdit(!isEdit);
@@ -184,10 +242,18 @@ const AcademicYearInformation = () => {
                     <Col xs={24} md={8}>
                         <Card>
                             <Title level={5}>Lớp 3-4 tuổi</Title>
-                            <Form.Item label="Số lớp mở dự kiến" name="totalClassLevel1">
+                            <Form.Item
+                                label="Số lớp mở dự kiến"
+                                name="totalClassLevel1"
+                                rules={[{ required: true, message: "Vui lòng nhập số lớp mở dự kiến" }]}
+                            >
                                 <InputNumber disabled={isEdit} min={1} style={{ width: "100%" }} />
                             </Form.Item>
-                            <Form.Item label="Sĩ số tối đa 1 lớp" name="totalStudentLevel1">
+                            <Form.Item
+                                label="Sĩ số tối đa 1 lớp"
+                                name="totalStudentLevel1"
+                                rules={[{ required: true, message: "Vui lòng nhập sĩ số tối đa 1 lớp" }]}
+                            >
                                 <InputNumber disabled={isEdit} min={1} style={{ width: "100%" }} />
                             </Form.Item>
                         </Card>
@@ -195,10 +261,18 @@ const AcademicYearInformation = () => {
                     <Col xs={24} md={8}>
                         <Card>
                             <Title level={5}>Lớp 4-5 tuổi</Title>
-                            <Form.Item label="Số lớp mở dự kiến" name="totalClassLevel2">
+                            <Form.Item
+                                label="Số lớp mở dự kiến"
+                                name="totalClassLevel2"
+                                rules={[{ required: true, message: "Vui lòng nhập số lớp mở dự kiến" }]}
+                            >
                                 <InputNumber disabled={isEdit} min={1} style={{ width: "100%" }} />
                             </Form.Item>
-                            <Form.Item label="Sĩ số tối đa 1 lớp" name="totalStudentLevel2">
+                            <Form.Item
+                                label="Sĩ số tối đa 1 lớp"
+                                name="totalStudentLevel2"
+                                rules={[{ required: true, message: "Vui lòng nhập sĩ số tối đa 1 lớp" }]}
+                            >
                                 <InputNumber disabled={isEdit} min={1} style={{ width: "100%" }} />
                             </Form.Item>
                         </Card>
@@ -206,10 +280,18 @@ const AcademicYearInformation = () => {
                     <Col xs={24} md={8}>
                         <Card>
                             <Title level={5}>Lớp 5-6 tuổi</Title>
-                            <Form.Item label="Số lớp mở dự kiến" name="totalClassLevel3">
+                            <Form.Item
+                                label="Số lớp mở dự kiến"
+                                name="totalClassLevel3"
+                                rules={[{ required: true, message: "Vui lòng nhập số lớp mở dự kiến" }]}
+                            >
                                 <InputNumber disabled={isEdit} min={1} style={{ width: "100%" }} />
                             </Form.Item>
-                            <Form.Item label="Sĩ số tối đa 1 lớp" name="totalStudentLevel3">
+                            <Form.Item
+                                label="Sĩ số tối đa 1 lớp"
+                                name="totalStudentLevel3"
+                                rules={[{ required: true, message: "Vui lòng nhập sĩ số tối đa 1 lớp" }]}
+                            >
                                 <InputNumber disabled={isEdit} min={1} style={{ width: "100%" }} />
                             </Form.Item>
                         </Card>
@@ -217,20 +299,116 @@ const AcademicYearInformation = () => {
                 </Row>
 
                 <Row gutter={[16, 16]} className="mt-3">
-                    <Col xs={24}>
+                    <Col xs={24} md={24}>
                         <Form.Item
-                            label="Thời gian nhận đơn nhập học dự tính"
-                            name="enrollmentPeriod"
+                            label="Thời gian nhận đơn nhập học trực tuyến"
+                            name="enrollmentPeriodOnline"
                             rules={[
-                                { required: true, message: "Vui lòng chọn thời gian nhận đơn dự tính" },
+                                {
+                                    required: true,
+                                    message: "Vui lòng chọn thời gian nhận đơn dự tính",
+                                },
                             ]}
                         >
-                            <RangePicker disabled={isEdit} style={{ width: "100%" }} disabledDate={disableDatesOutsideCurrentYear} format="YYYY-MM-DD" />
+                            <RangePicker
+                                disabled={isEdit}
+                                style={{ width: "100%" }}
+                                disabledDate={disableDatesOutsideCurrentYear}
+                                format="YYYY-MM-DD"
+                            />
+                        </Form.Item>
+                    </Col>
+                    <Col xs={24} md={24}>
+                        <Form.Item
+                            label="Thời gian nhận đơn nhập học trực tiếp"
+                            name="enrollmentPeriodOffline"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng chọn thời gian nhận đơn dự tính",
+                                },
+                            ]}
+                        >
+                            <RangePicker
+                                disabled={isEdit}
+                                style={{ width: "100%" }}
+                                disabledDate={disableDatesOutsideCurrentYear}
+                                format="YYYY-MM-DD"
+                            />
                         </Form.Item>
                     </Col>
                 </Row>
 
-                <Row justify="center">
+                <Row gutter={[16, 16]} className="mt-3">
+                    <Title level={5}>Hồ sơ nhập học</Title>
+                </Row>
+                <Form.List name="admissionDocuments">
+                    {(fields, { add, remove }) => (
+                        <>
+                            {fields.map(({ key, name, fieldKey, ...restField }) => (
+                                <Row key={key} gutter={[16, 16]}>
+                                    <Col xs={10}>
+                                        <Form.Item
+                                            {...restField}
+                                            name={[name, 'document']}
+                                            fieldKey={[fieldKey, 'document']}
+                                            rules={[{ required: true, message: 'Vui lòng nhập tên hồ sơ' }]}
+                                        >
+                                            <Input placeholder="Tên hồ sơ" disabled={isEdit} />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={10}>
+                                        <Form.Item
+                                            {...restField}
+                                            name={[name, 'note']}
+                                            fieldKey={[fieldKey, 'note']}
+                                        >
+                                            <Input placeholder="Ghi chú" disabled={isEdit} />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col xs={4}>
+                                        <MinusCircleOutlined
+                                            onClick={() => remove(name)}
+                                            style={{ display: isEdit ? 'none' : 'inline-block' }}
+                                        />
+                                    </Col>
+                                </Row>
+                            ))}
+                            <Row>
+                                <Col xs={24}>
+                                    <Button
+                                        type="dashed"
+                                        onClick={() => add()}
+                                        block
+                                        icon={<PlusOutlined />}
+                                        style={{ display: isEdit ? 'none' : 'inline-block' }}
+                                    >
+                                        Thêm hồ sơ
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </>
+                    )}
+                </Form.List>
+                <Row gutter={[16, 16]} className="mt-3">
+                    <Title level={5}>Ghi chú</Title>
+                </Row>
+                <Row gutter={[16, 16]}>
+                    <Col xs={24}>
+                        <Form.Item name="note">
+                            <CKEditor
+                                editor={ClassicEditor}
+                                data={initialValues.note || ''}
+                                disabled={isEdit}
+                                onChange={(event, editor) => {
+                                    const data = editor.getData();
+                                    form.setFieldsValue({ note: data });
+                                }}
+                            />
+                        </Form.Item>
+                    </Col>
+                </Row>
+                <Row justify="center" className="mt-3">
                     <Button type="primary" htmlType="submit" hidden={isEdit} loading={loading} className='me-5'>
                         Lưu
                     </Button>

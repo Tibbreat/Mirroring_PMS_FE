@@ -8,7 +8,7 @@ const instance = axios.create({
 instance.interceptors.request.use(
     (config) => {
         const token = window.localStorage.getItem('access_token');
-        if (token && config.url.startsWith('/pms')) {
+        if (token && config.url.startsWith('/pms') && !config.url.includes('/public')) {
             config.headers.Authorization = `Bearer ${token}`;
         }
         return config;

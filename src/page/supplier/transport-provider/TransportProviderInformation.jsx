@@ -240,15 +240,6 @@ const TransportProviderInformation = () => {
                         </Col>
                         <Col span={24}>
                             <Form.Item
-                                name="pickUpLocation"
-                                label="Điểm đón"
-                                rules={[{ required: true, message: 'Vui lòng nhập điểm đón' }]}
-                            >
-                                <Input placeholder="Điểm đón" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={24}>
-                            <Form.Item
                                 name="images"
                                 label="Tải lên hình ảnh"
                                 valuePropName="fileList"

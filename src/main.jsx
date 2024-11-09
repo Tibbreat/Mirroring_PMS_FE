@@ -37,6 +37,7 @@ import RouteList from './page/route/RouteList';
 import RouteInformation from './page/route/RouteInformation';
 import Attendance from './page/attendance/Attendance';
 import ImportExcelChildren from './page/children/ImportExcelChildren';
+import { Landing } from './page/landing/Landing';
 
 
 const App = () => (
@@ -45,6 +46,7 @@ const App = () => (
       <Route path="/pms/auth/login" element={<Login />} />
       <Route path="/pms/auth/forgot-password" element={<ForgotPassword />} />
       <Route path="/pms/auth/change-password" element={<ChangePassword />} />
+      <Route path="/tuyen-sinh/nam-hoc/:academicYear" element={<Landing />} />
       <Route path="/pms/manage" element={
         <AuthWrapper>
           <PrivateRoute>
