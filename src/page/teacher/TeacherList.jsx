@@ -26,7 +26,7 @@ const TeacherList = () => {
     const fetchTeachers = useCallback(async (page, fullName) => {
         setLoading(true);
         try {
-            const response = await getUsersAPI(user.schoolId, page, ["TEACHER"], true, fullName);
+            const response = await getUsersAPI( page, ["TEACHER"], true, fullName);
             setTeachers(response.data.listData);
             setTotal(response.data.total);
         } catch (error) {
@@ -53,7 +53,7 @@ const TeacherList = () => {
     const handleChangeName = (event) => {
         const value = event.target.value;
         setFullName(value);
-        fetchTeachers(currentPage, value); // Pass new value directly to fetchTeachers
+        fetchTeachers(currentPage, value); 
     };
 
     const handleOk = async (values) => {

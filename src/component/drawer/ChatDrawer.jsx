@@ -2,12 +2,12 @@ import React, { useState, useEffect, useContext, useRef, useCallback } from 'rea
 import { Drawer, List, Avatar, Input, Typography, Button, Modal, Select, message, Divider } from 'antd';
 import { database, ref, onValue, set } from '../../services/firebaseConfig';
 import { AuthContext } from '../context/auth.context';
-import { getParentWithUserNameAPI, getUserAPI, getUserOpnionWithUserNameAPI } from '../../services/services.user';
+import { getUserAPI } from '../../services/services.user';
 import { v4 as uuidv4 } from 'uuid';
 import { SendOutlined, PlusOutlined } from '@ant-design/icons';
 import { getChildrenByTeacherIdAPI } from '../../services/service.children';
 
-const { Search, TextArea } = Input;
+const { TextArea } = Input;
 const { Text } = Typography;
 
 const ChatDrawer = ({ isVisible, onClose }) => {

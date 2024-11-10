@@ -4,7 +4,7 @@ import { Button, Card, Col, Input, Modal, Row, Select, Spin, Form, message, Date
 import StaffTable from "../../component/table/StaffTable";
 import NoData from "../../component/no-data-page/NoData";
 import UploadImage from "../../component/input/UploadImage";
-import moment from "moment"; // Import for handling date formatting
+import dayjs from "dayjs"; // Import for handling date formatting
 import { AuthContext } from "../../component/context/auth.context";
 
 const { Option } = Select;
@@ -27,7 +27,7 @@ export const StaffList = () => {
             setLoading(true);
             try {
                 const roles = selectedRole.length > 0 ? selectedRole : ["KITCHEN_MANAGER", "CLASS_MANAGER", "TRANSPORT_MANAGER"];
-                const response = await getUsersAPI(user.schoolId, page, roles, true, fullName);
+                const response = await getUsersAPI(page, roles, true, fullName);
                 setStaff(response.data.listData);
                 setTotal(response.data.total);
             } catch (error) {
@@ -75,7 +75,7 @@ export const StaffList = () => {
             address,
             phone,
             role,
-            dob: dob ? moment(dob).format("YYYY-MM-DD") : null,
+            dob: dob ? dayjs(dob).format("YYYY-MM-DD") : null,
             schoolId: user?.schoolId
         };
 
@@ -105,19 +105,19 @@ export const StaffList = () => {
     return (
         <Card className="m-2">
             <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
-            <Col xs={24} sm={8}>
-                <Select
-                    placeholder="Chọn vai trò"
-                    style={{ width: '100%' }}
-                    onChange={handleRoleChange}
-                    allowClear 
-                    value={selectedRole[0] || null}
-                >
-                    <Option value="CLASS_MANAGER">Quản lý lớp</Option>
-                    <Option value="KITCHEN_MANAGER">Quản lý bếp</Option>
-                    <Option value="TRANSPORT_MANAGER">Quản lý dịch vụ đưa đón</Option>
-                </Select>
-            </Col>
+                <Col xs={24} sm={8}>
+                    <Select
+                        placeholder="Chọn vai trò"
+                        style={{ width: '100%' }}
+                        onChange={handleRoleChange}
+                        allowClear 
+                        value={selectedRole[0] || null}
+                    >
+                        <Option value="CLASS_MANAGER">Quản lý lớp</Option>
+                        <Option value="KITCHEN_MANAGER">Quản lý bếp</Option>
+                        <Option value="TRANSPORT_MANAGER">Quản lý dịch vụ đưa đón</Option>
+                    </Select>
+                </Col>
                 <Col xs={24} sm={16}>
                     <Input
                         placeholder="Nhập tên nhân viên cần tìm"
@@ -160,22 +160,22 @@ export const StaffList = () => {
             >
                 <div className="container">
                     <Row gutter={[16, 16]} align="middle">
-                        <Col span={8} className="d-flex justify-content-center">
+                        <Col xs={24} md={8} className="d-flex justify-content-center">
                             <UploadImage onImageChange={handleImageChange} disabled={isSubmitting} />
                         </Col>
-                        <Col span={16}>
+                        <Col xs={24} md={16}>
                             <Form
                                 form={form}
                                 layout="vertical"
                                 onFinish={handleOk}
                                 initialValues={{
-                                    dob: moment(),
+                                    dob: dayjs(),
                                 }}
                                 disabled={isSubmitting} // Disable the form when loading
                             >
                                 <Card title="Thông tin cá nhân" bordered={false}>
                                     <Row gutter={[16, 16]}>
-                                        <Col span={8}>
+                                        <Col xs={24} md={12} lg={8}>
                                             <Form.Item
                                                 label="Họ và tên"
                                                 name="fullName"
@@ -187,7 +187,7 @@ export const StaffList = () => {
                                                 <Input placeholder="Nhập họ và tên" disabled={isSubmitting} />
                                             </Form.Item>
                                         </Col>
-                                        <Col span={8}>
+                                        <Col xs={24} md={12} lg={8}>
                                             <Form.Item
                                                 label="Số điện thoại"
                                                 name="phone"
@@ -199,7 +199,7 @@ export const StaffList = () => {
                                                 <Input placeholder="Nhập số điện thoại" disabled={isSubmitting} />
                                             </Form.Item>
                                         </Col>
-                                        <Col span={8}>
+                                        <Col xs={24} md={12} lg={8}>
                                             <Form.Item
                                                 label="Chức vụ"
                                                 name="role"
@@ -217,7 +217,7 @@ export const StaffList = () => {
                                 {/* Additional Information */}
                                 <Card title="Thông tin bổ sung" bordered={false} style={{ marginTop: 20 }}>
                                     <Row gutter={[16, 16]}>
-                                        <Col span={12}>
+                                        <Col xs={24} md={12}>
                                             <Form.Item
                                                 label="Ngày sinh"
                                                 name="dob"
@@ -230,7 +230,7 @@ export const StaffList = () => {
                                                 />
                                             </Form.Item>
                                         </Col>
-                                        <Col span={12}>
+                                        <Col xs={24} md={12}>
                                             <Form.Item
                                                 label="CMT/CCCD"
                                                 name="idCardNumber"
@@ -244,7 +244,7 @@ export const StaffList = () => {
                                         </Col>
                                     </Row>
                                     <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-                                        <Col span={24}>
+                                        <Col xs={24}>
                                             <Form.Item
                                                 label="Địa chỉ"
                                                 name="address"

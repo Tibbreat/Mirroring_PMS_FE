@@ -1,7 +1,7 @@
 import { EditOutlined, PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import { Button, Col, Form, InputNumber, Row, Select, DatePicker, Card, Modal, message, Input } from "antd";
 import Title from "antd/es/typography/Title";
-import moment from "moment";
+import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { getAcademicYearsAPI } from "../../services/services.public";
 import { getAcademicYearInformationAPI, updateAcademicInformation } from "../../services/service.school";
@@ -20,6 +20,7 @@ const AcademicYearInformation = () => {
     const [selectedAcademicYear, setSelectedAcademicYear] = useState('');
     const [loading, setLoading] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [transformedValues, setTransformedValues] = useState(null);
 
     const { user } = useContext(AuthContext);
 
@@ -30,19 +31,19 @@ const AcademicYearInformation = () => {
 
             if (data.onlineEnrollmentStartDate && data.onlineEnrollmentEndDate) {
                 data.enrollmentPeriodOnline = [
-                    moment(data.onlineEnrollmentStartDate),
-                    moment(data.onlineEnrollmentEndDate)
+                    dayjs(data.onlineEnrollmentStartDate),
+                    dayjs(data.onlineEnrollmentEndDate)
                 ];
             }
 
             if (data.offlineEnrollmentStartDate && data.offlineEnrollmentEndDate) {
                 data.enrollmentPeriodOffline = [
-                    moment(data.offlineEnrollmentStartDate),
-                    moment(data.offlineEnrollmentEndDate)
+                    dayjs(data.offlineEnrollmentStartDate),
+                    dayjs(data.offlineEnrollmentEndDate)
                 ];
             }
 
-            data.openingDay = moment(data.openingDay);
+            data.openingDay = dayjs(data.openingDay);
             data.admissionDocuments = data.admissionFiles.map(file => ({
                 document: file.fileName,
                 note: file.note
@@ -55,7 +56,7 @@ const AcademicYearInformation = () => {
         }
     };
 
-    const today = moment();
+    const today = dayjs();
     const currentYear = today.year();
     const nextYear = currentYear + 1;
     const currentAcademicYear = `${currentYear}-${nextYear}`;
@@ -116,26 +117,9 @@ const AcademicYearInformation = () => {
             }))
         };
 
-        try {
-            setLoading(true);
-            const validValues = await form.validateFields();
-            if (JSON.stringify(validValues) === JSON.stringify(initialValues)) {
-                message.info('Không có gì thay đổi');
-                setIsEdit(true);
-                return;
-            }
-
-            console.log("Transformed values:", transformedValues);
-            await updateAcademicInformation(transformedValues);
-        } catch (error) {
-            console.error('An error occurred:', error);
-            message.error("Cập nhật thông tin thất bại. Vui lòng thử lại.");
-        } finally {
-            setLoading(false);
-            setIsModalVisible(true);
-        }
+        setTransformedValues(transformedValues);
+        setIsModalVisible(true);
     };
-
 
     const handleEditClick = () => {
         setIsEdit(!isEdit);
@@ -149,13 +133,14 @@ const AcademicYearInformation = () => {
 
     const handleConfirmSave = async () => {
         try {
-            const values = form.getFieldsValue();
-            console.log("Saving data:", values);
-            setInitialValues(values);
+            setLoading(true);
+            await updateAcademicInformation(transformedValues);
+            fetchAcademicYearInformation();
             setIsEdit(true);
-            message.success("Lưu thành công");
+            message.success("Cập nhật thông tin tuyển sinh năm học " + { selectedAcademicYear } + " thành công");
         } catch (error) {
             console.error('Failed to save:', error);
+            message.error("Cập nhật thông tin thất bại. Vui lòng thử lại.");
         } finally {
             setLoading(false);
             setIsModalVisible(false);

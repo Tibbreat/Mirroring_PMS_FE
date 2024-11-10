@@ -1,6 +1,6 @@
 import axios from '../../axios.customize';
 
-export const getUsersAPI = async (schoolId, page, role, isActive, fullName) => {
+export const getUsersAPI = async ( page, role, isActive, fullName) => {
     let params = new URLSearchParams();
 
     if (page) {
@@ -16,7 +16,7 @@ export const getUsersAPI = async (schoolId, page, role, isActive, fullName) => {
         params.append('fullName', fullName);
     }
 
-    const URL = `/pms/users/school/${schoolId}?${params.toString()}`;
+    const URL = `/pms/users/school?${params.toString()}`;
     return axios.get(URL);
 };
 

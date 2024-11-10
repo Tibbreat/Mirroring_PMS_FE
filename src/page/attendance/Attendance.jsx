@@ -4,11 +4,11 @@ import { useParams } from 'react-router-dom';
 import { attendAPI, createBaseLogAPI } from '../../services/service.log';
 import { AuthContext } from '../../component/context/auth.context';
 import { EditOutlined, EyeOutlined } from '@ant-design/icons';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const Attendance = () => {
     const [children, setChildren] = useState([]);
-    const [selectedDate, setSelectedDate] = useState(moment());
+    const [selectedDate, setSelectedDate] = useState(dayjs());
     const [attendanceStatus, setAttendanceStatus] = useState({});
     const [notes, setNotes] = useState({});
     const { id } = useParams();
@@ -257,7 +257,7 @@ const Attendance = () => {
                         style={{ width: '100%' }}
                         value={selectedDate}
                         onChange={handleDateChange}
-                        disabledDate={(current) => current && current > moment().endOf('day')}
+                        disabledDate={(current) => current && current > dayjs().endOf('day')}
                     />
                 </Col>
             </Row>
@@ -271,7 +271,7 @@ const Attendance = () => {
                 bordered={true}
             />
 
-            {selectedDate.format('YYYY-MM-DD') === moment().format('YYYY-MM-DD') && (
+            {selectedDate.format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD') && (
                 <Row justify="end" className="mt-3">
                     <Col>
                         <Button type="primary" onClick={handleSave}>

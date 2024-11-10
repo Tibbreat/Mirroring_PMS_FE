@@ -6,33 +6,6 @@ import { AuthContext } from '../../component/context/auth.context';
 const { Title, Paragraph } = Typography;
 
 const Dashboard = () => {
-    const [schoolInfo, setSchoolInfo] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const { user } = useContext(AuthContext);
-
-    useEffect(() => {
-        const fetchSchoolInfo = async () => {
-            try {
-                const response = await getSchoolInformationAPI(user.schoolId);
-                setSchoolInfo(response.data);
-            } catch (error) {
-                console.error('Error fetching school information:', error);
-                message.error('Không thể lấy thông tin trường học');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchSchoolInfo();
-    }, [user.schoolId]);
-
-    if (loading) {
-        return (
-            <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-                <Spin size="large" />
-            </div>
-        );
-    }
 
     return (
         <Card className="m-2">
@@ -40,7 +13,6 @@ const Dashboard = () => {
                 <Col xs={24} md={18} className="d-flex flex-column justify-content-center align-items-center">
                     <div className="col-10" style={{ textAlign: 'center' }}>
                         <Title level={2}>Chào mừng đến với hệ thống quản lý PMS</Title>
-                        <Paragraph>{schoolInfo?.emailContact}</Paragraph>
                     </div>
                     <div className="col-10">
                         <Row gutter={[16, 16]} align="middle" className='mt-5'>

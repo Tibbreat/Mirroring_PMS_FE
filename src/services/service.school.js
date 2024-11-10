@@ -1,7 +1,7 @@
 import axios from '../../axios.customize';
 
 export const getSchoolInformationAPI = async (schoolId) => {
-    const url = `/pms/school?schoolId=${schoolId}`;
+    const url = `/pms/school`;
     return await axios.get(url);
 }
 

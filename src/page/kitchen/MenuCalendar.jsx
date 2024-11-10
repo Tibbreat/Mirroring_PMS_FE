@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Modal, Form, Input, Row, Col, Button, message, Badge, Descriptions, Card, Typography, Tabs } from 'antd'; // Import Typography
-import moment from 'moment';
-import 'moment/locale/vi';
+import { Calendar, Modal, Form, Input, Row, Col, Button, message, Badge, Descriptions, Card, Typography, Tabs } from 'antd';
+import dayjs from 'dayjs';
+import 'dayjs/locale/vi';
 import { addNewMenu, getDailyMenuByDate, getMonthlyMenu } from '../../services/services.menu';
 import viVN from 'antd/es/calendar/locale/vi_VN';
 import TabPane from 'antd/es/tabs/TabPane';
 
-moment.locale('vi');
+dayjs.locale('vi');
 
 const { Title } = Typography;
 
@@ -59,14 +59,14 @@ const MenuCalendar = () => {
 
     const onSelect = (date) => {
         const formattedDate = date.format('YYYY-MM-DD');
-        const today = moment().startOf('day');
+        const today = dayjs().startOf('day');
         const isPastDate = date.isBefore(today);
         setSelectedDate(formattedDate);
         fetchMenu(formattedDate, isPastDate);
     };
 
     useEffect(() => {
-        const currentDate = moment();
+        const currentDate = dayjs();
         fetchMonthlyMenu(currentDate.year(), currentDate.month() + 1);
     }, []);
 
