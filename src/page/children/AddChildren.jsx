@@ -4,7 +4,7 @@ import { addChildren } from '../../services/service.children';
 import UploadImage from '../../component/input/UploadImage';
 import { AuthContext } from '../../component/context/auth.context';
 import { getClassList } from '../../services/services.class';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 
 const { Option } = Select;
@@ -22,7 +22,7 @@ const AddChildren = () => {
     };
 
     useEffect(() => {
-        const today = moment();
+        const today = dayjs();
         const currentYear = today.year();
         const nextYear = currentYear + 1;
         const academicYear = `${currentYear}-${nextYear}`;
@@ -75,6 +75,11 @@ const AddChildren = () => {
         setSelectedClass(value);
     };
 
+    const disabledDate = (current) => {
+        // Can not select days after today
+        return current && current > dayjs().endOf('day');
+    };
+
     const renderFormItem = (name, label, placeholder, rules, component = <Input />, span = 8) => (
         <Col xs={24} md={span}>
             <Form.Item name={name} label={label} rules={rules}>
@@ -117,7 +122,7 @@ const AddChildren = () => {
                                     'Ngày sinh',
                                     'Chọn ngày sinh',
                                     [{ required: true, message: 'Vui lòng chọn ngày sinh' }],
-                                    <DatePicker style={{ width: '100%' }} />
+                                    <DatePicker style={{ width: '100%' }} disabledDate={disabledDate} />
                                 )}
                                 {renderFormItem(
                                     'gender',

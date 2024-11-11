@@ -201,6 +201,13 @@ const Attendance = () => {
                     key: 'morningBoardingTime',
                     align: 'center',
                     render: (text) => text || 'Chưa có',
+                },
+                {
+                    title: 'Thời gian xuống xe',
+                    dataIndex: 'morningAlightingTime',
+                    key: 'morningAlightingTime',
+                    align: 'center',
+                    render: (text) => text || 'Chưa có',
                 }
             ],
         },
@@ -212,6 +219,13 @@ const Attendance = () => {
                     title: 'Thời gian lên xe',
                     dataIndex: 'afternoonBoardingTime',
                     key: 'afternoonBoardingTime',
+                    align: 'center',
+                    render: (text) => text || 'Chưa có',
+                },
+                {
+                    title: 'Thời gian xuống xe',
+                    dataIndex: 'afternoonAlightingTime',
+                    key: 'afternoonAlightingTime',
                     align: 'center',
                     render: (text) => text || 'Chưa có',
                 }
