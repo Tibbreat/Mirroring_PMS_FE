@@ -49,7 +49,7 @@ const ImportExcelChildren = () => {
             }
         },
         { title: "Quốc Tịch", dataIndex: "nationality", key: "nationality", align: "center" },
-        { title: "Giới Tính", dataIndex: "gender", key: "gender", align: "center" },
+        { title: "Giới Tính", dataIndex: "gender", key: "gender", align: "center", render: (text) => text === "male" ? "Nam" : "Nữ" },
         {
             title: "Khuyết tật", dataIndex: "isDisabled", key: "isDisabled", align: "center",
             render: (text) => text ? 
