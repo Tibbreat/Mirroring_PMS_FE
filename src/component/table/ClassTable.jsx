@@ -62,9 +62,9 @@ export const ClassTable = ({ data }) => {
     ];
 
     // If the user has the role "ADMIN", add the "Hành động" column
-    if (user.role === "ADMIN") {
+    if (user.role === "TEACHER") {
         columns.push({
-            title: 'Hành động',
+            title: '',
             key: 'action',
             render: (text, record) => (
                 <Button type="primary" onClick={() => onAttendance(record.id)}>

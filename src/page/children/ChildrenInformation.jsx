@@ -9,6 +9,7 @@ import Title from 'antd/es/typography/Title';
 import Loading from '../common/Loading';
 import { getVehicleOfRoute } from '../../services/service.vehicle';
 import UploadImage from '../../component/input/UploadImage';
+import { getClassesBaseOnStudentId } from '../../services/services.class';
 
 const { Step } = Steps;
 
@@ -27,9 +28,8 @@ const ChildrenInformation = () => {
     const [currentStep, setCurrentStep] = useState(0);
     const [hasUploadedImage, setHasUploadedImage] = useState(false);
     const [imageFile, setImageFile] = useState(null);
-
     const [isModalUpdateChildren, setIsModalUpdateChildren] = useState(false);
-
+    const [classes, setClasses] = useState([]);
 
     const { id } = useParams();
     const [formUpdateChildren] = Form.useForm();
@@ -39,6 +39,8 @@ const ChildrenInformation = () => {
         setLoading(true);
         try {
             const response = await getChildDetailAPI(id);
+            const response_class = await getClassesBaseOnStudentId(id);
+            setClasses(response_class.data);
             setChildrenData(response.data);
         } catch (error) {
             console.error('Error fetching children data:', error);
@@ -127,7 +129,7 @@ const ChildrenInformation = () => {
                     message.error("Vui lòng chọn tuyến");
                     return;
                 }
-            } 
+            }
             await updateServiceStatus(id, serviceName, selectedRoute, selectedvehicle);
             setIsVehicleModalVisible(false);
             message.success("Đăng ký thành công");
@@ -300,6 +302,15 @@ const ChildrenInformation = () => {
                     <Descriptions.Item label="Họ và tên mẹ" span={3}>{childrenData?.motherName}</Descriptions.Item>
                     <Descriptions.Item label="Số điện thoại " span={3}>{childrenData?.motherPhone} </Descriptions.Item>
                 </Descriptions>
+                <Divider />
+                <Row justify="space-between" className='mb-3'>
+                    <Col><Title level={5}>Danh sách lớp đã và đang học</Title></Col>
+                    <Col><Button type="link" icon={<EditOutlined />} > Chỉnh sửa thông tin </Button></Col>
+                </Row>
+                <Table dataSource={classes} columns={[
+                    { title: 'Lớp', dataIndex: 'className', key: 'className' },
+                    { title: 'Năm học', dataIndex: 'schoolYear', key: 'schoolYear' },
+                    { title: 'Trạng thái', dataIndex: 'status', key: 'status' }]} />
             </Card>
 
             <Modal

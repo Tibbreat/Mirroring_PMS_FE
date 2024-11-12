@@ -26,9 +26,17 @@ const ClassList = () => {
     const fetchClasses = useCallback(async (page, className, ageRange) => {
         setLoading(true);
         try {
-            const response = await getClassesAPI(page, className, ageRange);
-            setClasses(response.data.listData);
-            setTotal(response.data.total);
+            if (user.role === 'ADMIN') {
+                const response = await getClassesAPI(page, className, ageRange);
+                setClasses(response.data.listData);
+                setTotal(response.data.total);
+            }
+            if (user.role === 'TEACHER') {
+                const response = await getClassesAPI(page, className, ageRange);
+                setClasses(response.data.listData);
+                setTotal(response.data.total);
+            }
+
         } catch (error) {
             console.error('Error fetching classes:', error);
         } finally {

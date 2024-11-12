@@ -2,13 +2,15 @@ import { Link, useParams } from "react-router-dom";
 import { changeStatusRouteAPI, fetchRouteAPI, fetchStopLocationAPI } from "../../services/services.route";
 import { useEffect, useState } from "react";
 import Loading from "../common/Loading";
-import { Button, Card, Col, Descriptions, Divider, Row, Switch, Tabs, Table, Steps, Checkbox, Modal, Avatar, Tag, message, Image, Popconfirm, Popover, notification } from "antd";
+import { Button, Card, Col, Descriptions, Divider, Row, Switch, Tabs, Table, Steps, Checkbox, Modal, Avatar, Tag, message, Image, Popconfirm, Popover, notification, Select } from "antd";
 import Title from "antd/es/typography/Title";
 import { DeleteOutlined, DownloadOutlined, DownOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
 import { getAvailableVehicles, getVehicleOfRoute, unsubscribeRoute, updateRouteForVehicle } from "../../services/service.vehicle";
 import { exportChildrenToExcelByVehicle, getChildrenByRoute } from "../../services/service.children";
+import { getTransportManagerAPI } from "../../services/services.user";
 const { TabPane } = Tabs;
 const { Step } = Steps;
+const { Option } = Select;
 
 const RouteInformation = () => {
     const { id } = useParams();
@@ -24,7 +26,10 @@ const RouteInformation = () => {
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [vehicleToDelete, setVehicleToDelete] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [transportManager, setTransportManager] = useState([]);
+    const [selectedSupervisors, setSelectedSupervisors] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
+
     // Fetch data
     const fetchRoute = async () => {
         try {
@@ -75,28 +80,56 @@ const RouteInformation = () => {
         }
     };
 
+    const fetchTransportManager = async () => {
+        try {
+            const response = await getTransportManagerAPI();
+            setTransportManager(response.data);
+        } catch (error) {
+            console.error('Error fetching transport manager:', error);
+        }
+    };
+
     useEffect(() => {
         fetchRoute();
         fetchStopLocation();
         fetchAvailableVehicles();
         fetchVehicleOfRoute();
         fetchChildrenData();
+        fetchTransportManager();
     }, [id]);
 
-    const handleVehicleSelect = (vehicleId) => {
-        setSelectedVehicles((prevSelected) =>
-            prevSelected.includes(vehicleId)
-                ? prevSelected.filter((id) => id !== vehicleId)
-                : [...prevSelected, vehicleId]
-        );
+    const handleVehicleSelect = (vehicleId, supervisorId) => {
+        setSelectedVehicles((prevSelected) => {
+            const existingVehicle = prevSelected.find((v) => v.vehicleId === vehicleId);
+            if (existingVehicle) {
+                return prevSelected.map((v) =>
+                    v.vehicleId === vehicleId ? { ...v, supervisorId } : v
+                );
+            } else {
+                return [...prevSelected, { vehicleId, supervisorId }];
+            }
+        });
+    };
+
+    const handleSupervisorChange = (vehicleId, supervisorId) => {
+        setSelectedSupervisors((prevSelected) => ({
+            ...prevSelected,
+            [vehicleId]: supervisorId,
+        }));
+        handleVehicleSelect(vehicleId, supervisorId);
     };
 
     const handleConfirmVehicle = async () => {
         try {
-            await updateRouteForVehicle(id, selectedVehicles);
+            const requestData = selectedVehicles.map((v) => ({
+                vehicleId: v.vehicleId,
+                managerId: v.supervisorId,
+            }));
+            await updateRouteForVehicle(id, requestData);
             message.success("Thêm xe vào tuyến thành công.");
             fetchAvailableVehicles();
             fetchVehicleOfRoute();
+            fetchTransportManager();
             setIsVehicleModalVisible(false);
         } catch (error) {
             console.error("Error updating vehicles:", error);
@@ -114,6 +147,7 @@ const RouteInformation = () => {
             message.success("Xóa xe khỏi tuyến thành công.");
             fetchVehicleOfRoute();
             fetchAvailableVehicles();
+            fetchTransportManager();
             setIsConfirmDeleteModalVisible(false);
         } catch (error) {
             console.error("Error deleting vehicle:", error);
@@ -215,12 +249,32 @@ const RouteInformation = () => {
         { title: 'Nhãn hiệu', dataIndex: 'manufacturer', key: 'manufacturer' },
         { title: 'Đơn vị cung cấp', dataIndex: 'providerName', key: 'providerName' },
         {
-            title: 'Chọn',
+            title: 'Phụ trách',
+            dataIndex: 'supervisorId',
+            key: 'supervisorId',
+            render: (supervisorId, record) => (
+                <Select
+                    placeholder="Phụ trách"
+                    value={supervisorId}
+                    onChange={(value) => handleSupervisorChange(record.vehicleId, value)}
+                    style={{ width: '100%' }}
+                >
+                    {transportManager
+                        .filter(manager => !Object.values(selectedSupervisors).includes(manager.id) || manager.id === supervisorId)
+                        .map(manager => (
+                            <Option key={manager.id} value={manager.id}>
+                                {manager.username}
+                            </Option>
+                        ))}
+                </Select>
+            ),
+        },
+        {
             key: 'select',
             render: (text, record) => (
                 <Checkbox
-                    onChange={() => handleVehicleSelect(record.vehicleId)}
-                    checked={selectedVehicles.includes(record.vehicleId)}
+                    onChange={() => handleVehicleSelect(record.vehicleId, selectedSupervisors[record.vehicleId])}
+                    checked={selectedVehicles.some((v) => v.vehicleId === record.vehicleId)}
                 >
                     Chọn
                 </Checkbox>
@@ -341,7 +395,7 @@ const RouteInformation = () => {
                 onCancel={handleCancelVehicle}
                 okText="Xác nhận"
                 cancelText="Đóng"
-                width={800}
+                width={1000}
             >
                 <Table
                     dataSource={availableVehicleData}

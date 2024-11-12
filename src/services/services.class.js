@@ -47,3 +47,8 @@ export const getClassListBaseOnManagerId = async (managerId) => {
     const url = `/pms/classes/${managerId}`;
     return await axios.get(url);
 }
+
+export const getClassesBaseOnStudentId = async (studentId) => {
+    const url = `/pms/classes/byChildren/${studentId}`;
+    return await axios.get(url);
+}

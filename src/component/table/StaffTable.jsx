@@ -1,21 +1,21 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { Avatar, Table, Tag } from "antd";
+import { UserOutlined } from '@ant-design/icons';
 
 const roleMapping = {
     CLASS_MANAGER: 'Quản lý lớp',
     KITCHEN_MANAGER: 'Quản lý bếp',
-    TRANSPORT_MANAGER: 'Quản lý dịch vụ đưa đón',
-    // Bổ sung các role khác nếu cần
+    TRANSPORT_MANAGER: 'Quản lý đưa đón',
 };
 
 const StaffTable = ({ data, currentPage, pageSize, total, onPageChange }) => {
     const columns = [
-        {
+        {   align: 'center',
             title: '',
             dataIndex: 'imageLink',
             key: 'imageLink',
-            render: (url) => url ? <Avatar width={50} src={url} /> : 'Không có ảnh',
+            render: (url) => url ? <Avatar width={50} src={url} /> : <Avatar size="small" icon={<UserOutlined />} />,
         },
         {
             title: 'Tên đầy đủ',

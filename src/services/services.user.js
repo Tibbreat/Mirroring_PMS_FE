@@ -61,3 +61,8 @@ export const changeUserDescription = async (userId, formData) => {
         }
     });
 };
+
+export const getTransportManagerAPI = async () => {
+    const URL = `/pms/users/options/available-transport-manager`;
+    return axios.get(URL);
+}
