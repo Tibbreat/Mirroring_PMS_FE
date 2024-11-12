@@ -200,15 +200,25 @@ const Attendance = () => {
                     dataIndex: 'morningBoardingTime',
                     key: 'morningBoardingTime',
                     align: 'center',
-                    render: (text) => text || 'Chưa có',
+                    render: (text) =>
+                        text ? (
+                            <Tag color="green">{dayjs(text).format('HH:mm')}</Tag>
+                        ) : (
+                            <Tag color="default">Chưa có</Tag>
+                        ),
                 },
                 {
                     title: 'Thời gian xuống xe',
                     dataIndex: 'morningAlightingTime',
                     key: 'morningAlightingTime',
                     align: 'center',
-                    render: (text) => text || 'Chưa có',
-                }
+                    render: (text) =>
+                        text ? (
+                            <Tag color="orange">{dayjs(text).format('HH:mm')}</Tag>
+                        ) : (
+                            <Tag color="default">Chưa có</Tag>
+                        ),
+                },
             ],
         },
         {
@@ -220,17 +230,28 @@ const Attendance = () => {
                     dataIndex: 'afternoonBoardingTime',
                     key: 'afternoonBoardingTime',
                     align: 'center',
-                    render: (text) => text || 'Chưa có',
+                    render: (text) =>
+                        text ? (
+                            <Tag color="green">{dayjs(text).format('HH:mm')}</Tag>
+                        ) : (
+                            <Tag color="default">Chưa có</Tag>
+                        ),
                 },
                 {
                     title: 'Thời gian xuống xe',
                     dataIndex: 'afternoonAlightingTime',
                     key: 'afternoonAlightingTime',
                     align: 'center',
-                    render: (text) => text || 'Chưa có',
-                }
+                    render: (text) =>
+                        text ? (
+                            <Tag color="orange">{dayjs(text).format('HH:mm')}</Tag>
+                        ) : (
+                            <Tag color="default">Chưa có</Tag>
+                        ),
+                },
             ],
         },
+        
         {
             title: 'Điểm danh',
             key: 'actions',
