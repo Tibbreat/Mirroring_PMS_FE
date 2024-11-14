@@ -1,5 +1,5 @@
 import { EditOutlined, PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
-import { Button, Col, Form, InputNumber, Row, Select, DatePicker, Card, Modal, message, Input } from "antd";
+import { Button, Col, Form, InputNumber, Row, Select, DatePicker, Card, Modal, message, Input, Divider } from "antd";
 import Title from "antd/es/typography/Title";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useState } from "react";
@@ -193,7 +193,7 @@ const AcademicYearInformation = () => {
 
             <Form form={form} layout="horizontal" onFinish={handleFinish}>
                 <Row gutter={[16, 16]}>
-                    <Col xs={24} md={12}>
+                    <Col xs={24} md={24}>
                         <Form.Item
                             label="Chỉ tiêu tuyển sinh"
                             name="totalEnrolledStudents"
@@ -220,9 +220,23 @@ const AcademicYearInformation = () => {
                                 format="YYYY-MM-DD"
                             />
                         </Form.Item>
+                        <Form.Item
+                            label="Bế giảng dự kiến"
+                            name="closingDay"
+                            rules={[
+                                { required: true, message: "Vui lòng chọn ngày bế giảng cho năm học này" },
+                            ]}
+                        >
+                            <DatePicker
+                                disabled={isEdit}
+                                style={{ width: "100%" }}
+                                disabledDate={disableDatesOutsideCurrentYear}
+                                format="YYYY-MM-DD"
+                            />
+                        </Form.Item>
                     </Col>
                 </Row>
-
+                <Divider />
                 <Row gutter={[16, 16]}>
                     <Col xs={24} md={8}>
                         <Card>
@@ -282,7 +296,10 @@ const AcademicYearInformation = () => {
                         </Card>
                     </Col>
                 </Row>
-
+                <Divider />
+                <Row gutter={[16, 16]} className="mt-3">
+                    <Title level={5}>Thời gian tuyển sinh</Title>
+                </Row>
                 <Row gutter={[16, 16]} className="mt-3">
                     <Col xs={24} md={24}>
                         <Form.Item

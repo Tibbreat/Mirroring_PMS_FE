@@ -18,12 +18,12 @@ export const getChildDetailAPI = async (childId) => {
     return await axios.get(url);
 };
 
-export const updateServiceStatus = async (childrenId, serviceName, routeId = null, vehicleId = null) => {
+export const updateServiceStatus = async (childrenId, serviceName, routeId = null, stopLocation = null) => {
     const url = `/pms/children/service/${childrenId}/${serviceName}`;
     const params = {};
 
     if (routeId) params.routeId = routeId;
-    if (vehicleId) params.vehicleId = vehicleId;
+    if (stopLocation) params.stopLocation = stopLocation;
 
     return await axios.put(url, null, { params });
 };
@@ -33,8 +33,8 @@ export const getChildrenByClassAPI = async (classId, page) => {
     const url = `/pms/children/class/${classId}?page=${page}`;
     return await axios.get(url);
 };
-export const getChildrenByRoute = async (routeId, page) => {
-    const url = `/pms/children/route/${routeId}?page=${page}`;
+export const getChildrenByRoute = async (routeId) => {
+    const url = `/pms/children/route/${routeId}`;
     return await axios.get(url);
 };
 export const exportChildrenToExcelByClassId = async (classId) => {
@@ -95,3 +95,7 @@ export const getChildrenByTeacherIdAPI = async (teacherId) => {
     return await axios.get(url);
 };
 
+export const transferClass = async (childrenId, oldClassId, newClassId) => {
+    const url = `/pms/children/transfer-class`;
+    return await axios.put(url, { childrenId, oldClassId, newClassId });
+}

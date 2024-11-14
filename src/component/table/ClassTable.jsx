@@ -53,12 +53,36 @@ export const ClassTable = ({ data }) => {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            render: (status) => (
-                <Tag color={status ? 'green' : 'red'}>
-                    {status ? 'Đang hoạt động' : 'Ngưng hoạt động'}
-                </Tag>
-            ),
-        },
+            render: (status) => {
+                let color = '';
+                let text = '';
+
+                switch (status) {
+                    case 'NOT_STARTED':
+                        color = 'blue';
+                        text = 'Chưa bắt đầu';
+                        break;
+                    case 'IN_PROGRESS':
+                        color = 'green';
+                        text = 'Đang trong năm học';
+                        break;
+                    case 'COMPLETED':
+                        color = 'gray';
+                        text = 'Đã kết thúc';
+                        break;
+                    case 'CANCELED':
+                        color = 'red';
+                        text = 'Đã hủy';
+                        break;
+                    default:
+                        color = 'default';
+                        text = 'Không xác định';
+                }
+
+                return <Tag color={color}>{text}</Tag>;
+            },
+        }
+
     ];
 
     // If the user has the role "ADMIN", add the "Hành động" column

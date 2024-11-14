@@ -330,3 +330,11 @@
     border-color: #66bb6a !important;
     color: white !important;
 }
+
+.custom-calendar .ant-picker-cell {
+    height: 20px; 
+}
+
+.custom-calendar .ant-picker-cell-inner {
+    font-size: 12px; 
+}

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Loading from "../common/Loading";
 import { Button, Card, Col, Descriptions, Divider, Row, Switch, Tabs, Table, Steps, Checkbox, Modal, Avatar, Tag, message, Image, Popconfirm, Popover, notification, Select } from "antd";
 import Title from "antd/es/typography/Title";
-import { DeleteOutlined, DownloadOutlined, DownOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownloadOutlined, DownOutlined, EditOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
 import { getAvailableVehicles, getVehicleOfRoute, unsubscribeRoute, updateRouteForVehicle } from "../../services/service.vehicle";
 import { exportChildrenToExcelByVehicle, getChildrenByRoute } from "../../services/service.children";
 import { getTransportManagerAPI } from "../../services/services.user";
@@ -28,8 +28,6 @@ const RouteInformation = () => {
     const [loading, setLoading] = useState(true);
     const [transportManager, setTransportManager] = useState([]);
     const [selectedSupervisors, setSelectedSupervisors] = useState({});
-    const [currentPage, setCurrentPage] = useState(1);
-
     // Fetch data
     const fetchRoute = async () => {
         try {
@@ -71,8 +69,8 @@ const RouteInformation = () => {
 
     const fetchChildrenData = async () => {
         try {
-            const response = await getChildrenByRoute(id, currentPage);
-            setChildrenData(response.data.listData);
+            const response = await getChildrenByRoute(id);
+            setChildrenData(response.data);
         } catch (error) {
             console.error('Error fetching route:', error);
         } finally {
@@ -218,7 +216,8 @@ const RouteInformation = () => {
         { title: 'Phương tiện', dataIndex: 'vehicleName', key: 'vehicleName' },
         { title: 'Biển số xe', dataIndex: 'licensePlate', key: 'licensePlate' },
         { title: 'Màu sắc', dataIndex: 'color', key: 'color' },
-        { title: 'Số chỗ ngồi', dataIndex: 'numberOfSeats', key: 'numberOfSeats' },
+        { title: 'Số chỗ ngồi', dataIndex: 'numberOfSeats', key: 'numberOfSeats', align: 'center' },
+        { title: 'Số trẻ đã đăng ký', dataIndex: 'numberChildrenRegistered', key: 'numberChildrenRegistered', align: 'center' },
         { title: 'Nhãn hiệu', dataIndex: 'manufacturer', key: 'manufacturer' },
         {
             align: 'center',
@@ -285,9 +284,10 @@ const RouteInformation = () => {
     const childrenColumns = [
         {
             title: 'Ảnh',
-            dataIndex: 'imageUrl',
-            key: 'imageUrl',
-            render: (url) => url ? <Avatar width={50} src={url} /> : 'Không có ảnh',
+            dataIndex: 'childrenImage',
+            key: 'childrenImage',
+            align: 'center',
+            render: (url) => url ? <Avatar width={50} src={url} /> : <Avatar size="small" icon={<UserOutlined />} />,
         },
         {
             title: 'Họ và tên',
@@ -301,26 +301,24 @@ const RouteInformation = () => {
         },
         {
             title: 'Giới tính',
-            dataIndex: 'gender',
-            key: 'gender',
+            dataIndex: 'childrenGender',
+            key: 'childrenGender',
             render: (text) => text === 'male' ? 'Nam' : text === 'female' ? 'Nữ' : text,
         },
         {
-            title: 'Ngày sinh',
-            dataIndex: 'childBirthDate',
-            key: 'childBirthDate',
-            render: (date) => new Date(date).toLocaleDateString(),
+            title: 'Điểm đón',
+            dataIndex: 'stopLocationRegistered',
+            key: 'stopLocationRegistered',
         },
         {
-            title: 'Địa chỉ',
-            dataIndex: 'childAddress',
-            key: 'childAddress',
+            title: 'Lớp',
+            dataIndex: 'childrenClassName',
+            key: 'childrenClassName',
         },
         {
             title: 'Xe đăng ký',
-            dataIndex: 'vehicle',
-            key: 'vehicle',
-            render: (record) => record.vehicleName || 'Không có xe đăng ký',
+            dataIndex: 'vehicleName',
+            key: 'vehicleName',
         },
     ];
 
@@ -360,6 +358,7 @@ const RouteInformation = () => {
                                 columns={vehicleColumns}
                                 dataSource={vehicleData}
                                 rowKey="vehicleId"
+                                bordered
                             />
                         </TabPane>
                         <TabPane tab="Danh sách các chặng" key="2">

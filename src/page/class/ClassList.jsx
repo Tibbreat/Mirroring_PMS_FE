@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { addClassAPI, getClassesAPI } from "../../services/services.class";
-import { Pagination, Spin, Card, Row, Col, Input, Select, Button, Modal, Form, notification } from "antd";
+import { Spin, Card, Row, Col, Input, Select, Button, Modal, Form, notification, message } from "antd";
 import { getTeacherAvailableInYear, getUserOpnionAPI } from "../../services/services.user";
 import NoData from "../../component/no-data-page/NoData";
 import { AuthContext } from "../../component/context/auth.context";
@@ -89,7 +89,7 @@ const ClassList = () => {
             const septemberFifth = moment(`${today.year()}-09-05`, "YYYY-MM-DD");
 
             if (today.isAfter(septemberFifth)) {
-                notification.error({ message: "Đã quá ngày khai giảng" });
+                message.error({ message: "Đã quá ngày khai giảng" });
                 return;
             }
 
