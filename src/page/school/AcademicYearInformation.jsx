@@ -3,11 +3,10 @@ import { Button, Col, Form, InputNumber, Row, Select, DatePicker, Card, Modal, m
 import Title from "antd/es/typography/Title";
 import dayjs from "dayjs";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { getAcademicYearsAPI } from "../../services/services.public";
-import { getAcademicYearInformationAPI, updateAcademicInformation } from "../../services/service.school";
 import { AuthContext } from "../../component/context/auth.context";
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import { getAcademicYearInformationAPI, updateAcademicInformation } from "../../services/service.school";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -44,6 +43,7 @@ const AcademicYearInformation = () => {
             }
 
             data.openingDay = dayjs(data.openingDay);
+            data.closingDay = dayjs(data.closingDay);
             data.admissionDocuments = data.admissionFiles.map(file => ({
                 document: file.fileName,
                 note: file.note
@@ -55,20 +55,6 @@ const AcademicYearInformation = () => {
             console.error('Failed to fetch academic year:', error);
         }
     };
-
-    const today = dayjs();
-    const currentYear = today.year();
-    const nextYear = currentYear + 1;
-    const currentAcademicYear = `${currentYear}-${nextYear}`;
-
-    const fetchAcademicYear = useCallback(async () => {
-        try {
-            const response = await getAcademicYearsAPI();
-            setAcademicYears(response.data || []);
-        } catch (error) {
-            console.error("Error fetching academic years:", error);
-        }
-    }, []);
 
     const handleFinish = async (values) => {
         const {
@@ -97,7 +83,8 @@ const AcademicYearInformation = () => {
 
         const transformedValues = {
             academicYear: selectedAcademicYear,
-            openingDay: values.openingDay.format('YYYY-MM-DD'),
+            openingDay: dayjs(values.openingDay).format('YYYY-MM-DD'),
+            closingDay: dayjs(values.closingDay).format('YYYY-MM-DD'),
             totalClassLevel1,
             totalStudentLevel1,
             totalClassLevel2,
@@ -105,10 +92,10 @@ const AcademicYearInformation = () => {
             totalClassLevel3,
             totalStudentLevel3,
             totalEnrolledStudents,
-            onlineEnrollmentStartDate: enrollmentPeriodOnline[0].format('YYYY-MM-DD'),
-            onlineEnrollmentEndDate: enrollmentPeriodOnline[1].format('YYYY-MM-DD'),
-            offlineEnrollmentStartDate: enrollmentPeriodOffline[0].format('YYYY-MM-DD'),
-            offlineEnrollmentEndDate: enrollmentPeriodOffline[1].format('YYYY-MM-DD'),
+            onlineEnrollmentStartDate: dayjs(enrollmentPeriodOnline[0]).format('YYYY-MM-DD'),
+            onlineEnrollmentEndDate: dayjs(enrollmentPeriodOnline[1]).format('YYYY-MM-DD'),
+            offlineEnrollmentStartDate: dayjs(enrollmentPeriodOffline[0]).format('YYYY-MM-DD'),
+            offlineEnrollmentEndDate: dayjs(enrollmentPeriodOffline[1]).format('YYYY-MM-DD'),
             note,
             schoolId: user.schoolId,
             admissionFiles: admissionDocuments.map(doc => ({
@@ -137,7 +124,7 @@ const AcademicYearInformation = () => {
             await updateAcademicInformation(transformedValues);
             fetchAcademicYearInformation();
             setIsEdit(true);
-            message.success("Cập nhật thông tin tuyển sinh năm học " + { selectedAcademicYear } + " thành công");
+            message.success(`Cập nhật thông tin tuyển sinh năm học ${selectedAcademicYear} thành công`);
         } catch (error) {
             console.error('Failed to save:', error);
             message.error("Cập nhật thông tin thất bại. Vui lòng thử lại.");
@@ -147,9 +134,23 @@ const AcademicYearInformation = () => {
         }
     };
 
+    const today = dayjs();
+    const currentYear = today.year();
+    const nextYear = currentYear + 1;
+    const currentAcademicYear = `${currentYear}-${nextYear}`;
+
     const uniqueAcademicYears = Array.from(new Set([currentAcademicYear, ...academicYears]));
 
     const disableDatesOutsideCurrentYear = (current) => current && current.year() !== currentYear;
+
+    const fetchAcademicYear = useCallback(async () => {
+        try {
+            const response = await getAcademicYearsAPI();
+            setAcademicYears(response.data || []);
+        } catch (error) {
+            console.error("Error fetching academic years:", error);
+        }
+    }, []);
 
     useEffect(() => {
         fetchAcademicYear();
@@ -420,14 +421,13 @@ const AcademicYearInformation = () => {
                 </Row>
             </Form>
 
-            {/* Confirmation Modal */}
             <Modal
                 title="Xác nhận lưu thông tin"
                 open={isModalVisible}
                 onOk={handleConfirmSave}
                 onCancel={() => {
                     setIsModalVisible(false);
-                    setLoading(false);  // Reset loading state when modal is canceled
+                    setLoading(false);
                 }}
                 okText="Đồng ý"
                 cancelText="Hủy"
