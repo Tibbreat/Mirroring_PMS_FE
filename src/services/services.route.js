@@ -28,3 +28,11 @@ export const changeStatusRouteAPI = async (id) => {
     const url = `/pms/route/change-status/${id}`;
     return await axios.put(url);
 }
+
+export const fetchRouteApplications = async (academicYear, routeId) => {
+    let url = `/api/application/get-all-application-form/${academicYear}`;
+    if (routeId) {
+        url += `?routeId=${routeId}`;
+    }
+    return await axios.get(url);
+}

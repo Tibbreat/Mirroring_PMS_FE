@@ -4,9 +4,9 @@ import { Button, Card, Col, Input, Modal, Pagination, Row, Select, Spin, DatePic
 import TeacherTable from "../../component/table/TeacherTable";
 import NoData from "../../component/no-data-page/NoData";
 import UploadImage from "../../component/input/UploadImage";
-import moment from "moment";
 import { AuthContext } from "../../component/context/auth.context";
 import Loading from "../common/Loading";
+import dayjs from "dayjs";
 
 const { Option } = Select;
 
@@ -26,7 +26,7 @@ const TeacherList = () => {
     const fetchTeachers = useCallback(async (page, fullName) => {
         setLoading(true);
         try {
-            const response = await getUsersAPI( page, ["TEACHER"], true, fullName);
+            const response = await getUsersAPI(page, ["TEACHER"], true, fullName);
             setTeachers(response.data.listData);
             setTotal(response.data.total);
         } catch (error) {
@@ -53,7 +53,7 @@ const TeacherList = () => {
     const handleChangeName = (event) => {
         const value = event.target.value;
         setFullName(value);
-        fetchTeachers(currentPage, value); 
+        fetchTeachers(currentPage, value);
     };
 
     const handleOk = async (values) => {
@@ -66,7 +66,7 @@ const TeacherList = () => {
             idCardNumber,
             address,
             phone,
-            dob: dob ? moment(dob).format("YYYY-MM-DD") : null,
+            dob: dob ? dayjs(dob).format("YYYY-MM-DD") : null,
             role: "TEACHER",
             schoolId: user?.schoolId,
             contractType
@@ -100,7 +100,7 @@ const TeacherList = () => {
                 <Col xs={24} sm={8}>
                     <Input
                         placeholder="Nhập tên giáo viên cần tìm"
-                        onChange = {handleChangeName}
+                        onChange={handleChangeName}
                         value={fullName}
                     />
                 </Col>
@@ -182,6 +182,7 @@ const TeacherList = () => {
                                                 <DatePicker
                                                     style={{ width: '100%' }}
                                                     format="DD-MM-YYYY"
+                                                    disabledDate={(current) => current && current > dayjs().endOf('day')}
                                                     disabled={isSubmitting}
                                                 />
                                             </Form.Item>

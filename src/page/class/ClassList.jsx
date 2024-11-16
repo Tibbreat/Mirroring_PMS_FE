@@ -1,95 +1,74 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { addClassAPI, getClassesAPI } from "../../services/services.class";
-import { Spin, Card, Row, Col, Input, Select, Button, Modal, Form, notification, message } from "antd";
+import { Spin, Card, Row, Col, Input, Select, Button, Modal, Form, message } from "antd";
 import { getTeacherAvailableInYear, getUserOpnionAPI } from "../../services/services.user";
 import NoData from "../../component/no-data-page/NoData";
 import { AuthContext } from "../../component/context/auth.context";
-import moment from "moment";
+import dayjs from "dayjs";
 import { ClassTable } from "../../component/table/ClassTable";
 import Title from "antd/es/typography/Title";
+import { getAcademicYearsAPI } from "../../services/services.public";
 
 const { Option } = Select;
 
 const ClassList = () => {
     const [classes, setClasses] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedAgeRange, setSelectedAgeRange] = useState(null);
     const [form] = Form.useForm();
     const [teachers, setTeachers] = useState([]);
     const [classManager, setClassManager] = useState([]);
+    const [academicYears, setAcademicYears] = useState([]);
     const { user } = useContext(AuthContext);
-    const [className, setClassName] = useState('');
 
-    const fetchClasses = useCallback(async (page, className, ageRange) => {
+    const [selectedAcademicYear, setSelectedAcademicYear] = useState(null);
+    const currentYear = dayjs().year();
+    const nextYear = currentYear + 1;
+    const academicYear = `${currentYear}-${nextYear}`;
+    const openingDate = `5-9-${currentYear}`;
+
+    const fetchClasses = async (year) => {
         setLoading(true);
         try {
-            if (user.role === 'ADMIN') {
-                const response = await getClassesAPI(page, className, ageRange);
-                setClasses(response.data.listData);
-                setTotal(response.data.total);
-            }
-            if (user.role === 'TEACHER') {
-                const response = await getClassesAPI(page, className, ageRange);
-                setClasses(response.data.listData);
-                setTotal(response.data.total);
-            }
-
+            const response = await getClassesAPI(year);
+            setClasses(response.data);
         } catch (error) {
             console.error('Error fetching classes:', error);
         } finally {
             setLoading(false);
         }
-    }, []);
+    };
 
-    const fetchTeachers = useCallback(async () => {
+    const fetchModalData = useCallback(async () => {
         try {
-            const today = moment();
-            const currentYear = today.year();
-            const nextYear = currentYear + 1;
-            const academicYear = `${currentYear}-${nextYear}`;
-            const response = await getTeacherAvailableInYear(academicYear);
-            setTeachers(response.data);
-        } catch (error) {
-            console.error('Error fetching teachers:', error);
-        }
-    }, []);
+            const teacherData = await getTeacherAvailableInYear(academicYear);
+            setTeachers(teacherData.data);
 
-    const fetchClassManager = useCallback(async () => {
-        try {
-            const response = await getUserOpnionAPI("CLASS_MANAGER");
-            setClassManager(response.data);
+            const academicYearData = await getAcademicYearsAPI();
+            setAcademicYears(academicYearData.data);
+
+            const classManagerData = await getUserOpnionAPI("CLASS_MANAGER");
+            setClassManager(classManagerData.data);
         } catch (error) {
-            console.error('Error fetching class managers:', error);
+            console.error('Error fetching modal data:', error);
         }
-    }, []);
+    }, [academicYear]);
 
     useEffect(() => {
-        fetchClasses(currentPage, className, selectedAgeRange);
-        fetchTeachers();
-        fetchClassManager();
-    }, [currentPage, selectedAgeRange, fetchClasses, fetchTeachers, fetchClassManager]);
+        fetchClasses(selectedAcademicYear || academicYear);
+    }, [selectedAcademicYear, academicYear]);
 
-    const handleAgeRangeChange = (value) => {
-        setSelectedAgeRange(value);
-        fetchClasses(currentPage, className, value);
-    };
-
-    const handleClassNameChange = (event) => {
-        const value = event.target.value;
-        setClassName(value);
-        fetchClasses(currentPage, value, selectedAgeRange);
-    };
+    useEffect(() => {
+        fetchModalData();
+    }, [fetchModalData]);
 
     const handleOk = async () => {
         try {
-            const today = moment();
-            const septemberFifth = moment(`${today.year()}-09-05`, "YYYY-MM-DD");
+            const today = dayjs();
+            const septemberFifth = dayjs(`${today.year()}-09-05`, "YYYY-MM-DD");
 
             if (today.isAfter(septemberFifth)) {
-                message.error({ message: "Đã quá ngày khai giảng" });
+                message.error("Đã quá ngày khai giảng");
                 return;
             }
 
@@ -102,17 +81,17 @@ const ClassList = () => {
                 managerId: values.managerId,
                 createdBy: user.id,
                 schoolId: user.schoolId,
+                academicYear: academicYear,
             };
 
             await addClassAPI(payload);
-            fetchClasses(currentPage);
-            fetchTeachers();
+            fetchClasses(academicYear);
             setIsModalOpen(false);
-            notification.success({ message: "Thêm lớp thành công" });
+            message.success("Thêm lớp thành công");
             form.resetFields();
         } catch (error) {
-            console.error('Error adding class:', error);
-            notification.error({ message: "Lỗi khi thêm lớp", description: error.message });
+            console.error("Error adding class:", error);
+            message.error("Thêm lớp thất bại: " + error.data.data);
         }
     };
 
@@ -121,37 +100,28 @@ const ClassList = () => {
         form.resetFields();
     };
 
-    const currentYear = moment().year();
-    const nextYear = currentYear + 1;
-    const academicYear = `${currentYear} - ${nextYear}`;
-    const openingDate = `5-9-${currentYear}`;
-
     return (
         <Card className="m-2">
-            <Row gutter={[16, 16]} justify="center" style={{ marginBottom: 20 }}>
-                <Col xs={24} sm={8}>
+            <Row gutter={[16, 16]} justify="between" className="m-2">
+                <Col span={12}>
                     <Select
-                        placeholder="Độ tuổi"
+                        placeholder="Năm học"
                         style={{ width: '100%' }}
-                        onChange={handleAgeRangeChange}
-                        allowClear
+                        onChange={(value) => setSelectedAcademicYear(value)}
+                        defaultValue={academicYear}
                     >
-                        <Option value="3-4">3 - 4 tuổi</Option>
-                        <Option value="4-5">4 - 5 tuổi</Option>
-                        <Option value="5-6">5 - 6 tuổi</Option>
+                        {academicYears.map((year) => (
+                            <Option key={year} value={year}>
+                                {year}
+                            </Option>
+                        ))}
                     </Select>
                 </Col>
-                <Col xs={24} sm={16}>
-                    <Input
-                        placeholder="Nhập tên lớp cần tìm"
-                        onChange={handleClassNameChange}
-                        value={className}
-                    />
+                <Col span={12} style={{ display: "flex", justifyContent: "end" }}>
+                    <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm lớp</Button>
                 </Col>
             </Row>
-            <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
-                <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm lớp</Button>
-            </Col>
+
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
                     <Spin size="large" />
@@ -201,10 +171,10 @@ const ClassList = () => {
                                 label="Tuổi"
                                 rules={[{ required: true, message: 'Vui lòng nhập tuổi' }]}
                             >
-                                <Select placeholder="Chọn lứa tuổi">
-                                    <Option value="3-4">3 - 4 tuổi</Option>
-                                    <Option value="4-5">4 - 5 tuổi</Option>
-                                    <Option value="5-6">5 - 6 tuổi</Option>
+                                <Select placeholder="Chọn tuổi" style={{ width: '100%' }}>
+                                    <Option value="3-4">3-4 tuổi</Option>
+                                    <Option value="4-5">4-5 tuổi</Option>
+                                    <Option value="5-6">5-6 tuổi</Option>
                                 </Select>
                             </Form.Item>
                         </Col>

@@ -75,7 +75,7 @@ const MenuCalendar = () => {
                 group5To6: values['5-6'],
                 date: formattedDate,
             };
-
+            console.log("Payload", payload);
             await createMeal(payload);
             message.success('Thực đơn đã được lưu thành công');
             setIsModalAddMealVisible(false);

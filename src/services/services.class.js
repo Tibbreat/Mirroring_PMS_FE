@@ -1,10 +1,8 @@
 import axios from '../../axios.customize';
 
-export const getClassesAPI = async (page, className, ageRange) => {
-    let URL = `/pms/classes?page=${page}`;
-    if (className) URL += `&className=${className}`; // Replace schoolYear with className
-    if (ageRange) URL += `&ageRange=${ageRange}`;
-    return await axios.get(URL);
+export const getClassesAPI = async (academicYear) => {
+    const url = `/pms/classes?academicYear=${academicYear}`;
+    return await axios.get(url);
 };
 
 export const addClassAPI = async (classData) => {
@@ -41,6 +39,11 @@ export const changeClassInformationAPI = async (classId, data) => {
 
 export const getClassList = async (academicYear) => {
     const url = `/pms/classes/available/${academicYear}`;
+    return await axios.get(url);
+}
+
+export const getClassListToTransfer = async (academicYear, childrenId) => {
+    const url = `/pms/classes/transfer-options/academic-year/${academicYear}/children/${childrenId}`;
     return await axios.get(url);
 }
 export const getClassListBaseOnManagerId = async (managerId) => {

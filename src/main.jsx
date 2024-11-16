@@ -38,6 +38,7 @@ import RouteInformation from './page/route/RouteInformation';
 import Attendance from './page/attendance/Attendance';
 import ImportExcelChildren from './page/children/ImportExcelChildren';
 import { Landing } from './page/landing/Landing';
+import { RouteSubmitedApplication } from './page/route/RouteSubmitedApplication';
 
 
 const App = () => (
@@ -68,6 +69,7 @@ const App = () => (
         <Route path="transport/provider/new-provider" element={<AddTransportProvider />} />
         <Route path="transport/route" element={<RouteList />} />
         <Route path="transport/route/:id" element={<RouteInformation />} />
+        <Route path="transport/submited-application" element={<RouteSubmitedApplication />} />
 
 
         {/* Kitchen */}

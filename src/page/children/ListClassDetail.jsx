@@ -1,5 +1,5 @@
 import { Button, Col, Modal, Row, Table, Tag, message } from "antd";
-import { getClassesBaseOnStudentId, getClassList } from "../../services/services.class";
+import { getClassesBaseOnStudentId, getClassListToTransfer } from "../../services/services.class";
 import Title from "antd/es/typography/Title";
 import { useEffect, useState } from "react";
 import dayjs from 'dayjs';
@@ -9,7 +9,6 @@ export const ListClassDetail = ({ id }) => {
     const [classes, setClasses] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [oldClass, setOldClass] = useState(null);
-    const [newClass, setNewClass] = useState(null)
     const [classList, setClassList] = useState([]);
 
     // Fetch classes for the specific student
@@ -29,7 +28,7 @@ export const ListClassDetail = ({ id }) => {
         const nextYear = currentYear + 1;
         const academicYear = `${currentYear}-${nextYear}`;
         try {
-            const response = await getClassList(academicYear);
+            const response = await getClassListToTransfer(academicYear, id);
             setClassList(response.data);
         } catch (error) {
             message.error('Không thể tải danh sách lớp');
@@ -46,16 +45,28 @@ export const ListClassDetail = ({ id }) => {
         fetchClasses();
     };
 
-    const handleOk = async () => {
-        try {
-            await transferClass(id, oldClass.id, newClass.id);
-            message.success(`Đã chuyển thành công sang lớp ${newClass.className}`);
-            setIsModalVisible(false);
-            fetchClassData(id);
-        } catch (error) {
-            console.error('Error transferring class:', error);
-            message.error("Chuyển lớp thất bại");
-        }
+    const confirmChangeClass = (selected) => {
+        Modal.confirm({
+            title: 'Xác nhận chuyển lớp',
+            content: `Bạn có chắc chắn muốn chuyển sang lớp ${selected.className}?`,
+            okText: 'Chuyển Lớp',
+            cancelText: 'Hủy',
+            onOk: async () => {
+                try {
+                    console.log("Old class:", oldClass.className + " - " + oldClass.id);
+                    console.log("New class:", selected.className + " - " + selected.id);
+                    console.log("Student ID:", id);
+
+                    await transferClass(id, oldClass.id, selected.id);
+                    message.success(`Đã chuyển thành công sang lớp ${selected.className}`);
+                    setIsModalVisible(false);
+                    fetchClassData(id); // Refresh the class list after transfer
+                } catch (error) {
+                    console.error('Error transferring class:', error);
+                    message.error("Chuyển lớp thất bại");
+                }
+            },
+        });
     };
 
     const columns = [
@@ -133,7 +144,7 @@ export const ListClassDetail = ({ id }) => {
             title: 'Hành động',
             key: 'action',
             align: 'center',
-            render: (text, record) => (
+            render: (record) => (
                 ((record.classStatus === 'IN_PROGRESS' && record.studyStatus === 'STUDYING') ||
                     (record.classStatus === 'NOT_STARTED' && record.studyStatus === 'STUDYING')) && (
                     <Button type="link" onClick={() => showModal(record)}>Chuyển lớp</Button>
@@ -145,32 +156,17 @@ export const ListClassDetail = ({ id }) => {
     const availableClasses = [
         { title: 'Lớp', dataIndex: 'className', key: 'className' },
         { title: 'Giáo viên', dataIndex: 'teacherName', key: 'teacherName' },
-        {
-            title: 'Lứa tuổi', dataIndex: 'ageRange', key: 'ageRange',
-            render: (ageRange) => `${ageRange} tuổi`,
-        },
+        { title: 'Lứa tuổi', dataIndex: 'ageRange', key: 'ageRange', render: (ageRange) => `${ageRange} tuổi` },
         { title: 'Sĩ số hiện tại', dataIndex: 'countStudent', key: 'countStudent', align: 'center' },
         {
             title: '',
             key: 'action',
             align: 'center',
-            render: (text, record) => (
+            render: (record) => (
                 <Button type="link" onClick={() => confirmChangeClass(record)}>Chuyển</Button>
             ),
         },
     ];
-
-    // Handle transfer confirmation
-    const confirmChangeClass = (selected) => {
-        setNewClass(selected);
-        Modal.confirm({
-            title: 'Xác nhận chuyển lớp',
-            content: `Bạn có chắc chắn muốn chuyển sang lớp ${selected.className}?`,
-            okText: 'Chuyển Lớp',
-            cancelText: 'Hủy',
-            onOk: handleOk,
-        });
-    };
 
     return (
         <>

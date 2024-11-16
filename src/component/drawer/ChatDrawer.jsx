@@ -85,7 +85,7 @@ const ChatDrawer = ({ isVisible, onClose }) => {
           ...Object.entries(chatData.sender1?.contents || {}).map(([id, msg]) => ({ ...msg, messageId: id })),
           ...Object.entries(chatData.sender2?.contents || {}).map(([id, msg]) => ({ ...msg, messageId: id })),
         ];
-  
+
         messages.sort((a, b) => a.time - b.time); // Sắp xếp tin nhắn theo thời gian
         setActiveChat({
           ...chat,
@@ -97,7 +97,7 @@ const ChatDrawer = ({ isVisible, onClose }) => {
     });
     setIsChatOpen(true);
   };
-  
+
 
   const handleCreateChat = () => {
     if (!selectedUser) {
@@ -116,7 +116,7 @@ const ChatDrawer = ({ isVisible, onClose }) => {
         id: selectedUser,
         contents: {},
       },
-      
+
     }).then(() => {
       console.log(selectedUser);
       message.success('Đoạn chat mới đã được tạo.');
@@ -127,12 +127,12 @@ const ChatDrawer = ({ isVisible, onClose }) => {
 
   const sendMessage = () => {
     if (!newMessage.trim()) return;
-  
+
     // Kiểm tra xem người dùng hiện tại là sender1 hay sender2
     const senderKey = user.id === activeChat.sender1?.id ? 'sender1' : 'sender2';
     const messageId = uuidv4();
     const messageRef = ref(database, `chats/${activeChat.chatId}/${senderKey}/contents/${messageId}`);
-    
+
     // Thêm tin nhắn vào Firebase
     set(messageRef, {
       content: newMessage,
@@ -156,7 +156,7 @@ const ChatDrawer = ({ isVisible, onClose }) => {
       });
     });
   };
-  
+
 
 
   // Styling for messages based on who sent them
@@ -188,7 +188,7 @@ const ChatDrawer = ({ isVisible, onClose }) => {
 
           <Modal
             title="Tạo đoạn chat mới"
-            visible={isModalVisible}
+            open={isModalVisible}
             onOk={handleCreateChat}
             onCancel={() => setIsModalVisible(false)}
             okText="Tạo đoạn chat"
@@ -202,11 +202,11 @@ const ChatDrawer = ({ isVisible, onClose }) => {
               onChange={(value) => setSelectedUser(value)}
             >
               {users.map((userOption) => (
-                   <Select.Option 
-                   key={userOption.parentId} 
-                   value={userOption.parentId} 
-                   label={`${userOption.parentName} - phụ huynh cháu ${userOption.fullName}`}
-                 >
+                <Select.Option
+                  key={userOption.parentId}
+                  value={userOption.parentId}
+                  label={`${userOption.parentName} - phụ huynh cháu ${userOption.fullName}`}
+                >
                   {userOption.parentName} - phụ huynh cháu {userOption.fullName}
                 </Select.Option>
               ))}

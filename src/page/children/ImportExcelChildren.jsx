@@ -1,4 +1,4 @@
-import { Card, Upload, Table, Button, Divider, message, Modal, Form, Input, Row, Col, Select, DatePicker, notification, Tag } from "antd";
+import { Card, Upload, Table, Button, Divider, message, Modal, Form, Input, Row, Col, Select, DatePicker, Tag } from "antd";
 import { DeleteOutlined, EditOutlined, InboxOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import Title from "antd/es/typography/Title";
@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import { handleExcelData, saveChildrenFromExcel } from "../../services/service.children";
 import { getClassList } from "../../services/services.class";
 import moment from "moment";
-import { render } from "react-dom";
+import { useNavigate } from "react-router-dom";
 
 const { Dragger } = Upload;
 const { Option } = Select;
@@ -24,6 +24,7 @@ const ImportExcelChildren = () => {
     const [isSaveLoading, setIsSaveLoading] = useState(false);
     const [form] = Form.useForm();
 
+    const navigate = useNavigate();
     const columns = [
         { title: "STT", dataIndex: "index", key: "index", align: "center" },
         { title: "Họ và Tên", dataIndex: "childName", key: "childName" },
@@ -52,8 +53,8 @@ const ImportExcelChildren = () => {
         { title: "Giới Tính", dataIndex: "gender", key: "gender", align: "center", render: (text) => text === "male" ? "Nam" : "Nữ" },
         {
             title: "Khuyết tật", dataIndex: "isDisabled", key: "isDisabled", align: "center",
-            render: (text) => text ? 
-            <Tag color="red"> Có </Tag> : <Tag color="green"> Không </Tag>
+            render: (text) => text ?
+                <Tag color="red"> Có </Tag> : <Tag color="green"> Không </Tag>
         },
         {
             title: "Thông Tin Phụ Huynh",
@@ -164,7 +165,7 @@ const ImportExcelChildren = () => {
     };
 
     const handleConfirm = async () => {
-        setIsSaveLoading(true); // Start loading effect
+        setIsSaveLoading(true);
         try {
             const payload = tableData.map((item) => ({
                 ...item,
@@ -174,6 +175,7 @@ const ImportExcelChildren = () => {
             await saveChildrenFromExcel(payload);
             message.success(`Đã thêm ${tableData.length} trẻ vào lớp thành công!`);
             setIsConfirmModalVisible(false);
+            navigate(`/pms/manage/class/${selectedClass}`);
         } catch (error) {
             console.log("Error:", error.status);
             console.log("Error:", error.data);

@@ -1,16 +1,7 @@
-import { EyeOutlined } from '@ant-design/icons';
-import { exp } from '@tensorflow/tfjs';
-import { Link, useNavigate } from "react-router-dom";
-import { Button, Pagination, Row, Switch, Table, Tag } from 'antd';
-import { useEffect, useState } from 'react';
-import { PlusOutlined } from '@ant-design/icons';
+import { Link } from "react-router-dom";
+import { Table, Tag } from 'antd';
 
 const RouteTable = ({ data }) => {
-
-    const [currentPage, setCurrentPage] = useState(1);
-    const [total, setTotal] = useState(0);
-
-
     const columns = [
         {
             title: 'Tên tuyến',
@@ -38,12 +29,11 @@ const RouteTable = ({ data }) => {
     ];
     return (
         <div className="p-2">
-            <Table columns={columns} dataSource={data} pagination={false} />
-            <Pagination
-                current={currentPage}
-                total={total}
-                className='mt-3'
-            />
+            <Table
+                columns={columns}
+                dataSource={data}
+                pagination={false}
+                rowKey='id' />
         </div>
     );
 };

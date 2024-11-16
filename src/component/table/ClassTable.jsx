@@ -24,12 +24,20 @@ export const ClassTable = ({ data }) => {
             title: 'Độ tuổi',
             dataIndex: 'ageRange',
             key: 'ageRange',
+            align: 'center',
             render: (text) => `${text} tuổi`,
+        },
+        {
+            title: 'Sĩ số hiện tại',
+            dataIndex: 'countStudentStudying',
+            key: 'countStudentStudying',
+            align: 'center'
         },
         {
             title: 'Sĩ số tối đa',
             dataIndex: 'totalStudent',
             key: 'totalStudent',
+            align: 'center'
         },
         {
             title: 'Quản lý',
@@ -40,11 +48,13 @@ export const ClassTable = ({ data }) => {
             title: 'Năm học',
             dataIndex: 'academicYear',
             key: 'academicYear',
+            align: 'center'
         },
         {
             title: 'Ngày khai giảng',
             dataIndex: 'openingDay',
             key: 'openingDay',
+            align: 'center',
             render: (text) => {
                 return text ? moment(text).format('DD-MM-YYYY') : '';
             },

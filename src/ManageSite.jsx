@@ -41,7 +41,8 @@ const ManageSite = () => {
       key: '6', label: 'Đưa đón',
       children: [
         { key: '61', label: 'Đối tác' },
-        { key: '62', label: 'Danh sách tuyến' }
+        { key: '62', label: 'Danh sách tuyến' },
+        { key: '63', label: 'Đơn đăng ký' },
       ],
     },
   ];
@@ -64,6 +65,7 @@ const ManageSite = () => {
       '/kitchen/menu/calendar': '52',
       '/transport/provider': '61',
       '/transport/route': '62',
+      '/transport/submited-application': '63',
       '/children': '7',
       '/settings': '8',
     };
@@ -90,16 +92,15 @@ const ManageSite = () => {
       '52': '/pms/manage/kitchen/menu/calendar',
       '61': '/pms/manage/transport/provider',
       '62': '/pms/manage/transport/route',
+      '63': '/pms/manage/transport/submited-application',
       '7': '/pms/manage/children',
       '8': '/pms/manage/settings',
     };
     navigate(routes[item.key]);
   };
 
-  // Function to open chat window
   const showChat = () => setIsChatVisible(true);
 
-  // Function to close chat window
   const closeChat = () => setIsChatVisible(false);
 
   return (
@@ -151,7 +152,6 @@ const ManageSite = () => {
         </Content>
       </Layout>
 
-      {/* Chat button and drawer for TEACHER role */}
       {user?.role === 'TEACHER' && (
         <>
           <FloatButton
