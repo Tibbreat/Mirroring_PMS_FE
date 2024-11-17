@@ -73,6 +73,7 @@ export const ProviderTable = ({ data, currentPage, total, setCurrentPage, provid
                 dataSource={data}
                 pagination={false}
                 rowKey="id"
+                bordered
             />
         </div>
     );

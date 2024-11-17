@@ -11,6 +11,7 @@ import { DownloadOutlined, PlusOutlined } from "@ant-design/icons";
 import Loading from "../common/Loading";
 
 const { Option } = Select;
+const { Search } = Input;
 
 const ChildrenList = () => {
     const [loading, setLoading] = useState(true);
@@ -26,7 +27,8 @@ const ChildrenList = () => {
     const [downloadAcademicYear, setDownloadAcademicYear] = useState(getDefaultAcademicYear());
 
     const { user } = useContext(AuthContext);
-    const fetchAcademicYear = useCallback(async () => {
+
+    const fetchAcademicYears = useCallback(async () => {
         try {
             const response = await getAcademicYearsAPI();
             setAcademicYears(response.data || []);
@@ -50,23 +52,22 @@ const ChildrenList = () => {
     }, []);
 
     useEffect(() => {
-        fetchAcademicYear();
-    }, [fetchAcademicYear]);
+        fetchAcademicYears();
+    }, [fetchAcademicYears]);
 
     useEffect(() => {
         fetchChildrenList(currentPage, selectedAcademicYear, searchTerm);
     }, [currentPage, selectedAcademicYear, searchTerm, fetchChildrenList]);
 
-    const handleAcademicYearChange = async (year) => {
+    const handleAcademicYearChange = (year) => {
         setSelectedAcademicYear(year);
-        const data = await getChildrenAPI(page, year);
-        setChildrenList(data);
+        setCurrentPage(1);
     };
 
-    const handleSearch = (event) => {
-        const value = event.target.value;
+    const handleSearch = (value) => {
         setSearchTerm(value);
-        fetchChildrenList(currentPage, academicYears, searchTerm)
+        setCurrentPage(1);
+        fetchChildrenList(1, selectedAcademicYear, value);
     };
 
     const showModal = () => {
@@ -122,10 +123,10 @@ const ChildrenList = () => {
                 </Col>
 
                 <Col xs={24} sm={16}>
-                    <Input
+                    <Search
                         placeholder="Nhập tên trẻ cần tìm"
-                        onChange={handleSearch}
-                        value={searchTerm}
+                        onSearch={handleSearch}
+                        allowClear
                     />
                 </Col>
             </Row>
@@ -225,7 +226,6 @@ const ChildrenList = () => {
                         </Button>
                     </Col>
                 </Row>
-
             </Modal>
         </Card>
     );

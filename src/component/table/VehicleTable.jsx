@@ -30,7 +30,7 @@ export const VehicleTable = ({ dataDefault, providerId, providerStatus }) => {
         { title: 'Phương tiện', dataIndex: 'vehicleName', key: 'vehicleName' },
         { title: 'Biển số xe', dataIndex: 'licensePlate', key: 'licensePlate' },
         { title: 'Màu sắc', dataIndex: 'color', key: 'color', render: (text) => `${text}` },
-        { title: 'Số chỗ ngồi', dataIndex: 'numberOfSeats', key: 'numberOfSeats',  sorter: (a, b) => a.numberOfSeats - b.numberOfSeats, },
+        { title: 'Số chỗ ngồi', dataIndex: 'numberOfSeats', key: 'numberOfSeats', sorter: (a, b) => a.numberOfSeats - b.numberOfSeats, },
         { title: 'Nhãn hiệu', dataIndex: 'manufacturer', key: 'manufacturer' },
         {
             title: 'Trạng thái',
@@ -101,11 +101,12 @@ export const VehicleTable = ({ dataDefault, providerId, providerStatus }) => {
                 dataSource={data}
                 pagination={false}
                 rowKey="id"
+                bordered
             />
             <Pagination
                 current={currentPage}
                 total={total}
-                pageSize={pageSize} // Số lượng mục mỗi trang
+                pageSize={pageSize} 
                 onChange={handlePageChange}
                 style={{ textAlign: 'center', marginTop: 20 }}
             />

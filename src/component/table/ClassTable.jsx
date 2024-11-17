@@ -130,6 +130,7 @@ export const ClassTable = ({ data }) => {
                 dataSource={data}
                 pagination={false}
                 rowKey="id"
+                bordered
             />
         </div>
     );

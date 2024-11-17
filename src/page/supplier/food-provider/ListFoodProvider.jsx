@@ -46,11 +46,6 @@ const ListFoodProvider = () => {
         fetchBankList();
     }, [currentPage, searchTerm, fetchProviders, fetchBankList]);
 
-    const handleSearch = (value) => {
-        setSearchTerm(value);
-        setCurrentPage(1);
-    };
-
     const handleOk = async () => {
         const values = await form.validateFields();
         const payload = {

@@ -24,15 +24,9 @@ const RouteInformation = () => {
         }
     };
 
-
-
-
-
     useEffect(() => {
         fetchRoute();
     }, [id]);
-
-
 
     const handleSwitchChange = async () => {
         Modal.confirm({
@@ -87,7 +81,7 @@ const RouteInformation = () => {
                         </TabPane>
                         <TabPane tab="Danh sách trẻ đăng ký" key="3">
                             <ChildrenTab
-                                ìd={id}
+                                id={id}
                                 routeActive={route?.isActive}
                             />
                         </TabPane>

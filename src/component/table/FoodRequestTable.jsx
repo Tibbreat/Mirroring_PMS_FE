@@ -198,6 +198,7 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
                 dataSource={data}
                 pagination={false}
                 rowKey="id"
+                bordered
             />
             <Pagination
                 current={currentPage}

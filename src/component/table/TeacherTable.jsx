@@ -56,6 +56,7 @@ const TeacherTable = ({ data }) => {
                 dataSource={data}
                 pagination={false}
                 rowKey="id"
+                bordered
             />
         </div>
     );

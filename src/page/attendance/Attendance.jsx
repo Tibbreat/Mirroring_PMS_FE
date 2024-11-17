@@ -251,7 +251,7 @@ const Attendance = () => {
                 },
             ],
         },
-        
+
         {
             title: 'Điểm danh',
             key: 'actions',
@@ -286,7 +286,7 @@ const Attendance = () => {
     return (
         <Card title='Điểm danh' className='m-2'>
             <Row gutter={[16, 16]} className='mb-2' justify="end">
-                <Col>
+                <Col xs={24} sm={12} md={8} lg={6}>
                     <DatePicker
                         placeholder="Ngày"
                         style={{ width: '100%' }}

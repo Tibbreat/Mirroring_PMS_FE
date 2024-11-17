@@ -33,7 +33,8 @@ const RouteTable = ({ data }) => {
                 columns={columns}
                 dataSource={data}
                 pagination={false}
-                rowKey='id' />
+                rowKey='id' 
+                bordered/>
         </div>
     );
 };

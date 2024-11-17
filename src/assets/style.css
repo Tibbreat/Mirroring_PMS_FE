@@ -332,9 +332,21 @@
 }
 
 .custom-calendar .ant-picker-cell {
-    height: 20px; 
+    height: 20px;
 }
 
 .custom-calendar .ant-picker-cell-inner {
-    font-size: 12px; 
+    font-size: 12px;
+}
+
+.route-report-card-container {
+    max-height: 700px;
+    overflow-y: scroll;
+    padding-right: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.route-report-card-container::-webkit-scrollbar {
+    display: none;
 }

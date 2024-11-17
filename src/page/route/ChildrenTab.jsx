@@ -73,6 +73,12 @@ export const ChildrenTab = ({ id, routeActive }) => {
                 dataSource={childrenData}
                 rowKey="id"
                 bordered
+                size="small"
+                pagination={
+                    {
+                        defaultPageSize: 10,
+                    }
+                }
             />
         </>
     );

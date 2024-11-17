@@ -8,6 +8,7 @@ export const ChildrenTable = ({ data }) => {
             title: 'Ảnh',
             dataIndex: 'imageUrl',
             key: 'imageUrl',
+            align: 'center',
             render: (url) => url ? <Avatar width={50} src={url} /> : <Avatar size="small" icon={<UserOutlined />} />,
         },
         {
@@ -46,9 +47,7 @@ export const ChildrenTable = ({ data }) => {
             title: 'Lớp',
             dataIndex: 'className',
             key: 'className',
-            render: (text) => text === null ? (
-                <Tag color="red">Chưa được thêm vào lớp</Tag>
-            ) : (
+            render: (text) => (
                 <Tag color="lime">{text}</Tag>
             ),
         },
@@ -61,6 +60,7 @@ export const ChildrenTable = ({ data }) => {
                 dataSource={data}
                 pagination={false}
                 rowKey="id"
+                bordered
             />
         </div>
     );

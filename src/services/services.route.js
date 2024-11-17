@@ -36,3 +36,13 @@ export const fetchRouteApplications = async (academicYear, routeId) => {
     }
     return await axios.get(url);
 }
+
+export const fetchRouteReportByAcademicYear = async (academicYear) => {
+    const url = `/api/application/get-all-route-report/${academicYear}`;
+    return await axios.get(url);
+}
+
+export const approveApplicationAPI = async (data) => {
+    const url = `/api/application/approve-application`;
+    return await axios.put(url, data);
+}

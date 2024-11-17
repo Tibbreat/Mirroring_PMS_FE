@@ -11,7 +11,8 @@ const roleMapping = {
 
 const StaffTable = ({ data, currentPage, pageSize, total, onPageChange }) => {
     const columns = [
-        {   align: 'center',
+        {
+            align: 'center',
             title: '',
             dataIndex: 'imageLink',
             key: 'imageLink',
@@ -47,7 +48,7 @@ const StaffTable = ({ data, currentPage, pageSize, total, onPageChange }) => {
             title: 'Chức vụ',
             dataIndex: 'role',
             key: 'role',
-            render: (text) => roleMapping[text] || "N/A",  
+            render: (text) => roleMapping[text] || "N/A",
         },
         {
             title: 'Trạng thái',
@@ -73,6 +74,7 @@ const StaffTable = ({ data, currentPage, pageSize, total, onPageChange }) => {
                     onChange: onPageChange,
                 }}
                 rowKey="id"
+                bordered
             />
         </div>
     );
