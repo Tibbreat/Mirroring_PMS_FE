@@ -6,6 +6,8 @@ import Title from 'antd/es/typography/Title';
 import moment from 'moment';
 import UploadImage from '../../component/input/UploadImage';
 import { EditOutlined } from '@ant-design/icons';
+import { getClassListBaseOnManagerId } from '../../services/services.class';
+import Loading from '../common/Loading';
 
 const { Option } = Select;
 
@@ -15,9 +17,7 @@ const StaffInformation = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [imageFile, setImageFile] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
     const [classes, setClasses] = useState([]);
-    const [total, setTotal] = useState(0);
     const [form] = Form.useForm();
     const { id } = useParams();
 
@@ -26,11 +26,9 @@ const StaffInformation = () => {
         try {
             const response = await getUserAPI(id);
             setStaff(response.data);
-            form.setFieldsValue(response.data);  // Set giá trị mặc định từ dữ liệu staff
-            // Giả sử hàm API này lấy danh sách lớp của nhân viên
-            const response_2 = await getClassListBaseOnManagerId(id, currentPage);
-            setClasses(response_2.data.listData);
-            setTotal(response_2.data.total);
+            form.setFieldsValue(response.data);
+            const response_2 = await getClassListBaseOnManagerId(id);
+            setClasses(response_2.data);
         } catch (error) {
             console.error('Error fetching staff:', error);
         } finally {
@@ -40,11 +38,8 @@ const StaffInformation = () => {
 
     useEffect(() => {
         fetchStaff(id);
-    }, [id, currentPage]);
+    }, [id]);
 
-    const showModal = () => {
-        setIsModalVisible(true);
-    };
 
     const showEditModal = () => {
         setIsEditModalVisible(true);
@@ -81,12 +76,12 @@ const StaffInformation = () => {
     };
 
 
-    
+
     const showModalChangeStatus = () => {
         const contentMessage = staff?.isActive
             ? "Bạn có chắc chắn muốn ngừng hoạt động của nhân viên này? Nếu đồng ý, nhân viên sẽ bị hạn chế truy cập vào hệ thống."
             : "Bạn có chắc chắn muốn kích hoạt tài khoản của nhân viên này?";
-    
+
         Modal.confirm({
             title: 'Xác nhận thay đổi trạng thái',
             content: contentMessage,
@@ -94,8 +89,6 @@ const StaffInformation = () => {
                 try {
                     await changeUserStatusAPI(staff.id);
                     message.success('Cập nhật trạng thái thành công');
-    
-                    // Cập nhật lại thông tin nhân viên
                     await fetchStaff(id);
                 } catch (error) {
                     console.error('Error changing user status:', error);
@@ -107,7 +100,7 @@ const StaffInformation = () => {
             },
         });
     };
- 
+
 
     const handleEditCancel = () => {
         setIsEditModalVisible(false);
@@ -152,9 +145,7 @@ const StaffInformation = () => {
 
     if (loading) {
         return (
-            <div className='d-flex justify-content-center align-items-center' style={{ height: '100vh' }}>
-                <Spin size="large" />
-            </div>
+            <Loading />
         );
     }
 
@@ -189,7 +180,6 @@ const StaffInformation = () => {
                             <Descriptions.Item label="Trạng thái">
                                 <Switch checked={staff.isActive} onClick={showModalChangeStatus} />
                             </Descriptions.Item>
-                            <Descriptions.Item label="Mã nhân viên">{staff?.id}</Descriptions.Item>
                             <Descriptions.Item label="Account">{staff?.username}</Descriptions.Item>
                             <Descriptions.Item label="E-mail">{staff?.email}</Descriptions.Item>
                             <Descriptions.Item label="Số điện thoại">{staff?.phone}</Descriptions.Item>
@@ -208,14 +198,10 @@ const StaffInformation = () => {
                         <Table
                             dataSource={classes}
                             columns={columns}
-                            pagination={false}
+                            pagination={true}
+                            size='small'
                             rowKey={(record) => record.id}
-                        />
-                        <Pagination
-                            current={currentPage}
-                            total={total}
-                            onChange={(page) => setCurrentPage(page)}
-                            style={{ textAlign: 'center', marginTop: 20 }}
+                            bordered
                         />
                     </>
                 )}
@@ -228,17 +214,15 @@ const StaffInformation = () => {
                 onCancel={handleEditCancel}
                 okText="Lưu"
                 cancelText="Hủy"
-                width={1000}  // Chiều rộng cho modal lớn hơn để có không gian
+                width={1000}
             >
                 <div className="container">
                     <Row gutter={[16, 16]} align="middle">
-                        {/* Phần UploadImage bên trái */}
                         <Col span={8} className="d-flex flex-column align-items-center justify-content-center">
                             <Avatar size={128} src={staff?.imageLink || "/image/5856.jpg"} style={{ marginBottom: '16px' }} />
                             <UploadImage onImageChange={handleImageChange} />
                         </Col>
 
-                        {/* Form chỉnh sửa bên phải */}
                         <Col span={16}>
                             <Form form={form} layout="vertical">
                                 <Card title="Thông tin cá nhân" bordered={false}>

@@ -1,14 +1,22 @@
-import { Pagination, Tag, Table, Button } from "antd";
+import { Tag, Table, Button } from "antd";
 import moment from "moment";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../component/context/auth.context";
 import { useContext } from "react";
+import dayjs from "dayjs";
 
 export const ClassTable = ({ data }) => {
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
 
-    // Define columns for the table
+    const currentYear = dayjs().year();
+    const nextYear = currentYear + 1;
+    const academicYear = `${currentYear}-${nextYear}`; // Chuyển khai báo này lên trên
+
+    const onAttendance = (id) => {
+        navigate(`/pms/manage/class/attendance/${id}`);
+    };
+
     const columns = [
         {
             title: 'Tên lớp',
@@ -55,9 +63,7 @@ export const ClassTable = ({ data }) => {
             dataIndex: 'openingDay',
             key: 'openingDay',
             align: 'center',
-            render: (text) => {
-                return text ? moment(text).format('DD-MM-YYYY') : '';
-            },
+            render: (text) => text ? moment(text).format('DD-MM-YYYY') : '',
         },
         {
             title: 'Trạng thái',
@@ -92,11 +98,9 @@ export const ClassTable = ({ data }) => {
                 return <Tag color={color}>{text}</Tag>;
             },
         }
-
     ];
 
-    // If the user has the role "ADMIN", add the "Hành động" column
-    if (user.role === "TEACHER") {
+    if (user.role === "TEACHER" && data.some(item => item.academicYear === academicYear)) {
         columns.push({
             title: '',
             key: 'action',
@@ -107,21 +111,6 @@ export const ClassTable = ({ data }) => {
             ),
         });
     }
-
-    // Handle page change for pagination
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-    };
-
-    // Redirect to the attendance page for the class
-    const onAttendance = (id) => {
-        navigate(`/pms/manage/class/attendance/${id}`);
-    };
-
-    // Pagination handler for table
-    const onPageChange = (page) => {
-        handlePageChange(page);
-    };
 
     return (
         <div className="p-2">

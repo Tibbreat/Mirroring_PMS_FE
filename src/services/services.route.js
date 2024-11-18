@@ -30,7 +30,7 @@ export const changeStatusRouteAPI = async (id) => {
 }
 
 export const fetchRouteApplications = async (academicYear, routeId) => {
-    let url = `/api/application/get-all-application-form/${academicYear}`;
+    let url = `/pms/application/get-all-application-form/${academicYear}`;
     if (routeId) {
         url += `?routeId=${routeId}`;
     }
@@ -38,11 +38,11 @@ export const fetchRouteApplications = async (academicYear, routeId) => {
 }
 
 export const fetchRouteReportByAcademicYear = async (academicYear) => {
-    const url = `/api/application/get-all-route-report/${academicYear}`;
+    const url = `/pms/application/get-all-route-report/${academicYear}`;
     return await axios.get(url);
 }
 
 export const approveApplicationAPI = async (data) => {
-    const url = `/api/application/approve-application`;
+    const url = `/pms/application/approve-application`;
     return await axios.put(url, data);
 }

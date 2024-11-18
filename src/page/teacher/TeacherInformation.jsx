@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { getUserAPI, changeUserStatusAPI, changeUserDescription } from '../../services/services.user';
 import { Spin, Tag, Row, Col, Avatar, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, Pagination, Table, Form, Select } from 'antd';
 import { Link, useParams } from 'react-router-dom';
@@ -7,6 +7,8 @@ import { EditOutlined } from '@ant-design/icons';
 import Title from 'antd/es/typography/Title';
 import moment from 'moment';
 import UploadImage from '../../component/input/UploadImage';
+import Loading from '../common/Loading';
+import { AuthContext } from '../../component/context/auth.context';
 
 const { Option } = Select;
 
@@ -18,15 +20,12 @@ const TeacherInformation = () => {
     const { id } = useParams();
     const [imageFile, setImageFile] = useState(null);
     const [classes, setClasses] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [total, setTotal] = useState(0);
     const [form] = Form.useForm();
 
+    const { user } = useContext(AuthContext);
     const columns = [
         {
-            title: 'Tên lớp',
-            dataIndex: 'className',
-            key: 'className',
+            title: 'Tên lớp', dataIndex: 'className', key: 'className',
             render: (text, record) => (
                 <Link to={`/pms/manage/class/${record.id}`} style={{ textDecoration: "none" }}>
                     {text}
@@ -34,29 +33,19 @@ const TeacherInformation = () => {
             ),
         },
         {
-            title: 'Độ tuổi',
-            dataIndex: 'ageRange',
-            key: 'ageRange',
+            title: 'Độ tuổi', dataIndex: 'ageRange', key: 'ageRange', align: 'center',
             render: (text) => `${text} tuổi`,
         },
         {
-            title: 'Quản lý',
-            dataIndex: 'managerName',
-            key: 'managerName',
+            title: 'Quản lý', dataIndex: 'managerName', key: 'managerName',
             render: (text, record) => (
                 record.manager && record.manager.username ? record.manager.username : 'Chưa có quản lý'
             )
         },
 
+        { title: 'Năm học', dataIndex: 'academicYear', key: 'academicYear', align: 'center' },
         {
-            title: 'Năm học',
-            dataIndex: 'academicYear',
-            key: 'academicYear',
-        },
-        {
-            title: 'Ngày khai giảng',
-            dataIndex: 'openingDay',
-            key: 'openingDay',
+            title: 'Ngày khai giảng', dataIndex: 'openingDay', key: 'openingDay',
             render: (text) => {
                 return text ? moment(text).format('DD-MM-YYYY') : '';
             },
@@ -67,11 +56,10 @@ const TeacherInformation = () => {
         setLoading(true);
         try {
             const response = await getUserAPI(id);
-            const response_2 = await getClassBaseOnTeacher(id, currentPage);
-            setClasses(response_2.data.listData);
-            setTotal(response_2.data.total);
+            const response_2 = await getClassBaseOnTeacher(id);
+            setClasses(response_2.data);
             setTeacher(response.data);
-            form.setFieldsValue(response.data); // Set giá trị mặc định trong form từ dữ liệu giáo viên
+            form.setFieldsValue(response.data);
         } catch (error) {
             console.error('Error fetching teacher:', error);
         } finally {
@@ -87,7 +75,7 @@ const TeacherInformation = () => {
         const contentMessage = teacher?.isActive
             ? "Bạn có chắc chắn muốn ngừng hoạt động của nhân viên này? Nếu đồng ý, nhân viên sẽ bị hạn chế truy cập vào hệ thống."
             : "Bạn có chắc chắn muốn kích hoạt tài khoản của nhân viên này?";
-    
+
         Modal.confirm({
             title: 'Xác nhận thay đổi trạng thái',
             content: contentMessage,
@@ -95,7 +83,7 @@ const TeacherInformation = () => {
                 try {
                     await changeUserStatusAPI(teacher.id);
                     message.success('Cập nhật trạng thái thành công');
-    
+
                     // Cập nhật lại thông tin nhân viên
                     await fetchTeacher(id);
                 } catch (error) {
@@ -153,9 +141,7 @@ const TeacherInformation = () => {
 
     if (loading) {
         return (
-            <div className='d-flex justify-content-center align-items-center' style={{ height: '100vh' }}>
-                <Spin size="large" />
-            </div>
+            <Loading />
         );
     }
 
@@ -176,9 +162,12 @@ const TeacherInformation = () => {
                                 <Title level={5}>Thông tin giáo viên</Title>
                             </Col>
                             <Col>
-                                <Button type="link" icon={<EditOutlined />} onClick={showEditModal}>
-                                    Chỉnh sửa thông tin
-                                </Button>
+                                {user.role === 'ADMIN' || user.id === id && (
+                                    <Button type="link" icon={<EditOutlined />} onClick={showEditModal}>
+                                        Chỉnh sửa thông tin
+                                    </Button>
+                                )}
+
                             </Col>
                         </Row>
                         <Descriptions bordered column={2}>
@@ -204,17 +193,12 @@ const TeacherInformation = () => {
                 <Table
                     dataSource={classes}
                     columns={columns}
-                    pagination={false}
+                    pagination={true}
                     rowKey={(record) => record.id}
-                />
-                <Pagination
-                    current={currentPage}
-                    total={total}
-                    onChange={(page) => setCurrentPage(page)}
-                    style={{ textAlign: 'center', marginTop: 20 }}
+                    size='small'
+                    bordered
                 />
             </Card>
-
 
             <Modal
                 title="Chỉnh sửa thông tin giáo viên"
@@ -223,19 +207,15 @@ const TeacherInformation = () => {
                 onCancel={handleEditCancel}
                 okText="Lưu"
                 cancelText="Hủy"
-                width={1000}  // Đặt chiều rộng rộng hơn để có không gian cho layout
+                width={1000}
             >
                 <div className="container">
                     <Row gutter={[16, 16]} align="middle">
-                        {/* Phần UploadImage ở bên trái */}
                         <Col span={8} className="d-flex flex-column align-items-center justify-content-center">
-                            {/* Hiển thị ảnh đại diện */}
                             <Avatar size={128} src={teacher?.imageLink || "/image/5856.jpg"} style={{ marginBottom: '16px' }} />
-                            {/* Component UploadImage để tải lên ảnh mới */}
                             <UploadImage onImageChange={handleImageChange} />
                         </Col>
 
-                        {/* Phần Form ở bên phải */}
                         <Col span={16}>
                             <Form form={form} layout="vertical">
                                 <Card title="Thông tin cá nhân" bordered={false}>

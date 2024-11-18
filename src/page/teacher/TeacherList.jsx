@@ -105,9 +105,13 @@ const TeacherList = () => {
                     />
                 </Col>
             </Row>
+
             <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
-                <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm giáo viên</Button>
+                {(user.role === "ADMIN") && (
+                    <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm giáo viên</Button>
+                )}
             </Col>
+
             {loading ? (
                 <Loading />
             ) : teachers.length > 0 ? (

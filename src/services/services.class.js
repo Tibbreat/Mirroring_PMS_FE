@@ -10,8 +10,8 @@ export const addClassAPI = async (classData) => {
     return await axios.post(URL, classData);
 }
 
-export const getClassBaseOnTeacher = async (teacherId, page) => {
-    const URL = `/pms/classes/class/teacher/${teacherId}?page=${page}`;
+export const getClassBaseOnTeacher = async (teacherId) => {
+    const URL = `/pms/classes/class/teacher/${teacherId}`;
     return await axios.get(URL);
 }
 

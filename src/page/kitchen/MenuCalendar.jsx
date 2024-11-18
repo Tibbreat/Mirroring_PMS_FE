@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Calendar, Card, Form, Modal, Tabs, Input, Button, Row, Col, message, Badge, Descriptions, Typography } from 'antd';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import locale from 'antd/es/calendar/locale/vi_VN';
 import { createMeal, getMealsByMonth } from '../../services/services.meal';
+import { AuthContext } from '../../component/context/auth.context';
 
 dayjs.locale('vi');
 
@@ -16,6 +17,7 @@ const MenuCalendar = () => {
     const [selectedMeal, setSelectedMeal] = useState(null);
     const [currentMonth, setCurrentMonth] = useState(dayjs().startOf('month').format('YYYY-MM'));
     const [form] = Form.useForm();
+    const { user } = useContext(AuthContext);
 
     useEffect(() => {
         fetchMonthlyMealData(currentMonth);
@@ -246,19 +248,22 @@ const MenuCalendar = () => {
                     disabledDate={(current) => current && (current.day() === 0 || current.day() === 6)}
                 />
             </Card>
-            <Modal
-                title={`Thêm thực đơn cho ngày ${selectedDate ? selectedDate.format('DD-MM-YYYY') : ''}`}
-                open={isModalAddMealVisible}
-                onOk={handleOk}
-                onCancel={handleCancel}
-                okText="Lưu"
-                cancelText="Hủy"
-                width={800}
-            >
-                <Form form={form} layout='horizontal'>
-                    <Tabs defaultActiveKey="1" items={tabItems} />
-                </Form>
-            </Modal>
+            {(user.role === 'ADMIN' || user.role === 'KITCHEN_MANAGER') && (
+                <Modal
+                    title={`Thêm thực đơn cho ngày ${selectedDate ? selectedDate.format('DD-MM-YYYY') : ''}`}
+                    open={isModalAddMealVisible}
+                    onOk={handleOk}
+                    onCancel={handleCancel}
+                    okText="Lưu"
+                    cancelText="Hủy"
+                    width={800}
+                >
+                    <Form form={form} layout='horizontal'>
+                        <Tabs defaultActiveKey="1" items={tabItems} />
+                    </Form>
+                </Modal>
+            )}
+
             <Modal
                 title={`Thực đơn cho ngày ${selectedDate ? selectedDate.format('DD-MM-YYYY') : ''}`}
                 open={isModalViewMealVisible}

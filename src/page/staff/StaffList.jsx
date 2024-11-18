@@ -110,7 +110,7 @@ export const StaffList = () => {
                         placeholder="Chọn vai trò"
                         style={{ width: '100%' }}
                         onChange={handleRoleChange}
-                        allowClear 
+                        allowClear
                         value={selectedRole[0] || null}
                     >
                         <Option value="CLASS_MANAGER">Quản lý lớp</Option>
@@ -126,9 +126,11 @@ export const StaffList = () => {
                     />
                 </Col>
             </Row>
-            <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
-                <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm quản lý</Button>
-            </Col>
+            {(user.role === "ADMIN") && (
+                <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm quản lý</Button>
+                </Col>
+            )}
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
                     <Spin size="large" />
@@ -171,7 +173,7 @@ export const StaffList = () => {
                                 initialValues={{
                                     dob: dayjs(),
                                 }}
-                                disabled={isSubmitting} // Disable the form when loading
+                                disabled={isSubmitting}
                             >
                                 <Card title="Thông tin cá nhân" bordered={false}>
                                     <Row gutter={[16, 16]}>

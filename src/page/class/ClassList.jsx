@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { addClassAPI, getClassesAPI } from "../../services/services.class";
-import { Spin, Card, Row, Col, Input, Select, Button, Modal, Form, message } from "antd";
+import { Card, Row, Col, Input, Select, Button, Modal, Form, message } from "antd";
 import { getTeacherAvailableInYear, getUserOpnionAPI } from "../../services/services.user";
 import NoData from "../../component/no-data-page/NoData";
 import { AuthContext } from "../../component/context/auth.context";
@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 import { ClassTable } from "../../component/table/ClassTable";
 import Title from "antd/es/typography/Title";
 import { getAcademicYearsAPI } from "../../services/services.public";
+import Loading from "../common/Loading";
 
 const { Option } = Select;
 
@@ -117,15 +118,16 @@ const ClassList = () => {
                         ))}
                     </Select>
                 </Col>
-                <Col span={12} style={{ display: "flex", justifyContent: "end" }}>
-                    <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm lớp</Button>
-                </Col>
+                {(user.role === "ADMIN") && (
+                    <Col span={12} style={{ display: "flex", justifyContent: "end" }}>
+                        <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm lớp</Button>
+                    </Col>
+                )}
+
             </Row>
 
             {loading ? (
-                <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
-                    <Spin size="large" />
-                </div>
+                <Loading />
             ) : classes.length > 0 ? (
                 <ClassTable data={classes} />
             ) : (

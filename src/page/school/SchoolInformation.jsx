@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Card, Spin, message, Tabs, Form } from 'antd';
+import React from 'react';
+import { Card, Tabs } from 'antd';
 import SchoolInformationTab from './SchoolInformationTab';
 import AcademicYearInformation from './AcademicYearInformation';
 

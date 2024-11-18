@@ -340,9 +340,8 @@
 }
 
 .route-report-card-container {
-    max-height: 700px;
+    max-height: 520px;
     overflow-y: scroll;
-    padding-right: 8px;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }

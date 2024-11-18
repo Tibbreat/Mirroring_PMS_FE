@@ -1,20 +1,15 @@
 import { UserOutlined } from "@ant-design/icons";
-import { Pagination, Tag, Table, Avatar } from "antd";
+import { Table, Avatar, Tag } from "antd";
 import { Link } from "react-router-dom";
 
 export const ChildrenTable = ({ data }) => {
     const columns = [
         {
-            title: 'Ảnh',
-            dataIndex: 'imageUrl',
-            key: 'imageUrl',
-            align: 'center',
+            title: 'Ảnh', dataIndex: 'imageUrl', key: 'imageUrl', align: 'center',
             render: (url) => url ? <Avatar width={50} src={url} /> : <Avatar size="small" icon={<UserOutlined />} />,
         },
         {
-            title: 'Họ và tên',
-            dataIndex: 'childName',
-            key: 'childName',
+            title: 'Họ và tên', dataIndex: 'childName', key: 'childName',
             render: (text, record) => (
                 <Link to={`/pms/manage/children/${record.id}`} style={{ textDecoration: "none" }}>
                     {text}
@@ -22,34 +17,18 @@ export const ChildrenTable = ({ data }) => {
             ),
         },
         {
-            title: 'Giới tính',
-            dataIndex: 'gender',
-            key: 'gender',
+            title: 'Giới tính', dataIndex: 'gender', key: 'gender',
             render: (text) => text === 'male' ? 'Nam' : text === 'female' ? 'Nữ' : text,
         },
         {
-            title: 'Ngày sinh',
-            dataIndex: 'childBirthDate',
-            key: 'childBirthDate',
+            title: 'Ngày sinh', dataIndex: 'childBirthDate', key: 'childBirthDate',
             render: (date) => new Date(date).toLocaleDateString(),
         },
+        { title: 'Cha', dataIndex: 'fatherName', key: 'fatherName', },
+        { title: 'Mẹ', dataIndex: 'motherName', key: 'motherName', },
         {
-            title: 'Cha',
-            dataIndex: 'fatherName',
-            key: 'fatherName',
-        },
-        {
-            title: 'Mẹ',
-            dataIndex: 'motherName',
-            key: 'motherName',
-        },
-        {
-            title: 'Lớp',
-            dataIndex: 'className',
-            key: 'className',
-            render: (text) => (
-                <Tag color="lime">{text}</Tag>
-            ),
+            title: 'Lớp', dataIndex: 'className', key: 'className',
+            render: (text) => <Tag color="lime">{text}</Tag>,
         },
     ];
 

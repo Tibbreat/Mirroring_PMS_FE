@@ -76,9 +76,11 @@ const ListFoodProvider = () => {
 
     return (
         <Card className="m-2">
-            <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
-                <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm đối tác</Button>
-            </Col>
+            {(user.role === "ADMIN") && (
+                <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm đối tác</Button>
+                </Col>
+            )}
             {loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
                     <Spin size="large" />

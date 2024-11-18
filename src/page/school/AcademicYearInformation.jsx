@@ -7,6 +7,7 @@ import { AuthContext } from "../../component/context/auth.context";
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { getAcademicYearInformationAPI, updateAcademicInformation } from "../../services/service.school";
+import { getAcademicYearsAPI } from "../../services/services.public";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -138,6 +139,7 @@ const AcademicYearInformation = () => {
     const currentYear = today.year();
     const nextYear = currentYear + 1;
     const currentAcademicYear = `${currentYear}-${nextYear}`;
+    const fifthSeptember = dayjs(`${currentYear}-09-05`);
 
     const uniqueAcademicYears = Array.from(new Set([currentAcademicYear, ...academicYears]));
 
@@ -186,11 +188,14 @@ const AcademicYearInformation = () => {
             </Row>
             <Row justify="end" className="mb-3 mt-3">
                 <Col>
-                    <Button type="link" icon={<EditOutlined />} onClick={handleEditClick} hidden={!isEdit}>
-                        Chỉnh sửa thông tin
-                    </Button>
+                    {selectedAcademicYear === currentAcademicYear && isEdit && !today.isAfter(fifthSeptember) && (
+                        <Button type="link" icon={<EditOutlined />} onClick={handleEditClick}>
+                            Chỉnh sửa thông tin
+                        </Button>
+                    )}
                 </Col>
             </Row>
+
 
             <Form form={form} layout="horizontal" onFinish={handleFinish}>
                 <Row gutter={[16, 16]}>
