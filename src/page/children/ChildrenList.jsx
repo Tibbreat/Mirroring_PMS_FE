@@ -161,7 +161,7 @@ const ChildrenList = () => {
                         current={currentPage}
                         total={total}
                         onChange={(page) => setCurrentPage(page)}
-                        style={{ textAlign: 'center', marginTop: 20 }}
+                        showSizeChanger={false}
                     />
                 </>
             ) : (

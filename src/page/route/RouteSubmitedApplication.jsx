@@ -5,7 +5,6 @@ import { approveApplicationAPI, fetchRouteApplications, fetchRouteReportByAcadem
 import { RouteReportCard } from "./RouteReportCard";
 import dayjs from "dayjs";
 import Loading from "../common/Loading";
-import { RouteSubmittedApplicationTable } from "../../component/table/RouteSubmittedApplicationTable";
 
 const { Option } = Select;
 
@@ -131,10 +130,10 @@ export const RouteSubmitedApplication = () => {
                     message.success("Đã xếp xe thành công");
                     fetchApplications(selectedAcademicYear, selectedRouteId);
                     fetchRoutes(selectedAcademicYear);
-                    Modal.destroyAll(); 
+                    Modal.destroyAll();
                 } catch (error) {
                     console.error("Error approving application:", error);
-                    message.error("Xếp xe thất bại");
+                    message.error("Xếp xe thất bại: " + error.data.data);
                 }
             },
             onCancel() {
