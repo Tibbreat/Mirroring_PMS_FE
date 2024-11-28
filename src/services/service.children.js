@@ -7,7 +7,7 @@ export const addChildren = async (formData) => {
 export const getChildrenAPI = async (page, academicYear, childName) => {
     let url = `/pms/children?page=${page}`;
     if (academicYear) url += `&academicYear=${academicYear}`;
-    if (childName) url += `&childName=${encodeURIComponent(childName)}`; // Add childName if provided
+    if (childName) url += `&childName=${encodeURIComponent(childName)}`; 
     return await axios.get(url);
 };
 
@@ -30,7 +30,7 @@ export const updateServiceStatus = async (childrenId, serviceName, routeId = nul
 
 
 export const getChildrenByClassAPI = async (classId, page) => {
-    const url = `/pms/children/class/${classId}?page=${page}`;
+    const url = `/pms/children/class/${classId}`;
     return await axios.get(url);
 };
 export const getChildrenByRoute = async (routeId) => {
@@ -40,15 +40,14 @@ export const getChildrenByRoute = async (routeId) => {
 export const exportChildrenToExcelByClassId = async (classId) => {
     const url = `/pms/children/excel/${classId}`;
     return await axios.get(url, {
-        responseType: 'blob', // Specify blob type to handle file download
+        responseType: 'blob', 
     });
 };
 
-// Download children data by academic year
 export const exportChildrenToExcelByAcademicYear = async (academicYear) => {
     const url = `/pms/children/excel/academic-year/${academicYear}`;
     return await axios.get(url, {
-        responseType: 'blob', // Specify blob type to handle file download
+        responseType: 'blob',
     });
 };
 
@@ -72,7 +71,7 @@ export const saveChildrenFromExcel = async (childrenData) => {
     return axios.post(`/pms/children/excel/import/save`, childrenData);
 }
 
-export const uploadImageAPI = async (childrenId, imageFile) => {
+export const uploadImageAPI = async (childrenId, imageFile) => {u
     const formData = new FormData();
     formData.append('image', imageFile);
 
@@ -83,7 +82,6 @@ export const uploadImageAPI = async (childrenId, imageFile) => {
     });
 };
 
-// Download children data by vehicle 
 export const exportChildrenToExcelByVehicle = async (vehicleId) => {
     const url = `/pms/children/excel/vehicle/${vehicleId}`;
     return await axios.get(url, {

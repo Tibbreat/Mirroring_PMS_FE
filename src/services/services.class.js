@@ -55,3 +55,8 @@ export const getClassesBaseOnStudentId = async (studentId) => {
     const url = `/pms/classes/byChildren/${studentId}`;
     return await axios.get(url);
 }
+
+export const getKitchenReport = async (academicYear) => {
+    const url = `/pms/classes/kitchen/report/${academicYear}`;
+    return await axios.get(url);
+}

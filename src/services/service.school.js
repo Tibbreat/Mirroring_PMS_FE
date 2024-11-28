@@ -13,3 +13,8 @@ export const updateAcademicInformation = async (data) => {
     const url = `/pms/school/update-academic-information`;
     return await axios.put(url, data);
 }
+
+export const updateSchoolInformation = async (data) => {
+    const url = `/pms/school/update-school-information`;
+    return await axios.put(url, data);
+}

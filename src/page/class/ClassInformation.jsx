@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useCallback, useContext } from 'react';
-import { Button, Card, Col, Descriptions, Divider, message, Pagination, Row, Spin, Switch } from 'antd';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Button, Card, Col, Descriptions, Divider, message, Row, Spin, Switch } from 'antd';
 import { useParams } from 'react-router-dom';
 import { changeClassStatusAPI, getClassBaseOnClassId, getTeacherOfClass } from '../../services/services.class';
 import moment from 'moment';
 import Title from 'antd/es/typography/Title';
-import { ChildrenTable } from '../../component/table/ChildrenTable';
 import Modal from 'antd/es/modal/Modal';
 import { getUserOpnionAPI } from '../../services/services.user';
-import { AuthContext } from '../../component/context/auth.context';
-import { exportChildrenToExcelByClassId, getChildrenByClassAPI } from '../../services/service.children';
+import { exportChildrenToExcelByClassId } from '../../services/service.children';
 import { EditOutlined, DownloadOutlined } from '@ant-design/icons';
+import { ChildrenOfClassTable } from '../../component/table/ChildrenOfClassTable';
 
 const ClassInformation = () => {
     const [classInfo, setClassInfo] = useState(null);
@@ -18,12 +17,6 @@ const ClassInformation = () => {
     const [managers, setManagers] = useState([]);
     const [loading, setLoading] = useState(true);
     const { id } = useParams();
-    const [children, setChildren] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [total, setTotal] = useState(0);
-
-    const { user } = useContext(AuthContext);
 
     const fetchClassInfo = useCallback(async () => {
         setLoading(true);
@@ -39,18 +32,6 @@ const ClassInformation = () => {
         }
     }, [id]);
 
-    const fetchChildrenList = useCallback(async () => {
-        setLoading(true);
-        try {
-            const response = await getChildrenByClassAPI(id, currentPage);
-            setChildren(response.data.listData);
-            setTotal(response.data.total);
-        } catch (error) {
-            console.error('Error fetching children :', error);
-        } finally {
-            setLoading(false);
-        }
-    }, [id, currentPage]);
 
     const handleDownloadByClassId = async (classId) => {
         try {
@@ -106,10 +87,6 @@ const ClassInformation = () => {
         fetchTeachersAndManagers();
     }, [fetchClassInfo, fetchTeachersAndManagers]);
 
-    useEffect(() => {
-        fetchChildrenList();
-    }, [fetchChildrenList]);
-
     if (loading) {
         return (
             <div className='d-flex justify-content-center align-items-center' style={{ height: '100vh' }}>
@@ -163,13 +140,8 @@ const ClassInformation = () => {
                         </Col>
                     </Row>
                 </Col>
-                <ChildrenTable data={children} />
-                <Pagination
-                    current={currentPage}
-                    total={total}
-                    onChange={(page) => setCurrentPage(page)}
-                    style={{ textAlign: 'center', marginTop: 20 }}
-                />
+                <ChildrenOfClassTable id={id} />
+
             </Card>
         </div>
     );

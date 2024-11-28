@@ -1,60 +1,111 @@
-import React from 'react';
-import { Form, Input, Button, Card } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Form, Input, Button, Card, Row } from 'antd';
+import Title from 'antd/es/typography/Title';
 
 const ChangePassword = () => {
+    const [form] = Form.useForm();
+    const [isFormValid, setIsFormValid] = useState(false);
+
+    useEffect(() => {
+        const handleFormChange = () => {
+            const { otp, newPassword, confirmPassword } = form.getFieldsValue();
+            const isValid = otp && newPassword && confirmPassword && newPassword === confirmPassword;
+            setIsFormValid(isValid);
+        };
+
+        form.validateFields().then(handleFormChange).catch(() => handleFormChange());
+
+        form.setFieldsValue({
+            otp: '',
+            newPassword: '',
+            confirmPassword: ''
+        });
+
+        form.getFieldsValue();
+        form.getFieldInstance('otp').input.onchange = handleFormChange;
+        form.getFieldInstance('newPassword').input.onchange = handleFormChange;
+        form.getFieldInstance('confirmPassword').input.onchange = handleFormChange;
+
+    }, [form]);
+
     const onFinish = (values) => {
         console.log('Received values:', values);
-        // Handle form submission logic here
     };
 
     return (
         <div className="login-page d-flex justify-content-center align-items-center vh-100">
-            <Card className='login' style={{ width: 400 }}>
-                <div className="login-title text-center mb-4">
-                    <div className="login-title-first display-6 fw-bold">Đổi mật khẩu</div>
-                </div>
+            <Card className="forgot-password-card" style={{ width: 500 }}>
+                <Row justify="center">
+                    <Title level={1}>Đổi mật khẩu</Title>
+                </Row>
                 <Form
+                    layout="vertical"
                     name="change_password"
-                    className='login-form-body'
+                    form={form}
                     onFinish={onFinish}
                 >
-                    <div className="login-form-input d-flex flex-column justify-content-center align-items-center">
-                        <div className='login-sub-title mt-5'>
-                            <p>Vui lòng nhập mã xác minh đã được gửi về e-mail</p>
-                        </div>
+                    <Row justify="center">
+                        <Title level={5}>
+                            Vui lòng nhập mã xác minh đã được gửi về e-mail
+                        </Title>
+                    </Row>
+                    <Row justify="center">
                         <Form.Item
-                            name="code"
-                            rules={[{ required: true, message: 'Vui lòng nhập mã xác minh!' }]}
+                            label="Mã xác minh"
+                            name="otp"
+                            rules={[
+                                { required: true, message: 'Vui lòng nhập mã xác minh!' },
+                                { pattern: /^[0-9]{6}$/, message: 'Mã xác minh phải là 6 chữ số.' },
+                            ]}
+                            style={{ width: '80%' }}
                         >
-                            <Input
-                                className='form-control input-1 mt-3'
-                                placeholder="Mã xác minh"
-                            />
+                            <Input placeholder="Mã xác minh" />
                         </Form.Item>
+
                         <Form.Item
-                            name="password"
-                            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu mới!' }]}
+                            label="Mật khẩu mới"
+                            name="newPassword"
+                            rules={[
+                                { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
+                                { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự.' },
+                            ]}
+                            style={{ width: '80%' }}
                         >
-                            <Input.Password
-                                className='form-control input-1 mt-3'
-                                placeholder="Mật khẩu mới"
-                            />
+                            <Input.Password placeholder="Mật khẩu mới" />
                         </Form.Item>
+
                         <Form.Item
-                            name="re-password"
-                            rules={[{ required: true, message: 'Vui lòng xác nhận lại mật khẩu mới!' }]}
+                            label="Xác nhận mật khẩu"
+                            name="confirmPassword"
+                            dependencies={['newPassword']}
+                            rules={[
+                                { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || getFieldValue('newPassword') === value) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(
+                                            new Error('Mật khẩu xác nhận không khớp!')
+                                        );
+                                    },
+                                }),
+                            ]}
+                            style={{ width: '80%' }}
                         >
-                            <Input.Password
-                                className='form-control input-1 mt-3'
-                                placeholder="Xác nhận lại mật khẩu mới"
-                            />
+                            <Input.Password placeholder="Xác nhận mật khẩu" />
                         </Form.Item>
-                    </div>
-                    <div className='login-form-btn d-flex justify-content-center mt-3'>
-                        <Button type='primary' htmlType='submit' className='btn btn-blue-1'>
-                            Đổi mật khẩu
-                        </Button>
-                    </div>
+
+                        <Form.Item>
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                disabled={!isFormValid} 
+                            >
+                                Đổi mật khẩu
+                            </Button>
+                        </Form.Item>
+                    </Row>
                 </Form>
             </Card>
         </div>

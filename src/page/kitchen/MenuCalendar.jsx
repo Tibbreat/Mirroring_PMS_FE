@@ -6,6 +6,7 @@ import 'dayjs/locale/vi';
 import locale from 'antd/es/calendar/locale/vi_VN';
 import { createMeal, getMealsByMonth } from '../../services/services.meal';
 import { AuthContext } from '../../component/context/auth.context';
+import { getKitchenReport } from '../../services/services.class';
 
 dayjs.locale('vi');
 
@@ -15,6 +16,7 @@ const MenuCalendar = () => {
     const [isModalViewMealVisible, setIsModalViewMealVisible] = useState(false);
     const [mealData, setMealData] = useState([]);
     const [selectedMeal, setSelectedMeal] = useState(null);
+    const [reportData, setReportData] = useState([]);
     const [currentMonth, setCurrentMonth] = useState(dayjs().startOf('month').format('YYYY-MM'));
     const [form] = Form.useForm();
     const { user } = useContext(AuthContext);
@@ -96,6 +98,23 @@ const MenuCalendar = () => {
             message.error('Không thể tải dữ liệu thực đơn cho tháng');
         }
     };
+
+    const fetchKitchenReport = async () => {
+        try {
+            const today = dayjs();
+            const currentYear = today.year();
+            const nextYear = currentYear + 1;
+            const currentAcademicYear = `${currentYear}-${nextYear}`;
+            const response = await getKitchenReport(currentAcademicYear);
+            setReportData(response.data);
+        } catch (error) {
+            message.error('Không thể tải báo cáo nhà bếp');
+        }
+    };
+
+    useEffect(() => {
+        fetchKitchenReport();
+    }, []);
 
     const renderDishList = (ageGroup, dishType, label, isMainDish = false) => (
         <Form.List
