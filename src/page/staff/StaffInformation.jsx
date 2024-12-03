@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { getUserAPI, changeUserStatusAPI, changeUserDescription } from '../../services/services.user';
-import { Spin, Tag, Row, Col, Avatar, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, Pagination, Table, Form, Select } from 'antd';
+import { Tag, Row, Col, Avatar, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, Table, Form, Select } from 'antd';
 import { Link, useParams } from 'react-router-dom';
 import Title from 'antd/es/typography/Title';
 import moment from 'moment';
@@ -8,6 +8,7 @@ import UploadImage from '../../component/input/UploadImage';
 import { EditOutlined } from '@ant-design/icons';
 import { getClassListBaseOnManagerId } from '../../services/services.class';
 import Loading from '../common/Loading';
+import { AuthContext } from '../../component/context/auth.context';
 
 const { Option } = Select;
 
@@ -20,6 +21,8 @@ const StaffInformation = () => {
     const [classes, setClasses] = useState([]);
     const [form] = Form.useForm();
     const { id } = useParams();
+    const { user } = useContext(AuthContext);
+
 
     const fetchStaff = async (id) => {
         setLoading(true);
@@ -165,9 +168,11 @@ const StaffInformation = () => {
                                 <Title level={5}>Thông tin nhân viên</Title>
                             </Col>
                             <Col>
-                                <Button type="link" icon={<EditOutlined />} onClick={showEditModal}>
-                                    Chỉnh sửa thông tin
-                                </Button>
+                                {user.role === 'ADMIN' || user.id === id && (
+                                    <Button type="link" icon={<EditOutlined />} onClick={showEditModal}>
+                                        Chỉnh sửa thông tin
+                                    </Button>
+                                )}
                             </Col>
                         </Row>
                         <Descriptions bordered column={2}>
@@ -178,7 +183,10 @@ const StaffInformation = () => {
                                 {staff?.role === 'TRANSPORT_MANAGER' && 'Quản lý dịch vụ vận chuyển'}
                             </Descriptions.Item>
                             <Descriptions.Item label="Trạng thái">
-                                <Switch checked={staff.isActive} onClick={showModalChangeStatus} />
+                                {user.role === 'ADMIN' && (<Switch checked={staff.isActive} onClick={showModalChangeStatus} />)}
+                                {user.role !== 'ADMIN' && (<Tag color={staff.isActive ? 'green' : 'red'}>
+                                    {staff.isActive ? 'Tài khoản đang hoạt động' : 'Tài khoản bị hạn chế'}
+                                </Tag>)}
                             </Descriptions.Item>
                             <Descriptions.Item label="Account">{staff?.username}</Descriptions.Item>
                             <Descriptions.Item label="E-mail">{staff?.email}</Descriptions.Item>

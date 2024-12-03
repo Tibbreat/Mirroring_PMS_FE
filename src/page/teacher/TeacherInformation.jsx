@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { getUserAPI, changeUserStatusAPI, changeUserDescription } from '../../services/services.user';
-import { Spin, Tag, Row, Col, Avatar, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, Pagination, Table, Form, Select } from 'antd';
+import { Tag, Row, Col, Avatar, Button, Input, Modal, message, Card, Descriptions, Divider, Switch, Table, Form, Select } from 'antd';
 import { Link, useParams } from 'react-router-dom';
 import { getClassBaseOnTeacher } from '../../services/services.class';
 import { EditOutlined } from '@ant-design/icons';
@@ -84,7 +84,6 @@ const TeacherInformation = () => {
                     await changeUserStatusAPI(teacher.id);
                     message.success('Cập nhật trạng thái thành công');
 
-                    // Cập nhật lại thông tin nhân viên
                     await fetchTeacher(id);
                 } catch (error) {
                     console.error('Error changing user status:', error);
@@ -127,7 +126,7 @@ const TeacherInformation = () => {
             message.error('Có lỗi xảy ra khi cập nhật giáo viên');
         } finally {
             setIsEditModalVisible(false);
-            setImageFile(null); // Xóa ảnh sau khi cập nhật
+            setImageFile(null);
         }
     };
 
@@ -174,7 +173,10 @@ const TeacherInformation = () => {
                             <Descriptions.Item label="Họ và tên">{teacher?.fullName}</Descriptions.Item>
                             <Descriptions.Item label="Vai trò">Giáo viên</Descriptions.Item>
                             <Descriptions.Item label="Trạng thái">
-                                <Switch checked={teacher.isActive} onClick={showModalChangeStatus} />
+                                {user.role === 'ADMIN' && (<Switch checked={teacher.isActive} onClick={showModalChangeStatus} />)}
+                                {user.role !== 'ADMIN' && (<Tag color={teacher.isActive ? 'green' : 'red'}>
+                                    {teacher.isActive ? 'Tài khoản đang hoạt động' : 'Tài khoản bị hạn chế'}
+                                </Tag>)}
                             </Descriptions.Item>
                             <Descriptions.Item label="Mã nhân viên">{teacher?.id}</Descriptions.Item>
                             <Descriptions.Item label="Account">{teacher?.username}</Descriptions.Item>

@@ -1,17 +1,21 @@
-import { UserOutlined } from "@ant-design/icons";
-import { Table, Avatar, Tag, Button, Modal, message } from "antd";
-import { useCallback, useEffect, useState } from "react";
+import { DownloadOutlined, UserOutlined } from "@ant-design/icons";
+import { Table, Avatar, Tag, Button, Modal, message, Col, Row } from "antd";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getChildrenByClassAPI, transferClass } from "../../services/service.children";
+import { exportChildrenToExcelByClassId, getChildrenByClassAPI, transferClass } from "../../services/service.children";
 import dayjs from "dayjs";
 import { getClassListToTransfer } from "../../services/services.class";
+import { AuthContext } from "../context/auth.context";
+import Title from "antd/es/skeleton/Title";
 
-export const ChildrenOfClassTable = ({ id }) => {
+export const ChildrenOfClassTable = ({ id, managerId }) => {
     const [data, setData] = useState([]);
     const [classList, setClassList] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedChildren, setSelectedChildren] = useState();
-    
+    const { user } = useContext(AuthContext);
+    const [MID, setMID] = useState();
+
     const fetchChildrenList = useCallback(async () => {
         try {
             const response = await getChildrenByClassAPI(id);
@@ -41,9 +45,9 @@ export const ChildrenOfClassTable = ({ id }) => {
     };
 
     useEffect(() => {
+        setMID(managerId);
         fetchChildrenList();
-    }, []);
-
+    }, [fetchChildrenList]);
 
     const availableClasses = [
         { title: 'Lớp', dataIndex: 'className', key: 'className' },
@@ -112,14 +116,16 @@ export const ChildrenOfClassTable = ({ id }) => {
                 </Tag>
             ),
         },
-        {
-            title: 'Hành động',
-            key: 'action',
-            align: 'center',
-            render: (record) => (
-                <Button type="link" onClick={() => showModal(record)}>Chuyển lớp</Button>
-            ),
-        }
+        ...(user.role === "ADMIN" || (user.role === "CLASS_MANAGER" && user.id === MID)) ? [
+            {
+                title: 'Hành động',
+                key: 'action',
+                align: 'center',
+                render: (record) => (
+                    <Button type="link" onClick={() => showModal(record)}>Chuyển lớp</Button>
+                ),
+            }
+        ] : [],
     ];
 
     const confirmChangeClass = (selected, selectedChildren) => {
@@ -137,7 +143,7 @@ export const ChildrenOfClassTable = ({ id }) => {
                     await transferClass(selectedChildren.id, id, selected.id);
                     message.success(`Đã chuyển thành công bé ${selectedChildren.childName} sang lớp ${selected.className}`);
                     setIsModalVisible(false);
-                    fetchChildrenList(); 
+                    fetchChildrenList();
                 } catch (error) {
                     console.error('Error transferring class:', error);
                     message.error("Chuyển lớp thất bại");
@@ -145,18 +151,37 @@ export const ChildrenOfClassTable = ({ id }) => {
             },
         });
     };
+    const handleDownloadByClassId = async (classId) => {
+        try {
+            const response = await exportChildrenToExcelByClassId(classId);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `ChildrenData_Class_${classId}.xls`);
+            document.body.appendChild(link);
+            link.click();
+        } catch (error) {
+            console.error("Error downloading file:", error);
+        }
+    };
     return (
         <div className="p-2">
+            <Row justify="space-between" align="middle" className="mb-2">
+                <Col>
+                    <Title level={4}>Danh sách trẻ</Title>
+                </Col>
+                <Col>
+                    <Button type="primary" icon={<DownloadOutlined />} onClick={() => handleDownloadByClassId(id)}></Button>
+                </Col>
+            </Row>
             <Table
                 size="small"
                 columns={columns}
                 dataSource={data}
-                pagination={
-                    {
-                        pageSize: 10,
-                        showSizeChanger: false,
-                    }
-                }
+                pagination={{
+                    pageSize: 10,
+                    showSizeChanger: false,
+                }}
                 rowKey="id"
                 bordered
             />
@@ -171,7 +196,8 @@ export const ChildrenOfClassTable = ({ id }) => {
                     dataSource={classList}
                     columns={availableClasses}
                     pagination={false}
-                    bordered />
+                    bordered
+                />
             </Modal>
         </div>
     );

@@ -51,9 +51,35 @@ const ManageSite = () => {
     allItems.push({ key: '8', label: 'Cài đặt thông tin' });
   }
 
-  const items = user.role === "TEACHER"
-    ? allItems.filter(item => ['1', '2', '4', '6', '5', '7'].includes(item.key))
-    : allItems;
+  const items = (() => {
+    if (user.role === "TEACHER") {
+      return allItems
+        .filter(item => {
+          // Lọc các nhóm menu
+          if (item.key === '6') {
+            // Chỉ hiển thị các menu con 71, 72 cho role TEACHER
+            return item.children && item.children.some(child => ['61', '62'].includes(child.key));
+          }
+          // Lọc các nhóm khác bình thường
+          return ['1', '2', '4', '6', '5', '7'].includes(item.key);
+        })
+        .map(item => {
+          if (item.key === '6') {
+            // Lọc các menu con 71, 72 cho nhóm 7
+            item.children = item.children.filter(child => ['61', '62'].includes(child.key));
+          }
+          return item;
+        });
+    } else if (user.role === "TRANSPORT_MANAGER") {
+      return allItems.filter(item => ['1', '4', '6'].includes(item.key));
+    } else if (user.role === "KITCHEN_MANAGER") {
+      return allItems.filter(item => ['1', '4', '5'].includes(item.key));
+    } else {
+      return allItems;
+    }
+  })();
+
+
 
   useEffect(() => {
     const pathMap = {

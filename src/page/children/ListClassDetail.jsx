@@ -1,16 +1,17 @@
 import { Button, Col, Modal, Row, Table, Tag, message } from "antd";
 import { getClassesBaseOnStudentId, getClassListToTransfer } from "../../services/services.class";
 import Title from "antd/es/typography/Title";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import dayjs from 'dayjs';
 import { transferClass } from "../../services/service.children";
+import { AuthContext } from "../../component/context/auth.context";
 
 export const ListClassDetail = ({ id }) => {
     const [classes, setClasses] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [oldClass, setOldClass] = useState(null);
     const [classList, setClassList] = useState([]);
-
+    const { user } = useContext(AuthContext);
     // Fetch classes for the specific student
     const fetchClassData = async (id) => {
         try {
@@ -140,17 +141,25 @@ export const ListClassDetail = ({ id }) => {
                 return <Tag color={color}>{text}</Tag>;
             },
         },
-        {
-            title: 'Hành động',
-            key: 'action',
-            align: 'center',
-            render: (record) => (
-                ((record.classStatus === 'IN_PROGRESS' && record.studyStatus === 'STUDYING') ||
-                    (record.classStatus === 'NOT_STARTED' && record.studyStatus === 'STUDYING')) && (
-                    <Button type="link" onClick={() => showModal(record)}>Chuyển lớp</Button>
-                )
-            ),
-        }
+        // Hiển thị cột "Hành động" chỉ khi user là ADMIN
+        ...(user.role === "ADMIN"
+            ? [
+                {
+                    title: 'Hành động',
+                    key: 'action',
+                    align: 'center',
+                    render: (record) => {
+                        const canShowTransferButton =
+                            (record.classStatus === 'IN_PROGRESS' && record.studyStatus === 'STUDYING') ||
+                            (record.classStatus === 'NOT_STARTED' && record.studyStatus === 'STUDYING');
+
+                        return canShowTransferButton ? (
+                            <Button type="link" onClick={() => showModal(record)}>Chuyển lớp</Button>
+                        ) : null;
+                    },
+                },
+            ]
+            : []),
     ];
 
     const availableClasses = [

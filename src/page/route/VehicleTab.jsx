@@ -7,7 +7,7 @@ import { getTransportManagerAPI } from "../../services/services.user";
 
 const { Option } = Select;
 
-export const VehicleTab = ({ id, routeActive }) => {
+export const VehicleTab = ({ id, routeActive, role }) => {
     const [vehicleData, setVehicleData] = useState([]);
     const [availableVehicleData, setAvailableVehicleData] = useState([]);
     const [selectedVehicle, setSelectedVehicle] = useState(null);
@@ -190,14 +190,18 @@ export const VehicleTab = ({ id, routeActive }) => {
                 </>
             ),
         },
+
         {
             align: 'center',
             render: (record) => (
                 <Col>
-                    <DeleteOutlined onClick={() => openConfirmDeleteModal(record.id)} style={{ cursor: 'pointer', color: 'red' }} />
+                    {role === 'ADMIN' && (
+                        <DeleteOutlined onClick={() => openConfirmDeleteModal(record.id)} style={{ cursor: 'pointer', color: 'red' }} />
+                    )}
                     <Popover title="Tải danh sách trẻ đăng ký xe này">
                         <DownloadOutlined onClick={() => handleDownload(record.id)} style={{ cursor: 'pointer', marginLeft: 10 }} />
                     </Popover>
+
                 </Col>
             ),
         },
@@ -215,7 +219,7 @@ export const VehicleTab = ({ id, routeActive }) => {
     return (
         <>
             <Row justify="end" className="mb-3">
-                {routeActive && (
+                {routeActive && role === 'ADMIN' && (
                     <Button type="primary" onClick={() => openVehicleModal(true)}>
                         Thêm xe vào chặng
                     </Button>

@@ -32,7 +32,7 @@ const ChildrenInformation = () => {
                     childrenData={childrenData}
                     id={id} />
                 <Divider />
-                <ParentDetail childrenData={childrenData} />
+                <ParentDetail data={childrenData} />
                 <Divider />
                 <ListClassDetail id={id} />
             </Card>

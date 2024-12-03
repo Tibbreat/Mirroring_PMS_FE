@@ -1,26 +1,33 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Card, Col, Descriptions, Divider, message, Row, Spin, Switch } from 'antd';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
+import { Button, Card, Col, Descriptions, Divider, Form, Input, message, Row, Select } from 'antd';
 import { useParams } from 'react-router-dom';
 import { changeClassStatusAPI, getClassBaseOnClassId, getTeacherOfClass } from '../../services/services.class';
 import moment from 'moment';
 import Title from 'antd/es/typography/Title';
 import Modal from 'antd/es/modal/Modal';
-import { getUserOpnionAPI } from '../../services/services.user';
-import { exportChildrenToExcelByClassId } from '../../services/service.children';
-import { EditOutlined, DownloadOutlined } from '@ant-design/icons';
+import { getTeacherAvailableInYear, getUserOpnionAPI } from '../../services/services.user';
+import { EditOutlined } from '@ant-design/icons';
 import { ChildrenOfClassTable } from '../../component/table/ChildrenOfClassTable';
+import StatusDescription from '../../component/utils/StatusDescription';
+import Loading from '../common/Loading';
+import dayjs from 'dayjs';
+import { AuthContext } from '../../component/context/auth.context';
 
 const ClassInformation = () => {
     const [classInfo, setClassInfo] = useState(null);
     const [teachers, setTeachers] = useState([]);
     const [allTeachers, setAllTeachers] = useState([]);
     const [managers, setManagers] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
     const [loading, setLoading] = useState(true);
     const { id } = useParams();
+    const [form] = Form.useForm();
+    const { user } = useContext(AuthContext);
 
     const fetchClassInfo = useCallback(async () => {
         setLoading(true);
         try {
+
             const response = await getClassBaseOnClassId(id);
             const response_2 = await getTeacherOfClass(id);
             setTeachers(response_2.data);
@@ -32,24 +39,12 @@ const ClassInformation = () => {
         }
     }, [id]);
 
-
-    const handleDownloadByClassId = async (classId) => {
-        try {
-            const response = await exportChildrenToExcelByClassId(classId);
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `ChildrenData_Class_${classId}.xls`);
-            document.body.appendChild(link);
-            link.click();
-        } catch (error) {
-            console.error("Error downloading file:", error);
-        }
-    };
-
     const fetchTeachersAndManagers = useCallback(async () => {
         try {
-            const teacherResponse = await getUserOpnionAPI('TEACHER');
+            const currentYear = dayjs().year();
+            const nextYear = currentYear + 1;
+            const academicYear = `${currentYear}-${nextYear}`;
+            const teacherResponse = await getTeacherAvailableInYear(academicYear);;
             const managerResponse = await getUserOpnionAPI('CLASS_MANAGER');
             setAllTeachers(teacherResponse.data);
             setManagers(managerResponse.data);
@@ -58,43 +53,42 @@ const ClassInformation = () => {
         }
     }, []);
 
-    const showModalChangeStatus = () => {
-        const contentMessage = classInfo?.isActive
-            ? "Bạn có chắc chắn muốn ngừng hoạt động của lớp này?."
-            : "Bạn có chắc chắn muốn cấp phép lớp này được phép hoạt động?";
-
-        Modal.confirm({
-            title: 'Xác nhận thay đổi trạng thái',
-            content: contentMessage,
-            onOk: async () => {
-                try {
-                    await changeClassStatusAPI(classInfo.id);
-                    message.success('Cập nhật trạng thái thành công');
-                    fetchClassInfo();
-                } catch (error) {
-                    console.error('Error changing user status:', error);
-                    message.error('Có lỗi xảy ra khi cập nhật trạng thái.');
-                }
-            },
-            onCancel() {
-                console.log('Hủy thay đổi trạng thái');
-            },
-        });
-    };
-
     useEffect(() => {
         fetchClassInfo();
-        fetchTeachersAndManagers();
-    }, [fetchClassInfo, fetchTeachersAndManagers]);
+    }, []);
 
     if (loading) {
         return (
-            <div className='d-flex justify-content-center align-items-center' style={{ height: '100vh' }}>
-                <Spin size="large" />
-            </div>
+            <Loading />
         );
     }
 
+    const openModal = () => {
+        setModalVisible(true);
+        fetchTeachersAndManagers();
+    };
+    const changeClassStatus = () => {
+        Modal.confirm({
+            title: 'Xác nhận kết thúc lớp',
+            content: (
+                <>
+                    Bạn có chắc chắn muốn kết thúc quá trình học của lớp này? <br />
+                    Không thể mở lại lớp này sau khi kết thúc. <br />
+                    Mọi thông tin liên quan đến lớp sẽ không thể chỉnh sửa sau khi kết thúc.
+                </>
+            ),
+            onOk: async () => {
+                try {
+                    await changeClassStatusAPI(id);
+                    message.success('Kết thúc lớp thành công');
+                    fetchClassInfo();
+                } catch (error) {
+                    console.error('Error changing class status:', error);
+                    message.error('Lỗi khi kết thúc lớp');
+                }
+            },
+        });
+    };
     return (
         <div className="container">
             <Card style={{ marginTop: 20 }}>
@@ -104,9 +98,21 @@ const ClassInformation = () => {
                             <Title level={5}>Thông tin lớp</Title>
                         </Col>
                         <Col>
-                            <Button type="link" icon={<EditOutlined />}>
-                                Chỉnh sửa thông tin
-                            </Button>
+                            {classInfo?.status === 'NOT_STARTED' && (
+                                <Button type="link" icon={<EditOutlined />} onClick={() => { openModal() }}>
+                                    Chỉnh sửa thông tin
+                                </Button>
+                            )}
+                            {classInfo?.status === 'IN_PROGRESS' && (user?.role === 'ADMIN' || user?.role === 'CLASS_MANAGER') && (
+                                <Button type="default"
+                                    style={{
+                                        backgroundColor: '#f5222d',
+                                        color: 'white',
+                                    }}
+                                    onClick={() => { changeClassStatus() }}>
+                                    Kết thúc lớp
+                                </Button>
+                            )}
                         </Col>
                     </Row>
                     <Descriptions bordered column={2}>
@@ -123,27 +129,86 @@ const ClassInformation = () => {
                         </Descriptions.Item>
                         <Descriptions.Item label="Quản lý lớp">{classInfo?.manager.username}</Descriptions.Item>
                         <Descriptions.Item label="Trạng thái" span={3}>
-                            <Switch checked={classInfo?.status} onClick={showModalChangeStatus} />
+                            <StatusDescription status={classInfo?.status} />
                         </Descriptions.Item>
                     </Descriptions>
                 </Col>
                 <Divider />
-                <Col xs={24} sm={16} className='container'>
-                    <Row justify="space-between" align="middle">
-                        <Col>
-                            <Title level={4}>Danh sách trẻ</Title>
+
+                <ChildrenOfClassTable
+                    id={id}
+                    managerId={classInfo.manager.id} />
+            </Card >
+            <Modal
+                title="Chỉnh sửa thông tin lớp"
+                open={modalVisible}
+                onCancel={() => setModalVisible(false)}
+                width={800}
+            >
+                <Form form={form} layout="vertical">
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item
+                                name="className"
+                                label="Tên lớp"
+                                initialValue={classInfo.className}
+                                rules={[{ required: true, message: 'Vui lòng nhập tên lớp' }]}
+                            >
+                                <Input placeholder="Nhập tên lớp" />
+                            </Form.Item>
                         </Col>
-                        <Col>
-                            <Button type="primary" icon={<DownloadOutlined />} onClick={() => handleDownloadByClassId(id)}>
-                                Download
-                            </Button>
+                        <Col span={12}>
+                            <Form.Item
+                                name="ageRange"
+                                label="Tuổi"
+                                rules={[{ required: true, message: 'Vui lòng nhập tuổi' }]}
+                                initialValue={classInfo.ageRange}
+                            >
+                                <Select placeholder="Chọn tuổi" style={{ width: '100%' }}>
+                                    <Option value="3-4">3-4 tuổi</Option>
+                                    <Option value="4-5">4-5 tuổi</Option>
+                                    <Option value="5-6">5-6 tuổi</Option>
+                                </Select>
+                            </Form.Item>
                         </Col>
                     </Row>
-                </Col>
-                <ChildrenOfClassTable id={id} />
-
-            </Card>
-        </div>
+                    <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item
+                                name="teacherId"
+                                label="Chọn giáo viên"
+                                rules={[{ required: true, message: 'Vui lòng chọn giáo viên' }]}
+                                initialValue={teachers.map((t) => t.username)}
+                            >
+                                <Select placeholder="Chọn giáo viên" style={{ width: '100%' }}>
+                                    {allTeachers.map((teacher) => (
+                                        <Option key={teacher.id} value={teacher.id}>
+                                            {teacher.username}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                name="managerId"
+                                label="Quản lý lớp"
+                                initialValue={classInfo.manager.id}
+                                rules={[{ required: true, message: 'Vui lòng chọn quản lý lớp' }]}
+                            >
+                                <Select placeholder="Chọn quản lý lớp" style={{ width: '100%' }}>
+                                    {managers.map((manager) => (
+                                        <Option key={manager.id} value={manager.id}>
+                                            {manager.username}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                </Form>
+            </Modal>
+        </div >
     );
 }
 

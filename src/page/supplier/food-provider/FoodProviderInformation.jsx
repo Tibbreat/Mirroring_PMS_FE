@@ -19,7 +19,7 @@ const FoodProviderInformation = () => {
     const [form] = Form.useForm();
     const { user } = useContext(AuthContext);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false); // State mới để điều khiển loading và disable
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fetchFoodProvider = async (id) => {
         setLoading(true);
@@ -51,7 +51,7 @@ const FoodProviderInformation = () => {
     };
 
     const handleOk = async () => {
-        setIsSubmitting(true); // Bắt đầu trạng thái loading
+        setIsSubmitting(true);
         try {
             const values = await form.validateFields();
 
@@ -65,7 +65,7 @@ const FoodProviderInformation = () => {
 
             if (foodRequestItems.length === 0) {
                 message.warning('Không có thực phẩm nào được yêu cầu');
-                setIsSubmitting(false); // Kết thúc loading khi không có yêu cầu thực phẩm
+                setIsSubmitting(false);
                 return;
             }
 
@@ -231,7 +231,7 @@ const FoodProviderInformation = () => {
                                         onClick={() => add()}
                                         style={{ width: '100%' }}
                                         icon={<PlusOutlined />}
-                                        disabled={isSubmitting} 
+                                        disabled={isSubmitting}
                                     >
                                         Thêm yêu cầu
                                     </Button>

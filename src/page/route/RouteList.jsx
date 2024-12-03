@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Button, Card, Col, Modal, Form, Input, Row, notification, message } from "antd";
 import RouteTable from "../../component/table/RouteTable";
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { fetchRoutesAPI, newRouteAPI } from '../../services/services.route';
+import { AuthContext } from '../../component/context/auth.context';
 
 const RouteList = () => {
     const [routes, setRoutes] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [form] = Form.useForm();
+    const { user } = useContext(AuthContext);
 
     // Show modal to add a new route
     const showModal = () => {
@@ -65,10 +67,12 @@ const RouteList = () => {
     return (
         <Card className="m-2">
             <Col span={24} style={{ marginBottom: 20, display: 'flex', justifyContent: 'flex-end' }}>
-                <Button type="primary" onClick={showModal}>Thêm tuyến mới</Button>
+                {user.role === 'ADMIN' && (
+                    <Button type="primary" onClick={showModal}>Thêm tuyến mới</Button>
+                )
+                }
             </Col>
             <RouteTable data={routes} />
-
             <Modal
                 title="Thêm tuyến mới"
                 visible={isModalVisible}

@@ -4,7 +4,7 @@ import { Button, Row, Steps } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import { Step } from "@tensorflow/tfjs";
 
-export const StopLocationTab = ({ id, routeActive }) => {
+export const StopLocationTab = ({ id, routeActive, role }) => {
     const [stopLocations, setStopLocations] = useState([]);
 
     const fetchStopLocation = async () => {
@@ -22,7 +22,7 @@ export const StopLocationTab = ({ id, routeActive }) => {
     return (
         <>
             <Row justify="end" className='mb-3'>
-                <Button type="link" icon={<EditOutlined />}>Chỉnh sửa các điểm dừng</Button>
+                {!routeActive && role === 'ADMIN' && <Button type="link" icon={<EditOutlined />}>Chỉnh sửa các điểm dừng</Button>}
             </Row>
             <Steps
                 direction="horizontal"

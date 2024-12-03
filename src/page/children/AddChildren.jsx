@@ -76,7 +76,6 @@ const AddChildren = () => {
     };
 
     const disabledDate = (current) => {
-        // Can not select days after today
         return current && current > dayjs().endOf('day');
     };
 

@@ -1,6 +1,6 @@
 import axios from '../../axios.customize';
 
-export const getUsersAPI = async ( page, role, isActive, fullName) => {
+export const getUsersAPI = async (page, role, isActive, fullName) => {
     let params = new URLSearchParams();
 
     if (page) {
@@ -48,13 +48,13 @@ export const getParentWithUserNameAPI = async (teacherId) => {
     return axios.get(URL);
 }
 
-export const getTeacherAvailableInYear = async(academicYear) => {
+export const getTeacherAvailableInYear = async (academicYear) => {
     const url = `/pms/users/options/available-teacher/${academicYear}`;
     return axios.get(url);
 }
 export const changeUserDescription = async (userId, formData) => {
     const URL = `/pms/users/update-user/${userId}`;
-    
+
     return axios.put(URL, formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
@@ -65,4 +65,9 @@ export const changeUserDescription = async (userId, formData) => {
 export const getTransportManagerAPI = async () => {
     const URL = `/pms/users/options/available-transport-manager`;
     return axios.get(URL);
+}
+
+export const updateParentInfo = async (payload) => {
+    const URL = `/pms/users/updateParent`;
+    return axios.put(URL, payload);
 }
