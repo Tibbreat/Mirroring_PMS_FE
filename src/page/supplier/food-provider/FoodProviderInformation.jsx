@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Row, Col, Button, Input, Modal, message, Card, Descriptions, Divider, Form, notification, DatePicker, Switch } from 'antd';
+import { Row, Col, Button, Input, Modal, message, Card, Descriptions, Divider, Form, notification, DatePicker, Switch, Tag } from 'antd';
 import { useParams } from 'react-router-dom';
 import { getFoodProviderDetailAPI, getFoodRequestsAPI, requestFoodAPI, updateStatusFoodProviderAPI } from '../../../services/service.foodprovider';
 import Title from 'antd/es/typography/Title';
@@ -81,7 +81,7 @@ const FoodProviderInformation = () => {
             console.error('Error creating food request:', error);
             message.error('Có lỗi xảy ra, vui lòng thử lại sau');
         } finally {
-            setIsSubmitting(false); // Kết thúc trạng thái loading dù thành công hay thất bại
+            setIsSubmitting(false);
         }
     };
 
@@ -128,13 +128,17 @@ const FoodProviderInformation = () => {
                                 <Title level={5}>Thông tin đơn vị</Title>
                             </Col>
                             <Col>
-                                <Button type="link" icon={<EditOutlined />}>Chỉnh sửa thông tin</Button>
+                                {user.role === 'ADMIN' && (
+                                    <Button type="link" icon={<EditOutlined />}>Chỉnh sửa thông tin</Button>
+                                )}
                             </Col>
                         </Row>
                         <Descriptions bordered column={6}>
                             <Descriptions.Item label="Tên đơn vị" span={4}>{provider?.providerName}</Descriptions.Item>
                             <Descriptions.Item label="Trạng thái" span={2}>
-                                <Switch checked={provider?.isActive} onClick={showModalChangeStatus} />
+                                {user.role === 'ADMIN' && (<Switch checked={provider?.isActive} onClick={showModalChangeStatus} />)}
+                                {user.role !== 'ADMIN' && (provider?.isActive ? <Tag color="success">Đang hoạt động</Tag> : <Tag color="error">Đã hạn chế</Tag>)}
+
                             </Descriptions.Item>
                             <Descriptions.Item label="Người đại diện" span={2}>{provider?.representativeName}</Descriptions.Item>
                             <Descriptions.Item label="Chức vụ" span={2}>{provider?.representativePosition}</Descriptions.Item>
@@ -159,7 +163,13 @@ const FoodProviderInformation = () => {
                             </Button>
                         )}
                     </Row>
-                    <FoodRequestTable dataDefault={foodRequest} total={total} providerId={id} currentPage={currentPage} isActive={provider?.isActive} />
+                    <FoodRequestTable
+                        dataDefault={foodRequest}
+                        total={total}
+                        providerId={id}
+                        currentPage={currentPage}
+                        isActive={provider?.isActive}
+                        role={user.role} />
                 </Col>
             </Card>
 

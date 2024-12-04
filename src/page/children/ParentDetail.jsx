@@ -3,22 +3,19 @@ import { Button, Col, Descriptions, Form, Input, Modal, Row, message } from "ant
 import { EditOutlined } from "@ant-design/icons";
 import Title from "antd/es/typography/Title";
 import { updateParentInfo } from "../../services/services.user";
-import { getChildDetailAPI } from "../../services/service.children";
 
-export const ParentDetail = ({ data }) => {
+export const ParentDetail = ({ data, role }) => {
     const [formUpdateParent] = Form.useForm();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [childrenData, setChildrenData] = useState(null);
 
-    // Fetch children data when component mounts or 'data' prop changes
     useEffect(() => {
         if (data) {
-            setChildrenData(data); // Initialize children data from the prop
+            setChildrenData(data);
         }
-    }, [data]); // Dependency on 'data' to update when prop changes
+    }, [data]);
 
-    // Show modal and populate form fields
     const showModalChange = () => {
         if (childrenData) {
             setIsModalVisible(true);
@@ -35,7 +32,6 @@ export const ParentDetail = ({ data }) => {
         }
     };
 
-    // Update parent information (via API)
     const updateParent = async (values) => {
         setLoading(true);
         try {
@@ -51,14 +47,9 @@ export const ParentDetail = ({ data }) => {
                 },
             };
 
-            // Call API to update parent info
             await updateParentInfo(requestPayload);
             message.success("Cập nhật thông tin phụ huynh thành công");
-
-            // Close modal after successful update
             setIsModalVisible(false);
-
-            // Optimistically update state without re-fetching data
             setChildrenData(prevData => ({
                 ...prevData,
                 fatherName: values.father.fullName,
@@ -77,7 +68,8 @@ export const ParentDetail = ({ data }) => {
         <>
             <Row justify="space-between" className="mb-3">
                 <Col><Title level={5}>Thông tin phụ huynh</Title></Col>
-                <Col><Button type="link" icon={<EditOutlined />} onClick={showModalChange}>Chỉnh sửa thông tin</Button></Col>
+                <Col>
+                    {role === 'CLASS_MANAGER' && (<Button type="link" icon={<EditOutlined />} onClick={showModalChange}>Chỉnh sửa thông tin</Button>)}</Col>
             </Row>
             <Descriptions bordered column={6}>
                 <Descriptions.Item label="Họ và tên cha" span={3}>{childrenData?.fatherName}</Descriptions.Item>

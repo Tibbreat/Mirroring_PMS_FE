@@ -1,5 +1,5 @@
 import { EditOutlined } from "@ant-design/icons";
-import { Avatar, Button, Col, Descriptions, Form, Input, Modal, Radio, Row, Steps, Switch, Table, message, DatePicker, Select } from "antd";
+import { Avatar, Button, Col, Descriptions, Form, Input, Modal, Radio, Row, Steps, Switch, Table, message, DatePicker, Select, Tag } from "antd";
 import Title from "antd/es/typography/Title";
 import UploadImage from "../../component/input/UploadImage";
 import React, { useEffect, useState } from "react";
@@ -10,7 +10,7 @@ import { getChildDetailAPI, updateServiceStatus, uploadImageAPI } from "../../se
 const { Step } = Steps;
 const { Option } = Select;
 
-export const ChildrenDetail = ({ id }) => {
+export const ChildrenDetail = ({ id, role }) => {
     const [updating, setUpdating] = useState(false);
     const [children, setChildren] = useState();
     const [isBoardingModalVisible, setIsBoardingModalVisible] = useState(false);
@@ -240,12 +240,15 @@ export const ChildrenDetail = ({ id }) => {
                         src={hasUploadedImage || children?.imageUrl ? children?.imageUrl : "/image/placeholder.jpg"}
                         style={{ display: hasUploadedImage || children?.imageUrl ? "block" : "none" }}
                     />
-                    <Button className='mt-3' type="link" onClick={() => setIsUploadImageModalVisible(true)}>Cập nhật ảnh</Button>
+                    {role === 'CLASS_MANAGER' && (<Button className='mt-3' type="link" onClick={() => setIsUploadImageModalVisible(true)}>Cập nhật ảnh</Button>)}
+
                 </Col>
                 <Col xs={24} sm={16}>
                     <Row justify="space-between" className='mb-3'>
                         <Col><Title level={5}>Thông tin cá nhân</Title></Col>
-                        <Col><Button type="link" icon={<EditOutlined />} onClick={openUpdateChildrenModal} >Chỉnh sửa thông tin</Button></Col>
+                        <Col>
+                            {role === 'CLASS_MANAGER' && (<Button type="link" icon={<EditOutlined />} onClick={openUpdateChildrenModal} >Chỉnh sửa thông tin</Button>)}
+                        </Col>
                     </Row>
                     <Descriptions bordered column={6}>
                         <Descriptions.Item label="Họ và tên" span={6}>{children?.childName} </Descriptions.Item>
@@ -254,18 +257,28 @@ export const ChildrenDetail = ({ id }) => {
                         <Descriptions.Item label="Nơi khai sinh" span={6}>{children?.birthAddress}</Descriptions.Item>
                         <Descriptions.Item label="Nơi ở hiện tại" span={6}>{children?.childAddress}</Descriptions.Item>
                         <Descriptions.Item label="Đăng ký bán trú" span={3}>
-                            <Switch
-                                checked={children?.isRegisteredForBoarding}
-                                loading={updating}
-                                onChange={handleBoardingSwitchChange}
-                            />
+                            {role === 'CLASS_MANAGER' && (
+                                <Switch
+                                    checked={children?.isRegisteredForBoarding}
+                                    loading={updating}
+                                    onChange={handleBoardingSwitchChange}
+                                />
+                            )
+                            }
+                            {role !== 'CLASS_MANAGER' && children?.isRegisteredForBoarding ?
+                                <Tag color="green">Đã đăng ký</Tag> : <Tag color="red">Chưa đăng ký</Tag>}
                         </Descriptions.Item>
                         <Descriptions.Item label="Đăng ký xe" span={3}>
-                            <Switch
-                                checked={children?.isRegisteredForTransport}
-                                loading={updating}
-                                onChange={handleTransportSwitchChange}
-                            />
+                            {role === 'CLASS_MANAGER' && (
+                                <Switch
+                                    checked={children?.isRegisteredForTransport}
+                                    loading={updating}
+                                    onChange={handleTransportSwitchChange}
+                                />
+                            )
+                            }
+                            {role !== 'CLASS_MANAGER' && children?.isRegisteredForTransport ?
+                                <Tag color="green">Đã đăng ký</Tag> : <Tag color="red">Chưa đăng ký</Tag>}
                         </Descriptions.Item>
                     </Descriptions>
                 </Col>

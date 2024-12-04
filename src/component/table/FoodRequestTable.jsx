@@ -5,7 +5,7 @@ import { useState, useEffect, useContext } from "react";
 import { getFoodRequestItems, getFoodRequestsAPI, updateAcceptFoodRequestAPI } from '../../services/service.foodprovider';
 import { AuthContext } from '../context/auth.context';
 
-export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPage, providerId, isActive }) => {
+export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPage, providerId, isActive, role }) => {
     const [data, setData] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState(null);
@@ -15,7 +15,6 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
     const [pdfBase64, setPdfBase64] = useState(null);
     const { user } = useContext(AuthContext);
 
-    // Fetch requests for the current page
     const fetchFoodRequests = async (page) => {
         try {
             const response = await getFoodRequestsAPI(providerId, page);
@@ -25,12 +24,10 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
         }
     }
 
-    // Initial fetch and re-fetch on dependencies
     useEffect(() => {
         fetchFoodRequests(currentPage);
     }, [currentPage, dataDefault]);
 
-    // Table columns for main food request table
     const columns = [
         {
             title: "Ngày tạo yêu cầu",
@@ -143,7 +140,6 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
     };
 
 
-    // Handle rejection action
     const handleReject = async () => {
         try {
             await updateAcceptFoodRequestAPI(selectedRequest.id, "CANCEL");
@@ -155,23 +151,20 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
         }
     }
 
-    // Handle page change for pagination
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
 
-    // Close PDF Preview Modal
     const handlePdfPreviewClose = () => {
         setPdfPreviewVisible(false);
         setPdfBase64(null);
     };
 
-    // Columns for the items table within the modal
     const itemColumns = [
         {
             title: 'STT',
             key: 'index',
-            render: (text, record, index) => index + 1,
+            render: (index) => index + 1,
         },
         {
             title: 'Tên thực phẩm',
@@ -192,7 +185,6 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
 
     return (
         <div className="p-2">
-            {/* Main Table */}
             <Table
                 columns={columns}
                 dataSource={data}
@@ -207,13 +199,12 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
                 style={{ textAlign: 'center', marginTop: 20 }}
             />
 
-            {/* Modal for Request Details */}
             <Modal
                 title="Thông tin yêu cầu"
                 open={isModalVisible}
                 onCancel={handleModalClose}
                 footer={
-                    selectedRequest?.status === 'PENDING' && isActive ? (
+                    role === "ADMIN" && selectedRequest?.status === 'PENDING' && isActive ? (
                         [
                             <Button key="reject" danger onClick={handleReject}>
                                 Từ chối
@@ -243,7 +234,6 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
                 />
             </Modal>
 
-            {/* PDF Preview Modal */}
             <Modal
                 title="Hợp đồng"
                 open={pdfPreviewVisible}
