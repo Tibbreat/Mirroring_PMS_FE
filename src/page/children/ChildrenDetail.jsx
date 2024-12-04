@@ -257,29 +257,33 @@ export const ChildrenDetail = ({ id, role }) => {
                         <Descriptions.Item label="Nơi khai sinh" span={6}>{children?.birthAddress}</Descriptions.Item>
                         <Descriptions.Item label="Nơi ở hiện tại" span={6}>{children?.childAddress}</Descriptions.Item>
                         <Descriptions.Item label="Đăng ký bán trú" span={3}>
-                            {role === 'CLASS_MANAGER' && (
+                            {role === 'CLASS_MANAGER' ? (
                                 <Switch
                                     checked={children?.isRegisteredForBoarding}
                                     loading={updating}
                                     onChange={handleBoardingSwitchChange}
                                 />
-                            )
-                            }
-                            {role !== 'CLASS_MANAGER' && children?.isRegisteredForBoarding ?
-                                <Tag color="green">Đã đăng ký</Tag> : <Tag color="red">Chưa đăng ký</Tag>}
+                            ) : (
+                                <Tag color={children?.isRegisteredForBoarding ? 'green' : 'red'}>
+                                    {children?.isRegisteredForBoarding ? 'Đã đăng ký' : 'Chưa đăng ký'}
+                                </Tag>
+                            )}
                         </Descriptions.Item>
+
                         <Descriptions.Item label="Đăng ký xe" span={3}>
-                            {role === 'CLASS_MANAGER' && (
+                            {role === 'CLASS_MANAGER' ? (
                                 <Switch
                                     checked={children?.isRegisteredForTransport}
                                     loading={updating}
                                     onChange={handleTransportSwitchChange}
                                 />
-                            )
-                            }
-                            {role !== 'CLASS_MANAGER' && children?.isRegisteredForTransport ?
-                                <Tag color="green">Đã đăng ký</Tag> : <Tag color="red">Chưa đăng ký</Tag>}
+                            ) : (
+                                <Tag color={children?.isRegisteredForTransport ? 'green' : 'red'}>
+                                    {children?.isRegisteredForTransport ? 'Đã đăng ký' : 'Chưa đăng ký'}
+                                </Tag>
+                            )}
                         </Descriptions.Item>
+
                     </Descriptions>
                 </Col>
             </Row>

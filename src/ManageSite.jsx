@@ -55,18 +55,18 @@ const ManageSite = () => {
     if (user.role === "TEACHER") {
       return allItems
         .filter(item => {
-          // Lọc các nhóm menu
           if (item.key === '6') {
-            // Chỉ hiển thị các menu con 71, 72 cho role TEACHER
-            return item.children && item.children.some(child => ['61', '62'].includes(child.key));
+            return item.children && item.children.some(child => ['62'].includes(child.key));
           }
-          // Lọc các nhóm khác bình thường
+          if (item.key === '5') {
+            item.children = item.children.filter(child => child.key === '52');
+            return true; // Bao gồm mục 'Bếp' trong danh sách
+          }
           return ['1', '2', '4', '6', '5', '7'].includes(item.key);
         })
         .map(item => {
           if (item.key === '6') {
-            // Lọc các menu con 71, 72 cho nhóm 7
-            item.children = item.children.filter(child => ['61', '62'].includes(child.key));
+            item.children = item.children.filter(child => ['62'].includes(child.key));
           }
           return item;
         });
@@ -74,12 +74,12 @@ const ManageSite = () => {
       return allItems.filter(item => ['1', '4', '6'].includes(item.key));
     } else if (user.role === "KITCHEN_MANAGER") {
       return allItems.filter(item => ['1', '4', '5'].includes(item.key));
+    } else if (user.role === "CLASS_MANAGER") {
+      return allItems.filter(item => ['1', '2', '4', '7'].includes(item.key));
     } else {
       return allItems;
     }
   })();
-
-
 
   useEffect(() => {
     const pathMap = {
