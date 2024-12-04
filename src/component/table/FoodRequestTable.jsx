@@ -164,7 +164,8 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
         {
             title: 'STT',
             key: 'index',
-            render: (index) => index + 1,
+            align: 'center',
+            render: (record, text, index) => index + 1,
         },
         {
             title: 'Tên thực phẩm',
@@ -190,7 +191,7 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
                 dataSource={data}
                 pagination={false}
                 rowKey="id"
-                bordered
+                bordered={true}
             />
             <Pagination
                 current={currentPage}
@@ -231,6 +232,7 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
                     dataSource={items}
                     pagination={false}
                     rowKey="itemId"
+                    bordered={true}
                 />
             </Modal>
 
