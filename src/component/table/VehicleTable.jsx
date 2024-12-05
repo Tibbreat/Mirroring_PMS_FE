@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { EyeOutlined } from '@ant-design/icons';
 import { changeStatusAPI, getVehicles } from "../../services/service.vehicle";
 
-export const VehicleTable = ({ dataDefault, providerId, providerStatus }) => {
+export const VehicleTable = ({ dataDefault, providerId, providerStatus, role }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedVehicle, setSelectedVehicle] = useState(null);
     const [data, setVehicle] = useState([]);
@@ -40,7 +40,7 @@ export const VehicleTable = ({ dataDefault, providerId, providerStatus }) => {
                 <Switch
                     checked={isActive}
                     onChange={() => confirmStatusChange(record)}
-                    disabled={!providerStatus}
+                    disabled={!providerStatus || role !== 'ADMIN'}
                 />
             )
         },

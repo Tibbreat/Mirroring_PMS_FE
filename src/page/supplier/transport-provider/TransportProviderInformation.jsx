@@ -136,13 +136,15 @@ const TransportProviderInformation = () => {
                                 <Title level={5}>Thông tin đơn vị</Title>
                             </Col>
                             <Col>
-                                <Button type="link" icon={<EditOutlined />}>Chỉnh sửa thông tin</Button>
+                                {user?.role === "ADMIN" && (
+                                    <Button type="link" icon={<EditOutlined />}>Chỉnh sửa thông tin</Button>
+                                )}
                             </Col>
                         </Row>
                         <Descriptions bordered column={6}>
                             <Descriptions.Item label="Tên đơn vị" span={4}>{provider?.providerName}</Descriptions.Item>
                             <Descriptions.Item label="Trạng thái" span={2}>
-                                <Switch checked={provider?.isActive} onClick={showModalChangeStatus} />
+                                <Switch checked={provider?.isActive} onClick={showModalChangeStatus} disabled={user.role !== 'ADMIN'} />
                             </Descriptions.Item>
                             <Descriptions.Item label="Người đại diện" span={2}>{provider?.representativeName}</Descriptions.Item>
                             <Descriptions.Item label="Chức vụ" span={2}>{provider?.representativePosition}</Descriptions.Item>
@@ -162,14 +164,14 @@ const TransportProviderInformation = () => {
                             <Title level={5}>Danh sách phương tiện</Title>
                         </Col>
                         <Col>
-                            {provider?.isActive && (
+                            {provider?.isActive && user.role === 'ADMIN' && (
                                 <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>
                                     Thêm phương tiện
                                 </Button>
                             )}
                         </Col>
                     </Row>
-                    <VehicleTable dataDefault={vehicle} providerId={id} providerStatus={provider?.isActive} />
+                    <VehicleTable dataDefault={vehicle} providerId={id} providerStatus={provider?.isActive} role={user.role} />
                 </Col>
             </Card>
 
