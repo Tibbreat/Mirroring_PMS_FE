@@ -157,7 +157,7 @@ const FoodProviderInformation = () => {
                         <Col>
                             <Title level={5}>Danh sách yêu cầu</Title>
                         </Col>
-                        {provider?.isActive && (
+                        {provider?.isActive && user.role === 'KITCHEN_MANAGER' && (
                             <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalVisible(true)}>
                                 Tạo yêu cầu
                             </Button>

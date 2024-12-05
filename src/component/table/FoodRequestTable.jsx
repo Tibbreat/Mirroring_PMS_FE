@@ -87,7 +87,6 @@ export const FoodRequestTable = ({ dataDefault, currentPage, total, setCurrentPa
         },
     ];
 
-    // Show request details in a modal
     const showRequestDetails = async (request) => {
         setSelectedRequest(request);
         setIsModalVisible(true);
