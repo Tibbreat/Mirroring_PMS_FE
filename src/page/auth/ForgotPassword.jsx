@@ -1,12 +1,24 @@
 import React from 'react';
-import { Form, Input, Button, Card } from 'antd';
+import { Form, Input, Button, Card, message } from 'antd';
 import Title from 'antd/es/typography/Title';
+import { generateCodeAPI } from '../../services/service.auth';
+import { useNavigate } from 'react-router-dom';
 
 
 const ForgotPassword = () => {
-    const onFinish = (values) => {
-        console.log('Received values of form: ', values);
-        // Handle form submission logic here
+
+    const navigate = useNavigate();
+
+    const onFinish = async (values) => {
+        try {
+            const response =  await generateCodeAPI(values.email);
+            message.success('Mã OTP đã được gửi đến email của bạn!');
+            localStorage.setItem('email', values.email);
+            localStorage.setItem('otp', response.data);
+            navigate('/pms/auth/change-password');
+        } catch (error) {
+            message.error("Email không tồn tại trong hệ thống!");
+        }
     };
 
     return (
@@ -17,17 +29,24 @@ const ForgotPassword = () => {
                     onFinish={onFinish}
                 >
                     <div className="forgot-password-sub-title text-center mt-3">
-                        <Title level={5}>Vui lòng nhập account hoặc số điện thoại để nhận mã OTP</Title>
+                        <Title level={5}>Vui lòng nhập email sử dụng để đăng nhập để nhận mã OTP</Title>
                     </div>
                     <Form.Item
-                        name="username"
+                        name="email"
                         rules={[
-                            { required: true, message: 'Vui lòng nhập tài khoản được cấp để lấy lại mật khẩu!' },
-                            { pattern: /^[a-zA-Z0-9._]{3,20}$/, message: 'Tên tài khoản phải từ 3 đến 20 ký tự và chỉ bao gồm chữ cái, số, dấu chấm hoặc gạch dưới.' }
+                            {
+                                required: true,
+                                message: 'Vui lòng nhập tài khoản được cấp để lấy lại mật khẩu!'
+                            },
+                            {
+                                pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                                message: 'Vui lòng nhập địa chỉ email hợp lệ!'
+                            }
                         ]}
                     >
-                        <Input type="text" placeholder="Account" />
+                        <Input placeholder="Nhập email" />
                     </Form.Item>
+
                     <Form.Item className="text-center">
                         <Button type="primary" htmlType="submit" className="btn btn-blue-1 mt-3">
                             Gửi mã

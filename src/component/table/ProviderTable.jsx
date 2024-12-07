@@ -8,10 +8,7 @@ export const ProviderTable = ({ data, currentPage, total, setCurrentPage, provid
             dataIndex: 'providerName',
             key: 'providerName',
             render: (text, record) => {
-                // Get the current path
                 const currentPath = window.location.pathname;
-
-                // Determine the base path based on the current URL
                 let basePath;
                 if (currentPath.includes("/transport")) {
                     basePath = `/pms/manage/transport/provider/${record.id}`;

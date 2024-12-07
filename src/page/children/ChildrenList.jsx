@@ -140,7 +140,7 @@ const ChildrenList = () => {
                 >
                     Xuất Excel
                 </Button>
-                {user?.role === 'ADMIN' && (
+                {user?.role === 'CLASS_MANAGER' && (
                     <Button
                         type="primary"
                         onClick={showAddChildModal}
@@ -173,7 +173,6 @@ const ChildrenList = () => {
                 </div>
             )}
 
-            {/* Download Modal */}
             <Modal
                 title="Chọn năm học "
                 open={isModalVisible}
