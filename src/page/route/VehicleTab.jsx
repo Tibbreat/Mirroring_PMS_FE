@@ -240,14 +240,14 @@ export const VehicleTab = ({ id, routeActive, role }) => {
             >
                 {selectedVehicle && (
                     <Descriptions title="Thông tin chi tiết" bordered>
-                        <Descriptions.Item span={4} label="Biển số xe">{selectedVehicle.licensePlate}</Descriptions.Item>
+                        <Descriptions.Item span={6} label="Biển số xe">{selectedVehicle.licensePlate}</Descriptions.Item>
                         <Descriptions.Item span={2} label="Màu sắc">{selectedVehicle.color}</Descriptions.Item>
-                        <Descriptions.Item span={4} label="Nhãn hiệu">{selectedVehicle.manufacturer}</Descriptions.Item>
+                        <Descriptions.Item span={2} label="Nhãn hiệu">{selectedVehicle.manufacturer}</Descriptions.Item>
                         <Descriptions.Item span={2} label="Số chỗ ngồi">{selectedVehicle.numberOfSeats}</Descriptions.Item>
-                        <Descriptions.Item span={6} label="Tài xế phụ trách">{selectedVehicle.driverName}</Descriptions.Item>
-                        <Descriptions.Item span={6} label="Số điện thoại tài xế">{selectedVehicle.driverPhone}</Descriptions.Item>
+                        <Descriptions.Item span={6} label="Quản lý xe">{selectedVehicle.manager.username}</Descriptions.Item>
+                        <Descriptions.Item span={3} label="Tài xế phụ trách">{selectedVehicle.driverName}</Descriptions.Item>
+                        <Descriptions.Item span={3} label="Số điện thoại tài xế">{selectedVehicle.driverPhone}</Descriptions.Item>
                         <Descriptions.Item span={6} label="Số lượng trẻ đã đăng ký">{selectedVehicle.numberChildrenRegistered}</Descriptions.Item>
-
                         <Descriptions.Item span={6} label="Hình ảnh phương tiện">
                             {selectedVehicle.images && selectedVehicle.images.length > 0 ? (
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
@@ -283,7 +283,7 @@ export const VehicleTab = ({ id, routeActive, role }) => {
 
             <Modal
                 title="Xác nhận xóa xe khỏi tuyến"
-                visible={isConfirmDeleteModalVisible}
+                open={isConfirmDeleteModalVisible}
                 onOk={handleDeleteVehicle}
                 onCancel={closeConfirmDeleteModal}
                 okText="Xóa"
