@@ -141,6 +141,7 @@ export const ListClassDetail = ({ id }) => {
                 return <Tag color={color}>{text}</Tag>;
             },
         },
+        { title: 'Tổng số ngày nghỉ', dataIndex: 'countAbsent', key: 'countAbsent', align: 'center' },
         // Hiển thị cột "Hành động" chỉ khi user là ADMIN
         ...(user.role === "ADMIN"
             ? [
