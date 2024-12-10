@@ -11,7 +11,7 @@ export const VehicleTab = ({ id, routeActive, role }) => {
     const [vehicleData, setVehicleData] = useState([]);
     const [availableVehicleData, setAvailableVehicleData] = useState([]);
     const [selectedVehicle, setSelectedVehicle] = useState(null);
-    const [selectedVehicles, setSelectedVehicles] = useState([]);
+    const [selectedVehicles, setSelectedVehicles] = useState([]); // Lưu danh sách xe đã chọn
     const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
     const [isVehicleModalVisible, setIsVehicleModalVisible] = useState(false);
     const [selectedSupervisors, setSelectedSupervisors] = useState({});
@@ -61,26 +61,24 @@ export const VehicleTab = ({ id, routeActive, role }) => {
         }
     };
 
+    const handleSupervisorChange = (vehicleId, supervisorId) => {
+        setSelectedSupervisors((prevSelected) => ({
+            ...prevSelected,
+            [vehicleId]: supervisorId,
+        }));
+    };
+
     const handleVehicleSelect = (vehicleId, supervisorId) => {
         setSelectedVehicles((prevSelected) => {
             const existingVehicle = prevSelected.find((v) => v.vehicleId === vehicleId);
             if (existingVehicle) {
-                return prevSelected.map((v) =>
-                    v.vehicleId === vehicleId ? { ...v, supervisorId } : v
-                );
+                return prevSelected.filter((v) => v.vehicleId !== vehicleId);
             } else {
                 return [...prevSelected, { vehicleId, supervisorId }];
             }
         });
     };
 
-    const handleSupervisorChange = (vehicleId, supervisorId) => {
-        setSelectedSupervisors((prevSelected) => ({
-            ...prevSelected,
-            [vehicleId]: supervisorId,
-        }));
-        handleVehicleSelect(vehicleId, supervisorId);
-    };
 
     const handleConfirmVehicle = async () => {
         try {
@@ -167,7 +165,7 @@ export const VehicleTab = ({ id, routeActive, role }) => {
             render: (text, record) => (
                 <Checkbox
                     onChange={() => handleVehicleSelect(record.vehicleId, selectedSupervisors[record.vehicleId])}
-                    checked={selectedVehicles.some((v) => v.vehicleId === record.vehicleId)}
+                    checked={selectedVehicles.some((v) => v.vehicleId === record.vehicleId)} // Kiểm tra xem xe đã được chọn chưa
                 >
                     Chọn
                 </Checkbox>
@@ -241,19 +239,15 @@ export const VehicleTab = ({ id, routeActive, role }) => {
                 width={800}
             >
                 {selectedVehicle && (
-                    <Descriptions bordered column={6}>
-                        <Descriptions.Item span={4} label="Tên phương tiện">{selectedVehicle.vehicleName}</Descriptions.Item>
-                        <Descriptions.Item span={2} label="Trạng thái">
-                            <Tag color={selectedVehicle.isActive ? 'green' : 'red'}>
-                                {selectedVehicle.isActive ? 'Đang hoạt động' : 'Ngưng hoạt động'}
-                            </Tag>
-                        </Descriptions.Item>
+                    <Descriptions title="Thông tin chi tiết" bordered>
                         <Descriptions.Item span={4} label="Biển số xe">{selectedVehicle.licensePlate}</Descriptions.Item>
                         <Descriptions.Item span={2} label="Màu sắc">{selectedVehicle.color}</Descriptions.Item>
                         <Descriptions.Item span={4} label="Nhãn hiệu">{selectedVehicle.manufacturer}</Descriptions.Item>
                         <Descriptions.Item span={2} label="Số chỗ ngồi">{selectedVehicle.numberOfSeats}</Descriptions.Item>
                         <Descriptions.Item span={6} label="Tài xế phụ trách">{selectedVehicle.driverName}</Descriptions.Item>
                         <Descriptions.Item span={6} label="Số điện thoại tài xế">{selectedVehicle.driverPhone}</Descriptions.Item>
+                        <Descriptions.Item span={6} label="Số lượng trẻ đã đăng ký">{selectedVehicle.numberChildrenRegistered}</Descriptions.Item>
+
                         <Descriptions.Item span={6} label="Hình ảnh phương tiện">
                             {selectedVehicle.images && selectedVehicle.images.length > 0 ? (
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
@@ -275,27 +269,27 @@ export const VehicleTab = ({ id, routeActive, role }) => {
                 onOk={handleConfirmVehicle}
                 onCancel={handleCancelVehicle}
                 okText="Xác nhận"
-                cancelText="Đóng"
-                width={1000}
+                cancelText="Hủy"
+                width={800}
             >
                 <Table
-                    dataSource={availableVehicleData}
                     columns={availableVehicleColumns}
+                    dataSource={availableVehicleData}
                     rowKey="vehicleId"
+                    bordered
                     pagination={false}
                 />
             </Modal>
 
             <Modal
-                title="Xác nhận xóa"
-                open={isConfirmDeleteModalVisible}
+                title="Xác nhận xóa xe khỏi tuyến"
+                visible={isConfirmDeleteModalVisible}
                 onOk={handleDeleteVehicle}
                 onCancel={closeConfirmDeleteModal}
                 okText="Xóa"
                 cancelText="Hủy"
-                width={400}
             >
-                <p>Bạn có chắc chắn muốn xóa phương tiện này khỏi tuyến?</p>
+                <p>Bạn có chắc chắn muốn xóa xe này khỏi tuyến? Khi xác nhận, toàn bộ trẻ đã đăng ký xe này sẽ bị hủy dịch vụ đưa đón</p>
             </Modal>
         </>
     );
