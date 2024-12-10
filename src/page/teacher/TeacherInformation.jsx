@@ -161,7 +161,7 @@ const TeacherInformation = () => {
                                 <Title level={5}>Thông tin giáo viên</Title>
                             </Col>
                             <Col>
-                                {user.role === 'ADMIN' || user.id === id && (
+                                {user.role === 'ADMIN' && (
                                     <Button type="link" icon={<EditOutlined />} onClick={showEditModal}>
                                         Chỉnh sửa thông tin
                                     </Button>
