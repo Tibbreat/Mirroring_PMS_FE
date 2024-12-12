@@ -52,8 +52,8 @@ const Navbar = () => {
             </div>
             <div className='navbar-content-2 col-2 d-flex justify-content-center align-items-center'>
                 <div className='d-flex flex-column me-3'>
-                    <p className='mb-0'>{user.username}</p>
-                    <p className='mb-0 text-blue'>{getRoleLabel(user.role)}</p>
+                    <p className='mb-0 text-blue'>{user.username}</p>
+                    <p className='mb-0 '>{getRoleLabel(user.role)}</p>
                 </div>
                 <Col>
                     <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">

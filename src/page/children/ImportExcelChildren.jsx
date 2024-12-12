@@ -1,12 +1,13 @@
 import { Card, Upload, Table, Button, Divider, message, Modal, Form, Input, Row, Col, Select, DatePicker, Tag } from "antd";
 import { DeleteOutlined, EditOutlined, InboxOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Title from "antd/es/typography/Title";
 import dayjs from 'dayjs';
 import { handleExcelData, saveChildrenFromExcel } from "../../services/service.children";
 import { getClassList } from "../../services/services.class";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../component/context/auth.context";
 
 const { Dragger } = Upload;
 const { Option } = Select;
@@ -23,6 +24,7 @@ const ImportExcelChildren = () => {
     const [selectedClass, setSelectedClass] = useState(null);
     const [isSaveLoading, setIsSaveLoading] = useState(false);
     const [form] = Form.useForm();
+    const {user} = useContext(AuthContext);
 
     const navigate = useNavigate();
     const columns = [
@@ -87,7 +89,6 @@ const ImportExcelChildren = () => {
 
     const handleUploadChange = async (info) => {
         const newFileList = info.fileList.slice(-1);
-        // setFileList(newFileList);
 
         const file = newFileList[0]?.originFileObj;
         if (file) {
@@ -110,7 +111,7 @@ const ImportExcelChildren = () => {
             const currentYear = today.year();
             const nextYear = currentYear + 1;
             const academicYear = `${currentYear}-${nextYear}`;
-            const response = await getClassList(academicYear);
+            const response = await getClassList(academicYear, user.id);
             setClassAvailable(response.data);
         } catch (error) {
             console.error(error);

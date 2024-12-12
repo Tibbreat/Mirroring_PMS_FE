@@ -37,8 +37,8 @@ export const changeClassInformationAPI = async (classId, data) => {
     });
 }
 
-export const getClassList = async (academicYear) => {
-    const url = `/pms/classes/available/${academicYear}`;
+export const getClassList = async (academicYear, managerId) => {
+    const url = `/pms/classes/available/${academicYear}/manager/${managerId}`;
     return await axios.get(url);
 }
 

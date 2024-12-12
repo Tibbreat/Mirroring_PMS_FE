@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Form, Input, Button, DatePicker, Select, Card, Row, Col, message, Spin } from 'antd';
+import { Form, Input, Button, DatePicker, Select, Card, Row, Col, message, Spin, Radio } from 'antd';
 import { addChildren } from '../../services/service.children';
 import UploadImage from '../../component/input/UploadImage';
 import { AuthContext } from '../../component/context/auth.context';
@@ -16,6 +16,7 @@ const AddChildren = () => {
     const [loading, setLoading] = useState(false);
     const [classList, setClassList] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
+
     const navigate = useNavigate();
     const handleImageChange = (file) => {
         setImageFile(file);
@@ -28,7 +29,7 @@ const AddChildren = () => {
         const academicYear = `${currentYear}-${nextYear}`;
         const fetchClasses = async () => {
             try {
-                const response = await getClassList(academicYear);
+                const response = await getClassList(academicYear, user.id);
                 setClassList(response.data);
             } catch (error) {
                 message.error('Không thể tải danh sách lớp');
@@ -63,8 +64,8 @@ const AddChildren = () => {
                 setSelectedClass(null);
                 navigate(`/pms/manage/children/${response.data.id}`);
             } catch (error) {
-                console.error('Error:', error);
-                message.error('Có lỗi xảy ra!');
+                console.error('Error:', error.data);
+                message.error(error.data.data);
             } finally {
                 setLoading(false);
             }
