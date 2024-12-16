@@ -61,10 +61,10 @@ export const ListClassDetail = ({ id }) => {
                     await transferClass(id, oldClass.id, selected.id);
                     message.success(`Đã chuyển thành công sang lớp ${selected.className}`);
                     setIsModalVisible(false);
-                    fetchClassData(id); // Refresh the class list after transfer
+                    fetchClassData(id); 
                 } catch (error) {
                     console.error('Error transferring class:', error);
-                    message.error("Chuyển lớp thất bại");
+                    message.error(error.data.data);
                 }
             },
         });

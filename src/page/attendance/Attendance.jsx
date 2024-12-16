@@ -260,6 +260,7 @@ const Attendance = () => {
                 <Radio.Group
                     value={attendanceStatus[record.id] || record.status}
                     onChange={(e) => handleAttendanceChange(record.id, e.target.value)}
+                    disabled={selectedDate.format('YYYY-MM-DD') !== dayjs().format('YYYY-MM-DD')}
                 >
                     <Radio.Button value="ABSENT" className="absent-button">Vắng</Radio.Button>
                     <Radio.Button value="PRESENT" className="present-button">Có mặt</Radio.Button>
@@ -273,12 +274,23 @@ const Attendance = () => {
             render: (text, record) => (
                 <Row>
                     <Col span={24}>
-                        <Button type="link" icon={<EditOutlined />} onClick={() => handleAddNote(record.id)} />
+                        {selectedDate.format('YYYY-MM-DD') === dayjs().format('YYYY-MM-DD') && (
+                            <Button
+                                type="link"
+                                icon={<EditOutlined />}
+                                onClick={() => handleAddNote(record.id)}
+                            />
+                        )}
                     </Col>
                     <Col span={24}>
-                        <Button type="link" icon={<EyeOutlined />} onClick={() => handleViewNote(record.id)} />
+                        <Button
+                            type="link"
+                            icon={<EyeOutlined />}
+                            onClick={() => handleViewNote(record.id)}
+                        />
                     </Col>
                 </Row>
+
             ),
         },
     ];
