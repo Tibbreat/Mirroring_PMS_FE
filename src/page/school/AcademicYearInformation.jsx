@@ -360,7 +360,15 @@ const AcademicYearInformation = () => {
                                             {...restField}
                                             name={[name, 'document']}
                                             fieldKey={[fieldKey, 'document']}
-                                            rules={[{ required: true, message: 'Vui lòng nhập tên hồ sơ' }]}
+                                            rules={[
+                                                { required: true, message: 'Vui lòng nhập tên hồ sơ' },
+                                                {
+                                                    validator: (_, value) =>
+                                                        value && value.trim()
+                                                            ? Promise.resolve()
+                                                            : Promise.reject('Tên hồ sơ không được chỉ chứa khoảng trắng'),
+                                                },
+                                            ]}
                                         >
                                             <Input placeholder="Tên hồ sơ" disabled={isEdit} />
                                         </Form.Item>

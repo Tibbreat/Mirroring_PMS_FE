@@ -1,5 +1,5 @@
-import { Card, Upload, Table, Button, Divider, message, Modal, Form, Input, Row, Col, Select, DatePicker, Tag } from "antd";
-import { DeleteOutlined, EditOutlined, FileExcelOutlined, InboxOutlined } from "@ant-design/icons";
+import { Card, Upload, Table, Button, Divider, message, Modal, Form, Input, Row, Col, Select, DatePicker, Tag, Tooltip } from "antd";
+import { DeleteOutlined, EditOutlined, ExclamationCircleOutlined, FileExcelOutlined, InboxOutlined } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 import Title from "antd/es/typography/Title";
 import dayjs from 'dayjs';
@@ -29,7 +29,21 @@ const ImportExcelChildren = () => {
     const navigate = useNavigate();
     const columns = [
         { title: "STT", dataIndex: "index", key: "index", align: "center" },
-        { title: "Họ và Tên", dataIndex: "childName", key: "childName" },
+        {
+            title: "Họ và Tên",
+            dataIndex: "childName",
+            key: "childName",
+            render: (text, record) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {record.duplicate && (
+                        <Tooltip title={`Thông tin của ${text} đã có trong hệ thống`}>
+                            <Tag color="red" icon={<ExclamationCircleOutlined />}></Tag>
+                        </Tooltip>
+                    )}
+                    {text}
+                </div>
+            ),
+        },
         { title: "Ngày Sinh", dataIndex: "childBirthDate", key: "childBirthDate", align: "center", },
         {
             title: "Địa Chỉ Hiện Tại", dataIndex: "childAddress", key: "childAddress",
@@ -299,7 +313,15 @@ const ImportExcelChildren = () => {
                             <Form.Item
                                 name="childName"
                                 label="Tên trẻ"
-                                rules={[{ required: true, message: 'Vui lòng nhập tên trẻ' }]}
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập tên trẻ' },
+                                    {
+                                        validator: (_, value) =>
+                                            value && value.trim()
+                                                ? Promise.resolve()
+                                                : Promise.reject('Tên trẻ không được chỉ chứa khoảng trắng'),
+                                    },
+                                ]}
                             >
                                 <Input placeholder="Nhập tên trẻ" />
                             </Form.Item>
@@ -331,7 +353,15 @@ const ImportExcelChildren = () => {
                             <Form.Item
                                 name="nationality"
                                 label="Quốc tịch"
-                                rules={[{ required: true, message: 'Vui lòng nhập quốc tịch' }]}
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập quốc tịch' },
+                                    {
+                                        validator: (_, value) =>
+                                            value && value.trim()
+                                                ? Promise.resolve()
+                                                : Promise.reject('Quốc tịch không được chỉ chứa khoảng trắng'),
+                                    },
+                                ]}
                             >
                                 <Input placeholder="Nhập quốc tịch" />
                             </Form.Item>
@@ -342,7 +372,15 @@ const ImportExcelChildren = () => {
                             <Form.Item
                                 name="religion"
                                 label="Tôn giáo"
-                                rules={[{ required: true, message: 'Vui lòng nhập tôn giáo' }]}
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập tôn giáo' },
+                                    {
+                                        validator: (_, value) =>
+                                            value && value.trim()
+                                                ? Promise.resolve()
+                                                : Promise.reject('Tôn giáo không được chỉ chứa khoảng trắng'),
+                                    },
+                                ]}
                             >
                                 <Input placeholder="Nhập tôn giáo" />
                             </Form.Item>
@@ -351,7 +389,15 @@ const ImportExcelChildren = () => {
                             <Form.Item
                                 name="birthAddress"
                                 label="Nơi sinh"
-                                rules={[{ required: true, message: 'Vui lòng nhập nơi sinh' }]}
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập nơi sinh' },
+                                    {
+                                        validator: (_, value) =>
+                                            value && value.trim()
+                                                ? Promise.resolve()
+                                                : Promise.reject('Nơi sinh không được chỉ chứa khoảng trắng'),
+                                    },
+                                ]}
                             >
                                 <Input placeholder="Nhập nơi sinh" />
                             </Form.Item>
@@ -362,7 +408,15 @@ const ImportExcelChildren = () => {
                             <Form.Item
                                 name="childAddress"
                                 label="Địa chỉ hiện tại"
-                                rules={[{ required: true, message: 'Vui lòng nhập địa chỉ hiện tại' }]}
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập địa chỉ hiện tại' },
+                                    {
+                                        validator: (_, value) =>
+                                            value && value.trim()
+                                                ? Promise.resolve()
+                                                : Promise.reject('Địa chỉ không được chỉ chứa khoảng trắng'),
+                                    },
+                                ]}
                             >
                                 <Input placeholder="Nhập địa chỉ hiện tại" />
                             </Form.Item>
@@ -375,7 +429,15 @@ const ImportExcelChildren = () => {
                                 <Form.Item
                                     name={['father', 'fullName']}
                                     label="Họ và tên"
-                                    rules={[{ required: true, message: 'Vui lòng nhập tên bố' }]}
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập tên bố' },
+                                        {
+                                            validator: (_, value) =>
+                                                value && value.trim()
+                                                    ? Promise.resolve()
+                                                    : Promise.reject('Tên bố không được chỉ chứa khoảng trắng'),
+                                        },
+                                    ]}
                                 >
                                     <Input placeholder="Nhập tên bố" />
                                 </Form.Item>
@@ -384,7 +446,15 @@ const ImportExcelChildren = () => {
                                 <Form.Item
                                     name={['father', 'phone']}
                                     label="Số điện thoại"
-                                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại bố' }]}
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập số điện thoại bố' },
+                                        {
+                                            validator: (_, value) =>
+                                                value && value.trim()
+                                                    ? Promise.resolve()
+                                                    : Promise.reject('Số điện thoại không được chỉ chứa khoảng trắng'),
+                                        },
+                                    ]}
                                 >
                                     <Input placeholder="Nhập số điện thoại bố" />
                                 </Form.Item>
@@ -393,7 +463,15 @@ const ImportExcelChildren = () => {
                                 <Form.Item
                                     name={['father', 'idCardNumber']}
                                     label="Số CMND/CCCD"
-                                    rules={[{ required: true, message: 'Vui lòng nhập số CMND/CCCD bố' }]}
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập số CMND/CCCD bố' },
+                                        {
+                                            validator: (_, value) =>
+                                                value && value.trim()
+                                                    ? Promise.resolve()
+                                                    : Promise.reject('Số CMND/CCCD không được chỉ chứa khoảng trắng'),
+                                        },
+                                    ]}
                                 >
                                     <Input placeholder="Nhập số CMND/CCCD bố" />
                                 </Form.Item>
@@ -407,7 +485,15 @@ const ImportExcelChildren = () => {
                                 <Form.Item
                                     name={['mother', 'fullName']}
                                     label="Họ và tên"
-                                    rules={[{ required: true, message: 'Vui lòng nhập tên mẹ' }]}
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập tên mẹ' },
+                                        {
+                                            validator: (_, value) =>
+                                                value && value.trim()
+                                                    ? Promise.resolve()
+                                                    : Promise.reject('Tên mẹ không được chỉ chứa khoảng trắng'),
+                                        },
+                                    ]}
                                 >
                                     <Input placeholder="Nhập tên mẹ" />
                                 </Form.Item>
@@ -416,7 +502,15 @@ const ImportExcelChildren = () => {
                                 <Form.Item
                                     name={['mother', 'phone']}
                                     label="Số điện thoại"
-                                    rules={[{ required: true, message: 'Vui lòng nhập số điện thoại mẹ' }]}
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập số điện thoại mẹ' },
+                                        {
+                                            validator: (_, value) =>
+                                                value && value.trim()
+                                                    ? Promise.resolve()
+                                                    : Promise.reject('Số điện thoại không được chỉ chứa khoảng trắng'),
+                                        },
+                                    ]}
                                 >
                                     <Input placeholder="Nhập số điện thoại mẹ" />
                                 </Form.Item>
@@ -425,7 +519,15 @@ const ImportExcelChildren = () => {
                                 <Form.Item
                                     name={['mother', 'idCardNumber']}
                                     label="Số CMND/CCCD"
-                                    rules={[{ required: true, message: 'Vui lòng nhập số CMND/CCCD mẹ' }]}
+                                    rules={[
+                                        { required: true, message: 'Vui lòng nhập số CMND/CCCD mẹ' },
+                                        {
+                                            validator: (_, value) =>
+                                                value && value.trim()
+                                                    ? Promise.resolve()
+                                                    : Promise.reject('Số CMND/CCCD không được chỉ chứa khoảng trắng'),
+                                        },
+                                    ]}
                                 >
                                     <Input placeholder="Nhập số CMND/CCCD mẹ" />
                                 </Form.Item>

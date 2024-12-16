@@ -68,10 +68,10 @@ const ClassList = () => {
             const today = dayjs();
             const septemberFifth = dayjs(`${today.year()}-09-05`, "YYYY-MM-DD");
 
-            if (today.isAfter(septemberFifth)) {
-                message.error("Đã quá ngày khai giảng");
-                return;
-            }
+            // if (today.isAfter(septemberFifth)) {
+            //     message.error("Đã quá ngày khai giảng");
+            //     return;
+            // }
 
             const values = await form.validateFields();
             const payload = {
@@ -162,7 +162,13 @@ const ClassList = () => {
                             <Form.Item
                                 name="className"
                                 label="Tên lớp"
-                                rules={[{ required: true, message: 'Vui lòng nhập tên lớp' }]}
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập tên lớp' },
+                                    {
+                                        validator: (_, value) =>
+                                            value && value.trim() ? Promise.resolve() : Promise.reject('Tên lớp không được chỉ chứa khoảng trắng'),
+                                    },
+                                ]}
                             >
                                 <Input placeholder="Nhập tên lớp" />
                             </Form.Item>
@@ -214,6 +220,7 @@ const ClassList = () => {
                         </Col>
                     </Row>
                 </Form>
+
             </Modal>
         </Card>
     );

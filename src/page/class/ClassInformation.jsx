@@ -103,7 +103,7 @@ const ClassInformation = () => {
                                     Chỉnh sửa thông tin
                                 </Button>
                             )}
-                            {classInfo?.status === 'IN_PROGRESS' && (user?.role === 'ADMIN' || user?.role === 'CLASS_MANAGER') && (
+                            {/* {classInfo?.status === 'IN_PROGRESS' && (user?.role === 'ADMIN' || user?.role === 'CLASS_MANAGER') && (
                                 <Button type="default"
                                     style={{
                                         backgroundColor: '#f5222d',
@@ -112,7 +112,7 @@ const ClassInformation = () => {
                                     onClick={() => { changeClassStatus() }}>
                                     Kết thúc lớp
                                 </Button>
-                            )}
+                            )} */}
                         </Col>
                     </Row>
                     <Descriptions bordered column={2}>

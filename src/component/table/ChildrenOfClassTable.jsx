@@ -146,7 +146,7 @@ export const ChildrenOfClassTable = ({ id, managerId }) => {
                     fetchChildrenList();
                 } catch (error) {
                     console.error('Error transferring class:', error);
-                    message.error("Chuyển lớp thất bại");
+                    message.error(error.data.data);
                 }
             },
         });
