@@ -1,5 +1,5 @@
 import { Card, Upload, Table, Button, Divider, message, Modal, Form, Input, Row, Col, Select, DatePicker, Tag } from "antd";
-import { DeleteOutlined, EditOutlined, InboxOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, FileExcelOutlined, InboxOutlined } from "@ant-design/icons";
 import { useContext, useEffect, useState } from "react";
 import Title from "antd/es/typography/Title";
 import dayjs from 'dayjs';
@@ -24,7 +24,7 @@ const ImportExcelChildren = () => {
     const [selectedClass, setSelectedClass] = useState(null);
     const [isSaveLoading, setIsSaveLoading] = useState(false);
     const [form] = Form.useForm();
-    const {user} = useContext(AuthContext);
+    const { user } = useContext(AuthContext);
 
     const navigate = useNavigate();
     const columns = [
@@ -199,6 +199,19 @@ const ImportExcelChildren = () => {
             setIsConfirmModalVisible(true);
         }
     };
+    const downloadSampleExcel = () => {
+        const link = document.createElement("a");
+
+        link.href = "/public/excel/Sample_import_children.xlsx";
+        link.download = "sample-data.xlsx";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        console.log("Download triggered for sample Excel file.");
+    };
+
 
     return (
         <div className="container">
@@ -218,8 +231,9 @@ const ImportExcelChildren = () => {
                         Hỗ trợ các file Excel (.xls, .xlsx)
                     </p>
                 </Dragger>
+                <Button className="mt-3" type="link" icon={<FileExcelOutlined />} onClick={downloadSampleExcel}>Vui lòng tải mẫu dữ liệu tại đây</Button>
                 <Divider />
-                <Title level={5} className="mt-2">Dữ liệu trẻ từ file Excel</Title>
+                <Title level={5} className="mt-2" >Dữ liệu trẻ từ file Excel</Title>
                 <Row justify="space-between" align="middle" className="mb-3">
                     <Col span={12}>
                         <span>Số lượng trẻ: {tableData.length}</span>
