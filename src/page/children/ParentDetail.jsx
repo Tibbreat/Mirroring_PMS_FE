@@ -98,7 +98,15 @@ export const ParentDetail = ({ data, role }) => {
                             <Form.Item
                                 name={['father', 'fullName']}
                                 label="Họ và tên"
-                                rules={[{ required: true, message: 'Vui lòng nhập tên bố' }]}>
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập tên bố' },
+                                    {
+                                        validator: (_, value) =>
+                                            value && value.trim()
+                                                ? Promise.resolve()
+                                                : Promise.reject('Tên bố không được chỉ chứa khoảng trắng'),
+                                    },
+                                ]}>
                                 <Input placeholder="Nhập tên bố" disabled={loading} />
                             </Form.Item>
                         </Col>
@@ -106,7 +114,15 @@ export const ParentDetail = ({ data, role }) => {
                             <Form.Item
                                 name={['father', 'phone']}
                                 label="Số điện thoại"
-                                rules={[{ required: true, message: 'Vui lòng nhập số điện thoại bố' }]}>
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập số điện thoại' },
+                                    {
+                                        validator: (_, value) =>
+                                            value && value.trim()
+                                                ? Promise.resolve()
+                                                : Promise.reject('Số điện thoạithoại không được chỉ chứa khoảng trắng'),
+                                    },
+                                ]}>
                                 <Input placeholder="Nhập số điện thoại bố" disabled={loading} />
                             </Form.Item>
                         </Col>
@@ -117,7 +133,15 @@ export const ParentDetail = ({ data, role }) => {
                             <Form.Item
                                 name={['mother', 'fullName']}
                                 label="Họ và tên"
-                                rules={[{ required: true, message: 'Vui lòng nhập tên mẹ' }]}>
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập tên mẹ' },
+                                    {
+                                        validator: (_, value) =>
+                                            value && value.trim()
+                                                ? Promise.resolve()
+                                                : Promise.reject('Tên mẹ không được chỉ chứa khoảng trắng'),
+                                    },
+                                ]}>
                                 <Input placeholder="Nhập tên mẹ" disabled={loading} />
                             </Form.Item>
                         </Col>
@@ -125,7 +149,15 @@ export const ParentDetail = ({ data, role }) => {
                             <Form.Item
                                 name={['mother', 'phone']}
                                 label="Số điện thoại"
-                                rules={[{ required: true, message: 'Vui lòng nhập số điện thoại mẹ' }]}>
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập số điện thoại' },
+                                    {
+                                        validator: (_, value) =>
+                                            value && value.trim()
+                                                ? Promise.resolve()
+                                                : Promise.reject('Số điện thoại không được chỉ chứa khoảng trắng'),
+                                    },
+                                ]}>
                                 <Input placeholder="Nhập số điện thoại mẹ" disabled={loading} />
                             </Form.Item>
                         </Col>
