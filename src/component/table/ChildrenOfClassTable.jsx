@@ -116,6 +116,17 @@ export const ChildrenOfClassTable = ({ id, managerId }) => {
                 </Tag>
             ),
         },
+        {
+            title: 'Sức khỏe',
+            dataIndex: 'disable',
+            key: 'disable',
+            align: 'center',
+            render: (value) => (
+                <Tag color={value ? "red" : "green"}>
+                    {value ?  "Có khuyết tật" : "Sức khỏe bình thường" }
+                </Tag>
+            ),
+        },
         ...(user.role === "ADMIN" || (user.role === "CLASS_MANAGER" && user.id === MID)) ? [
             {
                 title: 'Hành động',

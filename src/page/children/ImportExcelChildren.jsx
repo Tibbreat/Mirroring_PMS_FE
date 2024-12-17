@@ -200,12 +200,7 @@ const ImportExcelChildren = () => {
         } catch (error) {
             console.log("Error:", error.status);
             console.log("Error:", error.data);
-
-            if (error.status === 404) {
-                message.error(error.data.data);
-            } else {
-                message.error("Có lỗi xảy ra khi thêm trẻ vào lớp");
-            }
+            message.error(error.data.data);
         } finally {
             setIsSaveLoading(false);
         }
