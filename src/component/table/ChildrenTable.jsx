@@ -28,7 +28,7 @@ export const ChildrenTable = ({ data }) => {
         { title: 'Mẹ', dataIndex: 'motherName', key: 'motherName', },
         {
             title: 'Lớp', dataIndex: 'className', key: 'className',
-            render: (text) => <Tag color="lime">{text}</Tag>,
+            render: (text) => <Tag color="geekblue">{text}</Tag>,
         },
     ];
 

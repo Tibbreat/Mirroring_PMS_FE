@@ -84,6 +84,8 @@ const RouteInformation = () => {
                                 id={id}
                                 routeActive={route?.isActive}
                                 role={user.role}
+                                startLocation={route?.startLocation}
+                                endLocation={route?.endLocation}
                             />
                         </TabPane>
                         <TabPane tab="Danh sách trẻ đăng ký" key="3">

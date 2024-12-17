@@ -23,6 +23,7 @@ const ImportExcelChildren = () => {
     const [classAvailable, setClassAvailable] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
     const [isSaveLoading, setIsSaveLoading] = useState(false);
+    const [handleFile, setHandleFile] = useState(false);
     const [form] = Form.useForm();
     const { user } = useContext(AuthContext);
 
@@ -105,9 +106,12 @@ const ImportExcelChildren = () => {
         const newFileList = info.fileList.slice(-1);
 
         const file = newFileList[0]?.originFileObj;
+        setHandleFile(true);
         if (file) {
             try {
+
                 const data = await handleExcelData(file);
+
                 const dataWithIndex = data.map((item, index) => ({ ...item, index: index + 1, key: index + 1 }));
                 setTableData(dataWithIndex);
                 message.success("Tải lên và xử lý file thành công!");
@@ -115,6 +119,8 @@ const ImportExcelChildren = () => {
                 message.error("Lỗi khi tải lên file! Hãy kiểm tra lại file và thử lại.");
                 setTableData([]);
                 console.error(error);
+            } finally {
+                setHandleFile(false);
             }
         }
     };
@@ -270,6 +276,7 @@ const ImportExcelChildren = () => {
                     columns={columns}
                     dataSource={tableData}
                     pagination={false}
+                    loading={handleFile}
                 />
                 <Row justify="center" className="mt-3">
                     <Button type="primary" onClick={handleSaveButtonClick} disabled={tableData.length == 0}>Lưu</Button>

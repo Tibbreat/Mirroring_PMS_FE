@@ -11,6 +11,12 @@ const RouteList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [form] = Form.useForm();
     const { user } = useContext(AuthContext);
+    const validateNotEmpty = (value, fieldName) => {
+        if (!value || value.trim().length === 0) {
+            return Promise.reject(new Error(`${fieldName} không được để trống hoặc chỉ chứa khoảng trắng`));
+        }
+        return Promise.resolve();
+    };
 
     // Show modal to add a new route
     const showModal = () => {
@@ -23,38 +29,44 @@ const RouteList = () => {
         form.resetFields();
     };
 
-    // Handle form submission
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
-
-            // Map stopLocations to an array of strings
-            const stopLocations = values.stopLocations.map(location => location.stop);
-
-            const payload = {
-                ...values,
-                stopLocations,  // Send as an array of strings
-            };
+            const stopLocations = values.stopLocations
+                ? values.stopLocations.map(location => location.stop).filter(Boolean)
+                : [];
 
             if (stopLocations.length === 0) {
                 message.warning('Vui lòng thêm ít nhất một điểm dừng');
                 return;
             }
 
-            // Call the API to save the route
-            const response = await newRouteAPI(payload);
+
+            const payload = {
+                ...values,
+                stopLocations,
+            };
+
+            console.log("Payload:", payload);
+            await newRouteAPI(payload);
             fetchRoutes();
-            setIsModalVisible(false);
-            form.resetFields();
             notification.success({
                 message: 'Thêm tuyến thành công',
                 description: 'Tuyến mới đã được thêm vào danh sách',
             });
+
+            setIsModalVisible(false);
+            form.resetFields();
         } catch (error) {
-            console.error("Error adding route:", error);
-            message.error('Có lỗi xảy ra, vui lòng thử lại sau');
+            if (error.errorFields) {
+                message.error('Vui lòng điền đầy đủ thông tin');
+            } else {
+                console.error("Error adding route:", error);
+                message.error('Có lỗi xảy ra, vui lòng thử lại sau');
+            }
         }
     };
+
 
     const fetchRoutes = async () => {
         const response = await fetchRoutesAPI(currentPage);
@@ -88,7 +100,10 @@ const RouteList = () => {
                             <Form.Item
                                 label="Tên tuyến"
                                 name="routeName"
-                                rules={[{ required: true, message: 'Vui lòng nhập tên tuyến' }]}
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập tên tuyến' },
+                                    { validator: (_, value) => validateNotEmpty(value, 'Tên tuyến') },
+                                ]}
                             >
                                 <Input />
                             </Form.Item>
@@ -97,7 +112,10 @@ const RouteList = () => {
                             <Form.Item
                                 label="Vị trí bắt đầu"
                                 name="startLocation"
-                                rules={[{ required: true, message: 'Vui lòng nhập vị trí bắt đầu' }]}
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập vị trí bắt đầu' },
+                                    { validator: (_, value) => validateNotEmpty(value, 'Vị trí bắt đầu') },
+                                ]}
                             >
                                 <Input />
                             </Form.Item>
@@ -106,7 +124,10 @@ const RouteList = () => {
                             <Form.Item
                                 label="Vị trí kết thúc"
                                 name="endLocation"
-                                rules={[{ required: true, message: 'Vui lòng nhập vị trí kết thúc' }]}
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập vị trí kết thúc' },
+                                    { validator: (_, value) => validateNotEmpty(value, 'Vị trí kết thúc') },
+                                ]}
                             >
                                 <Input />
                             </Form.Item>
@@ -118,7 +139,10 @@ const RouteList = () => {
                             <Form.Item
                                 label="Thời gian đón"
                                 name="pickupTime"
-                                rules={[{ required: true, message: 'Vui lòng nhập thời gian đón' }]}
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập thời gian đón' },
+                                    { validator: (_, value) => validateNotEmpty(value, 'Thời gian đón') },
+                                ]}
                             >
                                 <Input placeholder="hh:mm" />
                             </Form.Item>
@@ -127,25 +151,30 @@ const RouteList = () => {
                             <Form.Item
                                 label="Thời gian đưa trẻ về"
                                 name="dropOffTime"
-                                rules={[{ required: true, message: 'Vui lòng nhập thời gian trả' }]}
+                                rules={[
+                                    { required: true, message: 'Vui lòng nhập thời gian trả' },
+                                    { validator: (_, value) => validateNotEmpty(value, 'Thời gian trả') },
+                                ]}
                             >
                                 <Input placeholder="hh:mm" />
                             </Form.Item>
                         </Col>
                     </Row>
 
-                    {/* Dynamic stop locations using Form.List similar to foodRequestItems */}
                     <Form.List name="stopLocations">
                         {(fields, { add, remove }) => (
                             <>
-                                {fields.map(({ key, name, fieldKey, ...restField }) => (
+                                {fields.map(({ key, name, ...restField }) => (
                                     <Row gutter={16} key={key}>
                                         <Col span={20}>
                                             <Form.Item
                                                 {...restField}
                                                 name={[name, 'stop']}
                                                 label="Điểm dừng"
-                                                rules={[{ required: true, message: 'Vui lòng nhập điểm dừng' }]}
+                                                rules={[
+                                                    { required: true, message: 'Vui lòng nhập điểm dừng' },
+                                                    { validator: (_, value) => validateNotEmpty(value, 'Điểm dừng') },
+                                                ]}
                                             >
                                                 <Input placeholder="Điểm dừng" />
                                             </Form.Item>
@@ -174,6 +203,7 @@ const RouteList = () => {
                         )}
                     </Form.List>
                 </Form>
+
             </Modal>
         </Card>
     );

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Card, Row, Col, Button, message, Form, Input, Select, Modal, Descriptions } from 'antd';
+import { Card, Row, Col, Button, message, Form, Input, Select, Modal, Descriptions, InputNumber } from 'antd';
 import { getBankListAPI } from '../../../services/services.public';
 import { addtransportProviderAPI } from '../../../services/service.transportprovider';
 import { useNavigate } from 'react-router-dom';
@@ -197,10 +197,28 @@ const AddTransportProvider = () => {
                         <Form.Item
                             name="totalVehicle"
                             label="Số lượng phương tiện"
-                            rules={[{ required: true, message: 'Vui lòng nhập số lượng phương tiện' }]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Vui lòng nhập số lượng phương tiện'
+                                },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (value === undefined || value === null || value < 1) {
+                                            return Promise.reject(new Error('Số lượng phương tiện phải lớn hơn hoặc bằng 1'));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                }),
+                            ]}
                         >
-                            <Input type='number' min={1} placeholder="Số lượng phương tiện" />
+                            <InputNumber
+                                min={1}
+                                placeholder="Số lượng phương tiện"
+                                style={{ width: '100%' }}
+                            />
                         </Form.Item>
+
                     </Col>
                     <Col span={16}>
                         <Form.Item

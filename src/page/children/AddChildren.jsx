@@ -247,19 +247,64 @@ const AddChildren = () => {
                                 ['father', 'fullName'],
                                 'Họ và tên',
                                 'Nhập tên bố',
-                                [{ required: true, message: 'Vui lòng nhập tên bố' }]
+                                [
+                                    {
+                                        required: true,
+                                        message: 'Vui lòng nhập tên bố'
+                                    },
+                                    {
+                                        pattern: /^[a-zA-ZÀ-ỹ\s]{3,50}$/,
+                                        message: 'Tên phải từ 3 đến 50 ký tự, chỉ gồm chữ cái và khoảng trắng'
+                                    },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            if (!value || value.trim().length === 0) {
+                                                return Promise.reject(new Error('Tên không được để trống'));
+                                            }
+                                            const words = value.trim().split(/\s+/); // Split by spaces
+                                            if (words.length < 2) {
+                                                return Promise.reject(new Error('Tên phải có ít nhất 2 từ'));
+                                            }
+
+                                            return Promise.resolve();
+                                        },
+                                    }),
+                                ]
+
                             )}
                             {renderFormItem(
                                 ['father', 'phone'],
                                 'Số điện thoại',
                                 'Nhập số điện thoại bố',
-                                [{ required: true, message: 'Vui lòng nhập số điện thoại bố' }]
+                                [
+                                    { required: true, message: 'Vui lòng nhập số điện thoại bố' },
+                                    { pattern: /^[0-9]{10,11}$/, message: 'Số điện thoại phải có 10 đến 11 chữ số' },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            if (!value || value.trim().length !== 0) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error('Số điện thoại không được để trống'));
+                                        },
+                                    }),
+                                ]
                             )}
                             {renderFormItem(
                                 ['father', 'idCardNumber'],
                                 'Số CMND/CCCD',
                                 'Nhập số CMND/CCCD bố',
-                                [{ required: true, message: 'Vui lòng nhập số CMND/CCCD bố' }]
+                                [
+                                    { required: true, message: 'Vui lòng nhập số CMND/CCCD bố' },
+                                    { pattern: /^[0-9]{9,12}$/, message: 'Số CMND/CCCD phải có từ 9 đến 12 chữ số' },
+                                    ({ getFieldValue }) => ({
+                                        validator(_, value) {
+                                            if (!value || value.trim().length !== 0) {
+                                                return Promise.resolve();
+                                            }
+                                            return Promise.reject(new Error('Số CMND/CCCD không được để trống'));
+                                        },
+                                    }),
+                                ]
                             )}
                         </Row>
                     </Card>
@@ -271,17 +316,29 @@ const AddChildren = () => {
                                 'Họ và tên',
                                 'Nhập tên mẹ',
                                 [
-                                    { required: true, message: 'Vui lòng nhập tên mẹ' },
-                                    { pattern: /^[a-zA-ZÀ-ỹ\s]{3,50}$/, message: 'Tên phải từ 3 đến 50 ký tự, chỉ gồm chữ cái và khoảng trắng' },
+                                    {
+                                        required: true,
+                                        message: 'Vui lòng nhập tên mẹ'
+                                    },
+                                    {
+                                        pattern: /^[a-zA-ZÀ-ỹ\s]{3,50}$/,
+                                        message: 'Tên phải từ 3 đến 50 ký tự, chỉ gồm chữ cái và khoảng trắng'
+                                    },
                                     ({ getFieldValue }) => ({
                                         validator(_, value) {
-                                            if (!value || value.trim().length !== 0) {
-                                                return Promise.resolve();
+                                            if (!value || value.trim().length === 0) {
+                                                return Promise.reject(new Error('Tên mẹ không được để trống'));
                                             }
-                                            return Promise.reject(new Error('Tên mẹ không được để trống'));
+                                            const words = value.trim().split(/\s+/);
+                                            if (words.length < 2) {
+                                                return Promise.reject(new Error('Tên phải có ít nhất 2 từ'));
+                                            }
+
+                                            return Promise.resolve();
                                         },
                                     }),
                                 ]
+
                             )}
                             {renderFormItem(
                                 ['mother', 'phone'],
