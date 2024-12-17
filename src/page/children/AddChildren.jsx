@@ -55,9 +55,8 @@ const AddChildren = () => {
             formData.append('image', imageFile);
             setLoading(true);
             try {
-                console.log(formData);
+                console.log(formattedValues);
                 const response = await addChildren(formData);
-                console.log(response);
                 message.success('Thêm trẻ thành công!');
                 form.resetFields();
                 setImageFile(null);
@@ -91,7 +90,13 @@ const AddChildren = () => {
     return (
         <div className="container" style={{ padding: '24px' }}>
             <Card title="Thêm trẻ mới" bordered={false}>
-                <Form form={form} layout="vertical" onFinish={onFinish}>
+                <Form form={form}
+                    layout="vertical"
+                    onFinish={onFinish}
+                    initialValues={{
+                        religion: "Không",
+                        nationality: "Việt Nam",
+                    }}>
                     <Row gutter={16}>
                         <Col xs={24} md={8}>
                             <Form.Item name="image">
@@ -115,8 +120,12 @@ const AddChildren = () => {
                                                 return Promise.reject(new Error('Tên trẻ không được để trống'));
                                             },
                                         }),
-                                    ]
+                                    ],
+                                    <Input />,
+                                    24
                                 )}
+                            </Row>
+                            <Row gutter={16}>
                                 {renderFormItem(
                                     'childBirthDate',
                                     'Ngày sinh',
@@ -134,6 +143,17 @@ const AddChildren = () => {
                                         <Option value="female">Nữ</Option>
                                     </Select>
                                 )}
+                                {renderFormItem(
+                                    'isDisabled',
+                                    'Tình trạng sức khỏe',
+                                    'Tình trạng sức khỏe',
+                                    [{ required: true, message: 'Vui lòng xác nhận tình trạng sức khỏe' }],
+                                    <Select>
+                                        <Option value="false">Bình thường</Option>
+                                        <Option value="true">Khuyết tật</Option>
+                                    </Select>
+                                )}
+
                             </Row>
                             <Row gutter={16}>
                                 {renderFormItem(

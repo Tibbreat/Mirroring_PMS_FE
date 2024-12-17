@@ -245,7 +245,7 @@ const ImportExcelChildren = () => {
                         Hỗ trợ các file Excel (.xls, .xlsx)
                     </p>
                 </Dragger>
-                <Button className="mt-3" type="link" icon={<FileExcelOutlined />} onClick={downloadSampleExcel}>Vui lòng tải mẫu dữ liệu tại đây</Button>
+                <Button className="mt-3" type="link" icon={<FileExcelOutlined />} onClick={downloadSampleExcel}>Vui lòng tải mẫu file excel tại đây</Button>
                 <Divider />
                 <Title level={5} className="mt-2" >Dữ liệu trẻ từ file Excel</Title>
                 <Row justify="space-between" align="middle" className="mb-3">
